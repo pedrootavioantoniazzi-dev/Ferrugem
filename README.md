@@ -4,6 +4,14 @@ Jogo educativo de fábrica automatizada, feito em um único arquivo HTML (HTML +
 
 O jogador extrai minérios, transforma em produtos cada vez mais complexos e liga as máquinas com esteiras para que trabalhem sozinhas. No caminho, aprende conceitos de automação industrial e Indústria 4.0: sensores, atuadores, CLPs, energia, custos e produtividade.
 
+## Links
+
+- **Jogar:** https://pedrootavioantoniazzi-dev.github.io/Ferrugem/
+- **Documentação completa:** [DOCUMENTACAO.md](DOCUMENTACAO.md) · [versão em página](https://pedrootavioantoniazzi-dev.github.io/Ferrugem/documentacao.html) · [PDF para imprimir](Documentacao-Ferrugem.pdf)
+
+## Em resumo
+
+- 34 máquinas, 36 itens, 40 níveis e 1.619 conquistas.
 - Funciona no computador e no celular (com modo de tela simplificada).
 - Salva o progresso no navegador e permite levar o jogo para outro aparelho pelo "🔗 Link do jogo".
-- Para jogar, basta abrir o `index.html` ou o site publicado pelo GitHub Pages.
+- Funciona sem internet: basta abrir o `index.html`.

@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR" xml:lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Ferrugem ��� F��brica �� Documenta����o</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">:root{--bg:#fbfaf7;--fg:#1d232b;--muted:#5b6673;--line:#d9dde2;--acc:#b8541f;--head:#f1efea;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#12161b;--fg:#e6edf3;--muted:#9aa6b4;--line:#2c3540;--acc:#ff9f1c;--head:#1a2028;color-scheme:dark}}
+html{background:var(--bg)}body{margin:0 auto;max-width:860px;padding:32px max(16px,env(safe-area-inset-left)) 64px;color:var(--fg);background:var(--bg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1{font-size:30px;line-height:1.2;margin:0 0 4px;color:var(--acc)}h2{font-size:22px;margin:40px 0 10px;padding-top:12px;border-top:2px solid var(--line)}
+p,li{max-width:70ch}a{color:var(--acc)}blockquote{margin:12px 0;padding:10px 16px;border-left:4px solid var(--acc);background:var(--head);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:10px 0}th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}th{background:var(--head)}
+.tw{overflow-x:auto}code{font-family:ui-monospace,Consolas,monospace;font-size:.9em;background:var(--head);padding:1px 4px;border-radius:4px}
+ul.task-list{list-style:none;padding-left:4px}.ciclo{width:100%;height:auto;margin:8px 0}
+@media print{:root{--bg:#fff;--fg:#111;--head:#f2f2f2;--line:#ccc;--acc:#a0461a}body{max-width:none;padding:0}h2{break-after:avoid}tr{break-inside:avoid}a{color:inherit;text-decoration:none}}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Ferrugem ��� F��brica �� Documenta����o</h1>
+</header>
+<h1 id="ferrugem--fábrica--documentação-do-projeto">Ferrugem — Fábrica ·
+Documentação do projeto</h1>
+<p>Versão 13 · novembro de 2026 · autor: Pedro Otávio Antoniazzi</p>
+<p><strong>Jogar agora:</strong> <a href="https://pedrootavioantoniazzi-dev.github.io/Ferrugem/">pedrootavioantoniazzi-dev.github.io/Ferrugem</a></p>
+<h2 id="sumário">Sumário</h2>
+<ol type="1">
+<li><a href="#apresentação">Apresentação</a></li>
+<li><a href="#como-jogar">Como jogar</a></li>
+<li><a href="#automação-industrial-no-jogo">Automação industrial no
+jogo</a></li>
+<li><a href="#máquinas">Máquinas</a></li>
+<li><a href="#itens-e-cadeias-de-produção">Itens e cadeias de
+produção</a></li>
+<li><a href="#progressão">Progressão</a></li>
+<li><a href="#recursos-do-jogo">Recursos do jogo</a></li>
+<li><a href="#como-foi-feito">Como foi feito</a></li>
+<li><a href="#roteiro-para-a-feira">Roteiro para a feira</a></li>
+<li><a href="#histórico-de-versões">Histórico de versões</a></li>
+<li><a href="#créditos-links-e-referência-técnica">Créditos, links e
+referência técnica</a></li>
+</ol>
+<h2 id="apresentação">Apresentação</h2>
+<p><strong>Ferrugem — Fábrica</strong> é um jogo educativo e gratuito,
+que roda no navegador do computador e do celular. Nele o jogador monta
+uma fábrica automatizada do zero e aprende, na prática, como funcionam a
+automação industrial e a Indústria 4.0.</p>
+<p>O jogador começa com $650. Ele extrai minérios, transforma em
+produtos cada vez mais complexos e liga as máquinas com esteiras para
+que trabalhem sozinhas. O papel dele não é produzir cada peça, e sim
+<strong>planejar, conectar e melhorar o sistema</strong>. A partida vai
+de um simples lingote de ferro até carros elétricos, trens, aviões e
+foguetes.</p>
+<p><strong>Para quem é:</strong> estudantes do ensino fundamental e
+médio, professores e qualquer pessoa curiosa sobre como uma indústria
+funciona. Não precisa saber nada antes: um tutorial de 8 passos ensina o
+começo.</p>
+<p><strong>Onde jogar:</strong></p>
+<ul>
+<li>Site público: <a href="https://pedrootavioantoniazzi-dev.github.io/Ferrugem/">pedrootavioantoniazzi-dev.github.io/Ferrugem</a></li>
+<li>Código-fonte: <a href="https://github.com/pedrootavioantoniazzi-dev/Ferrugem">github.com/pedrootavioantoniazzi-dev/Ferrugem</a></li>
+<li>Sem internet: basta abrir o arquivo <code>index.html</code> em
+qualquer navegador.</li>
+</ul>
+<p><strong>O jogo em números (versão 13):</strong></p>
+<div class="tw"><table>
+<thead>
+<tr class="header">
+<th>O quê</th>
+<th>Quantidade</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Máquinas diferentes</td>
+<td>34</td>
+</tr>
+<tr class="even">
+<td>Itens e materiais</td>
+<td>36</td>
+</tr>
+<tr class="odd">
+<td>Tipos de minério no mapa</td>
+<td>6 (ferro, cobre, carvão, areia, petróleo e bauxita)</td>
+</tr>
+<tr class="even">
+<td>Tamanho do mapa</td>
+<td>180 × 130 quadrados</td>
+</tr>
+<tr class="odd">
+<td>Níveis do jogador</td>
+<td>40</td>
+</tr>
+<tr class="even">
+<td>Níveis de melhoria de cada máquina</td>
+<td>10</td>
+</tr>
+<tr class="odd">
+<td>Contratos fixos</td>
+<td>45 (depois deles, os contratos continuam sem fim)</td>
+</tr>
+<tr class="even">
+<td>Conquistas</td>
+<td>1.619</td>
+</tr>
+<tr class="odd">
+<td>Tamanho do jogo</td>
+<td>um único arquivo de cerca de 110 KB, sem bibliotecas</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="como-jogar">Como jogar</h2>
+<p>A primeira fábrica fica pronta em cerca de 1 minuto: uma linha de
+ferro que vende lingotes sozinha. Na primeira vez, o jogo pergunta se a
+pessoa está no <strong>celular</strong> ou no
+<strong>computador</strong> e ajusta a tela.</p>
+<p><strong>O primeiro minuto (o mesmo caminho do tutorial):</strong></p>
+<ol type="1">
+<li>Coloque uma <strong>Mineradora</strong> em cima dos cristais laranja
+(ferro).</li>
+<li>Coloque um <strong>Gerador</strong> perto. Ele queima carvão e dá
+energia para as máquinas.</li>
+<li>Coloque outra mineradora no carvão (cristais cinza) e ligue ao
+gerador com <strong>Esteiras</strong>. Arraste o mouse ou o dedo para
+desenhar a esteira.</li>
+<li>Coloque um <strong>Forno</strong> e leve o minério de ferro até ele
+por esteira. A esteira precisa apontar para dentro da máquina.</li>
+<li>Ligue a saída do forno a um <strong>Mercado</strong> com outra
+esteira. Cada lingote vendido dá dinheiro e experiência.</li>
+<li>No nível 2 a <strong>Prensa</strong> é liberada: 2 lingotes viram 1
+chapa, que vale bem mais.</li>
+</ol>
+<p>Máquinas encostadas também entregam itens direto uma para a outra,
+sem esteira.</p>
+<p><strong>Controles no computador:</strong></p>
+<div class="tw"><table>
+<thead>
+<tr class="header">
+<th>Ação</th>
+<th>Como fazer</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Mover a câmera</td>
+<td>W A S D (ou setas), ou arrastar com a ferramenta Selecionar</td>
+</tr>
+<tr class="even">
+<td>Zoom</td>
+<td>Roda do mouse, ou + e −</td>
+</tr>
+<tr class="odd">
+<td>Escolher máquina</td>
+<td>Barra de baixo, teclas 1 a 9 e 0, ou o botão 🏗 Mais</td>
+</tr>
+<tr class="even">
+<td>Girar a esteira</td>
+<td>Tecla R, ou o botão ⟳</td>
+</tr>
+<tr class="odd">
+<td>Ver uma máquina</td>
+<td>Clicar nela (tecla Q volta para Selecionar)</td>
+</tr>
+<tr class="even">
+<td>Melhorar a máquina selecionada</td>
+<td>Botão ⬆ Melhorar, ou tecla U</td>
+</tr>
+<tr class="odd">
+<td>Remover</td>
+<td>Botão direito do mouse, ou tecla X e clicar</td>
+</tr>
+<tr class="even">
+<td>Pausar</td>
+<td>Espaço</td>
+</tr>
+<tr class="odd">
+<td>Minimapa</td>
+<td>Tecla M, ou o botão 🗺</td>
+</tr>
+<tr class="even">
+<td>Velocidade do tempo</td>
+<td>Botões 1x, 3x e 8x</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Controles no celular:</strong></p>
+<div class="tw"><table>
+<thead>
+<tr class="header">
+<th>Ação</th>
+<th>Como fazer</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Mover a câmera</td>
+<td>Arrastar um dedo com a ferramenta Selecionar</td>
+</tr>
+<tr class="even">
+<td>Zoom</td>
+<td>Pinça com dois dedos, ou + e −</td>
+</tr>
+<tr class="odd">
+<td>Escolher máquina</td>
+<td>Botão 🏗 Máquinas (grade separada por fases)</td>
+</tr>
+<tr class="even">
+<td>Colocar uma máquina</td>
+<td>Tocar no mapa; arrastando o dedo, a prévia acompanha e a máquina é
+colocada ao soltar</td>
+</tr>
+<tr class="odd">
+<td>Desenhar esteira</td>
+<td>Escolher Esteira e arrastar o dedo</td>
+</tr>
+<tr class="even">
+<td>Ver uma máquina</td>
+<td>Tocar nela: o painel abre como uma gaveta embaixo, com ✕ para
+fechar</td>
+</tr>
+<tr class="odd">
+<td>Menu (pausa, velocidade, conquistas, salvar, som, gráficos)</td>
+<td>Botão ☰ no topo</td>
+</tr>
+<tr class="even">
+<td>Ver como fazer o contrato</td>
+<td>Tocar no quadro do contrato</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="automação-industrial-no-jogo">Automação industrial no jogo</h2>
+<p>Cada peça do jogo representa uma parte real de uma linha de produção
+automatizada. Jogando, o aluno vê a automação funcionando em vez de só
+ler sobre ela.</p>
+<p><strong>O que é automação industrial:</strong> o uso de tecnologias e
+sistemas de controle, como computadores e robôs, para operar
+equipamentos e processos sem intervenção humana constante. Sensores
+identificam informações como temperatura, pressão, velocidade e posição.
+Esses dados vão para os CLPs (Controladores Lógicos Programáveis), que
+decidem o que fazer. Os comandos seguem para os atuadores, que
+movimentam peças, abrem válvulas e controlam máquinas.</p>
+<p><svg class="ciclo" viewBox="0 0 760 200" role="img" aria-label="Sensor, controlador e atuador trabalham em ciclo" font-family="system-ui,sans-serif"><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a94a0"></path></marker></defs>
+<g fill="none" stroke="#8a94a0" stroke-width="1.5"><path d="M174 70H208" marker-end="url(#a)"></path><path d="M358 70H392" marker-end="url(#a)"></path><path d="M542 70H576" marker-end="url(#a)"></path><path d="M651 106V150H99V106" marker-end="url(#a)"></path></g>
+<g font-size="14" text-anchor="middle"><rect x="24" y="34" width="150" height="72" rx="8" fill="none" stroke="#8a94a0"></rect><text x="99" y="60" font-weight="700" fill="currentColor">Sensor</text><text x="99" y="78" font-size="12" fill="currentColor">Mineradora</text><text x="99" y="94" font-size="12" fill="currentColor">reconhece
+o minério</text>
+<rect x="208" y="34" width="150" height="72" rx="8" fill="#ff9f1c22" stroke="#d9771e" stroke-width="2"></rect><text x="283" y="60" font-weight="700" fill="currentColor">Controlador
+(CLP)</text><text x="283" y="78" font-size="12" fill="currentColor">Cada
+máquina
+decide</text><text x="283" y="94" font-size="12" fill="currentColor">se
+trabalha ou espera</text>
+<rect x="392" y="34" width="150" height="72" rx="8" fill="none" stroke="#8a94a0"></rect><text x="467" y="60" font-weight="700" fill="currentColor">Atuador</text><text x="467" y="78" font-size="12" fill="currentColor">Esteira
+leva</text><text x="467" y="94" font-size="12" fill="currentColor">o
+material</text>
+<rect x="576" y="34" width="150" height="72" rx="8" fill="none" stroke="#8a94a0"></rect><text x="651" y="60" font-weight="700" fill="currentColor">Processo</text><text x="651" y="78" font-size="12" fill="currentColor">Forno
+e
+prensa</text><text x="651" y="94" font-size="12" fill="currentColor">transformam
+o item</text> <text x="375" y="172" font-size="12" fill="currentColor">o
+resultado volta a ser medido, e o ciclo recomeça</text></g></svg></p>
+<p>No jogo, as máquinas fazem esse ciclo sozinhas o tempo todo: o
+jogador só monta e melhora o sistema.</p>
+<div class="tw"><table>
+<thead>
+<tr class="header">
+<th>Conceito real</th>
+<th>Como aparece no jogo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Sensor</strong></td>
+<td>A Mineradora identifica qual minério está embaixo dela e só extrai
+aquele tipo</td>
+</tr>
+<tr class="even">
+<td><strong>Atuador</strong></td>
+<td>As Esteiras movimentam o material de uma etapa para a outra, sem
+ninguém carregar</td>
+</tr>
+<tr class="odd">
+<td><strong>CLP (controlador)</strong></td>
+<td>Cada máquina decide sozinha: sem matéria-prima, sem energia ou com a
+saída cheia, ela para e espera</td>
+</tr>
+<tr class="even">
+<td><strong>Sinalização de estado</strong></td>
+<td>A luz de cada máquina: verde funcionando, amarela sem material,
+vermelha sem energia ou bloqueada</td>
+</tr>
+<tr class="odd">
+<td><strong>Fluxo de produção</strong></td>
+<td>Cadeias como minério → forno → prensa → montadora → mercado</td>
+</tr>
+<tr class="even">
+<td><strong>Gargalo</strong></td>
+<td>Uma máquina lenta segura a linha toda; melhorar só ela já aumenta a
+produção</td>
+</tr>
+<tr class="odd">
+<td><strong>Energia</strong></td>
+<td>Geradores a carvão, painéis solares, turbinas eólicas e reator de
+fusão; sem energia suficiente, tudo fica mais lento</td>
+</tr>
+<tr class="even">
+<td><strong>Custo de investimento</strong></td>
+<td>Cada máquina igual comprada fica 5% mais cara, e as melhorias custam
+cada vez mais</td>
+</tr>
+<tr class="odd">
+<td><strong>Produtividade</strong></td>
+<td>Cada nível de melhoria deixa a máquina 40% mais rápida</td>
+</tr>
+<tr class="even">
+<td><strong>Estoque intermediário</strong></td>
+<td>O Armazém guarda itens para a linha não parar quando falta ou sobra
+material</td>
+</tr>
+<tr class="odd">
+<td><strong>Indústria 4.0</strong></td>
+<td>Robôs, eletrônica, motores elétricos, baterias e veículos elétricos
+nas fases avançadas</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Vantagens da automação que o jogo mostra:</strong> menor
+dependência do trabalho manual e maior produtividade. Uma linha bem
+montada produz sem parar.</p>
+<p><strong>Desvantagens que o jogo também mostra:</strong> alto custo e
+a necessidade de pessoas especializadas. As máquinas avançadas custam
+caro, consomem muita energia e exigem planejamento. A automação não
+resolve tudo sozinha: uma linha mal planejada trava.</p>
+<p><strong>No Vale do Taquari:</strong> o jogo cita empresas da região
+que usam automação, como a Fruki (Lajeado), a Atlas Calçados (Teutônia)
+e a Baldo S.A. Essas informações aparecem na janela
+<strong>Automação</strong> e nas curiosidades &quot;Você sabia?&quot;.</p>
+<p><strong>Curiosidades dentro do jogo:</strong> cada máquina tem um
+&quot;Você sabia?&quot; ligado ao tema, como sensores, atuadores, CLPs, energia
+solar e eólica, siderurgia, IHM (Interface Homem-Máquina), robótica,
+fusão nuclear e transportes.</p>
+<h2 id="máquinas">Máquinas</h2>
+<p>São 34 máquinas, liberadas do nível 1 ao 33. O custo da tabela é o da
+primeira unidade: cada máquina igual comprada depois fica 5% mais cara
+(a esteira não entra nessa regra). A coluna Energia mostra o consumo; as
+fontes de energia mostram o que geram.</p>
+<div class="tw"><table>
+<thead>
+<tr class="header">
+<th>Nível</th>
+<th>Máquina</th>
+<th>Custo</th>
+<th>Energia</th>
+<th>O que faz</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Esteira</td>
+<td>$3</td>
+<td>—</td>
+<td>Leva itens de uma máquina para outra</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>Mineradora</td>
+<td>$85</td>
+<td>20 kW</td>
+<td>Extrai ferro, cobre, carvão, areia ou bauxita (não petróleo)</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>Forno</td>
+<td>$130</td>
+<td>30 kW</td>
+<td>Minério vira lingote; areia vira vidro; bauxita vira alumínio</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>Gerador</td>
+<td>$100</td>
+<td>gera 80 kW</td>
+<td>Queima 1 carvão a cada 10 s</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>Mercado</td>
+<td>$50</td>
+<td>—</td>
+<td>Vende qualquer item que chegar</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Prensa</td>
+<td>$190</td>
+<td>40 kW</td>
+<td>2 lingotes viram 1 chapa</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>Armazém</td>
+<td>$70</td>
+<td>—</td>
+<td>Guarda até 200 itens por nível e solta aos poucos</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>Trefiladora</td>
+<td>$160</td>
+<td>30 kW</td>
+<td>1 lingote de cobre vira 2 fios</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>Painel solar</td>
+<td>$260</td>
+<td>gera 35 kW</td>
+<td>Energia sem combustível</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>Montadora</td>
+<td>$320</td>
+<td>60 kW</td>
+<td>Faz circuitos e engrenagens</td>
+</tr>
+<tr class="odd">
+<td>6</td>
+<td>Siderúrgica</td>
+<td>$450</td>
+<td>70 kW</td>
+<td>Ferro + carvão viram aço</td>
+</tr>
+<tr class="even">
+<td>7</td>
+<td>Eletrônica</td>
+<td>$600</td>
+<td>80 kW</td>
+<td>Vidro + circuito viram tela</td>
+</tr>
+<tr class="odd">
+<td>8</td>
+<td>Fáb. de motores</td>
+<td>$800</td>
+<td>100 kW</td>
+<td>Engrenagem + fios + aço viram motor</td>
+</tr>
+<tr class="even">
+<td>9</td>
+<td>Turbina eólica</td>
+<td>$500</td>
+<td>gera 60 kW</td>
+<td>Energia sem combustível</td>
+</tr>
+<tr class="odd">
+<td>10</td>
+<td>Linha de robôs</td>
+<td>$1.500</td>
+<td>150 kW</td>
+<td>Motor + circuitos + aço viram robô</td>
+</tr>
+<tr class="even">
+<td>11</td>
+<td>Bomba de petróleo</td>
+<td>$600</td>
+<td>40 kW</td>
+<td>Extrai petróleo das poças escuras</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>Refinaria</td>
+<td>$900</td>
+<td>80 kW</td>
+<td>Petróleo vira plástico</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>Fáb. de baterias</td>
+<td>$1.400</td>
+<td>100 kW</td>
+<td>Chapa de cobre + plástico viram bateria</td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td>Fáb. de carros</td>
+<td>$3.000</td>
+<td>200 kW</td>
+<td>Monta carro elétrico</td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td>Reator de fusão</td>
+<td>$8.000</td>
+<td>gera 500 kW</td>
+<td>Muita energia sem combustível</td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td>Petroquímica</td>
+<td>$2.500</td>
+<td>120 kW</td>
+<td>Petróleo vira borracha</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td>Fáb. de pneus</td>
+<td>$3.200</td>
+<td>120 kW</td>
+<td>Borracha + aço viram pneu</td>
+</tr>
+<tr class="odd">
+<td>17</td>
+<td>Laminadora</td>
+<td>$3.500</td>
+<td>140 kW</td>
+<td>Lingote de alumínio vira chapa</td>
+</tr>
+<tr class="even">
+<td>18</td>
+<td>Fáb. de bicicletas</td>
+<td>$4.500</td>
+<td>120 kW</td>
+<td>Monta bicicleta</td>
+</tr>
+<tr class="odd">
+<td>19</td>
+<td>Fáb. de patinetes</td>
+<td>$5.500</td>
+<td>140 kW</td>
+<td>Monta patinete elétrico</td>
+</tr>
+<tr class="even">
+<td>20</td>
+<td>Fáb. de motos</td>
+<td>$7.000</td>
+<td>180 kW</td>
+<td>Monta moto</td>
+</tr>
+<tr class="odd">
+<td>21</td>
+<td>Fáb. de caminhões</td>
+<td>$9.000</td>
+<td>220 kW</td>
+<td>Monta caminhão</td>
+</tr>
+<tr class="even">
+<td>22</td>
+<td>Fáb. de drones</td>
+<td>$10.000</td>
+<td>160 kW</td>
+<td>Monta drone</td>
+</tr>
+<tr class="odd">
+<td>23</td>
+<td>Fáb. de ônibus</td>
+<td>$12.000</td>
+<td>260 kW</td>
+<td>Monta ônibus</td>
+</tr>
+<tr class="even">
+<td>24</td>
+<td>Fáb. de trilhos</td>
+<td>$13.000</td>
+<td>200 kW</td>
+<td>Aço vira trilho</td>
+</tr>
+<tr class="odd">
+<td>26</td>
+<td>Fáb. de trens</td>
+<td>$18.000</td>
+<td>320 kW</td>
+<td>Monta trem</td>
+</tr>
+<tr class="even">
+<td>28</td>
+<td>Estaleiro</td>
+<td>$24.000</td>
+<td>360 kW</td>
+<td>Constrói navio</td>
+</tr>
+<tr class="odd">
+<td>30</td>
+<td>Fáb. de aviões</td>
+<td>$32.000</td>
+<td>420 kW</td>
+<td>Monta avião</td>
+</tr>
+<tr class="even">
+<td>33</td>
+<td>Base de foguetes</td>
+<td>$50.000</td>
+<td>600 kW</td>
+<td>Monta foguete, o item mais valioso ($9.000)</td>
+</tr>
+</tbody>
+</table></div>
+<p>A energia que as máquinas usam cresce 25% a cada nível de melhoria, e
+a que os geradores produzem cresce 50%.</p>
+<h2 id="itens-e-cadeias-de-produção">Itens e cadeias de produção</h2>
+<p>Tudo começa em 6 minérios e termina em 11 veículos. Quanto mais
+etapas um item tem, mais ele vale no Mercado: o minério de ferro vale
+$2, o foguete vale $9.000.</p>
+<p><strong>Minérios (no mapa):</strong> ferro (cristais laranja), cobre
+(azul-esverdeados), carvão (cinza), areia (bege), bauxita (vermelhos) e
+petróleo (poças escuras, só com a Bomba de petróleo).</p>
+<div class="tw"><table>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Valor</th>
+<th>Onde é feito</th>
+<th>Receita</th>
+<th>Tempo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Lingote de ferro</td>
+<td>$8</td>
+<td>Forno</td>
+<td>1 minério de ferro</td>
+<td>2 s</td>
+</tr>
+<tr class="even">
+<td>Lingote de cobre</td>
+<td>$9</td>
+<td>Forno</td>
+<td>1 minério de cobre</td>
+<td>2 s</td>
+</tr>
+<tr class="odd">
+<td>Vidro</td>
+<td>$9</td>
+<td>Forno</td>
+<td>1 areia</td>
+<td>2 s</td>
+</tr>
+<tr class="even">
+<td>Lingote de alumínio</td>
+<td>$12</td>
+<td>Forno</td>
+<td>2 bauxitas</td>
+<td>3 s</td>
+</tr>
+<tr class="odd">
+<td>Chapa de ferro</td>
+<td>$22</td>
+<td>Prensa</td>
+<td>2 lingotes de ferro</td>
+<td>3 s</td>
+</tr>
+<tr class="even">
+<td>Chapa de cobre</td>
+<td>$25</td>
+<td>Prensa</td>
+<td>2 lingotes de cobre</td>
+<td>3 s</td>
+</tr>
+<tr class="odd">
+<td>Fio de cobre</td>
+<td>$7 (sai 2)</td>
+<td>Trefiladora</td>
+<td>1 lingote de cobre</td>
+<td>2 s</td>
+</tr>
+<tr class="even">
+<td>Chapa de alumínio</td>
+<td>$35</td>
+<td>Laminadora</td>
+<td>2 lingotes de alumínio</td>
+<td>3 s</td>
+</tr>
+<tr class="odd">
+<td>Engrenagem</td>
+<td>$55</td>
+<td>Montadora</td>
+<td>2 chapas de ferro</td>
+<td>3 s</td>
+</tr>
+<tr class="even">
+<td>Circuito</td>
+<td>$60</td>
+<td>Montadora</td>
+<td>1 chapa de ferro + 3 fios</td>
+<td>4 s</td>
+</tr>
+<tr class="odd">
+<td>Aço</td>
+<td>$35</td>
+<td>Siderúrgica</td>
+<td>2 lingotes de ferro + 1 carvão</td>
+<td>4 s</td>
+</tr>
+<tr class="even">
+<td>Tela</td>
+<td>$140</td>
+<td>Eletrônica</td>
+<td>2 vidros + 1 circuito</td>
+<td>5 s</td>
+</tr>
+<tr class="odd">
+<td>Motor</td>
+<td>$200</td>
+<td>Fáb. de motores</td>
+<td>1 engrenagem + 4 fios + 1 aço</td>
+<td>6 s</td>
+</tr>
+<tr class="even">
+<td>Robô</td>
+<td>$700</td>
+<td>Linha de robôs</td>
+<td>1 motor + 2 circuitos + 2 aços</td>
+<td>8 s</td>
+</tr>
+<tr class="odd">
+<td>Plástico</td>
+<td>$24</td>
+<td>Refinaria</td>
+<td>2 petróleos</td>
+<td>3 s</td>
+</tr>
+<tr class="even">
+<td>Borracha</td>
+<td>$18</td>
+<td>Petroquímica</td>
+<td>2 petróleos</td>
+<td>3 s</td>
+</tr>
+<tr class="odd">
+<td>Bateria</td>
+<td>$150</td>
+<td>Fáb. de baterias</td>
+<td>2 chapas de cobre + 1 plástico</td>
+<td>5 s</td>
+</tr>
+<tr class="even">
+<td>Pneu</td>
+<td>$110</td>
+<td>Fáb. de pneus</td>
+<td>2 borrachas + 1 aço</td>
+<td>4 s</td>
+</tr>
+<tr class="odd">
+<td>Trilho</td>
+<td>$160</td>
+<td>Fáb. de trilhos</td>
+<td>3 aços</td>
+<td>4 s</td>
+</tr>
+<tr class="even">
+<td>Bicicleta</td>
+<td>$600</td>
+<td>Fáb. de bicicletas</td>
+<td>1 aço + 2 pneus + 2 engrenagens</td>
+<td>6 s</td>
+</tr>
+<tr class="odd">
+<td>Patinete elétrico</td>
+<td>$750</td>
+<td>Fáb. de patinetes</td>
+<td>2 chapas de alumínio + 1 bateria + 2 pneus</td>
+<td>6 s</td>
+</tr>
+<tr class="even">
+<td>Drone</td>
+<td>$900</td>
+<td>Fáb. de drones</td>
+<td>2 plásticos + 1 bateria + 2 circuitos + 1 motor</td>
+<td>7 s</td>
+</tr>
+<tr class="odd">
+<td>Moto</td>
+<td>$1.100</td>
+<td>Fáb. de motos</td>
+<td>1 motor + 2 pneus + 2 aços + 1 bateria</td>
+<td>8 s</td>
+</tr>
+<tr class="even">
+<td>Carro elétrico</td>
+<td>$2.200</td>
+<td>Fáb. de carros</td>
+<td>1 motor + 2 baterias + 2 aços + 1 tela</td>
+<td>10 s</td>
+</tr>
+<tr class="odd">
+<td>Caminhão</td>
+<td>$2.200</td>
+<td>Fáb. de caminhões</td>
+<td>2 motores + 6 pneus + 6 aços</td>
+<td>12 s</td>
+</tr>
+<tr class="even">
+<td>Ônibus</td>
+<td>$2.600</td>
+<td>Fáb. de ônibus</td>
+<td>2 motores + 6 pneus + 6 chapas de alumínio + 2 telas</td>
+<td>14 s</td>
+</tr>
+<tr class="odd">
+<td>Navio</td>
+<td>$3.200</td>
+<td>Estaleiro</td>
+<td>20 aços + 4 motores + 2 telas</td>
+<td>24 s</td>
+</tr>
+<tr class="even">
+<td>Avião</td>
+<td>$4.800</td>
+<td>Fáb. de aviões</td>
+<td>20 chapas de alumínio + 4 motores + 10 circuitos + 4 telas</td>
+<td>28 s</td>
+</tr>
+<tr class="odd">
+<td>Trem</td>
+<td>$5.200</td>
+<td>Fáb. de trens</td>
+<td>4 motores + 10 trilhos + 8 chapas de alumínio + 6 circuitos</td>
+<td>20 s</td>
+</tr>
+<tr class="even">
+<td>Foguete</td>
+<td>$9.000</td>
+<td>Base de foguetes</td>
+<td>30 chapas de alumínio + 20 circuitos + 10 baterias + 6 motores</td>
+<td>40 s</td>
+</tr>
+</tbody>
+</table></div>
+<p>Os minérios também podem ser vendidos direto: ferro, cobre e bauxita
+valem $2, petróleo $3, carvão e areia $1. Os tempos são da máquina no
+nível 1; cada melhoria reduz o tempo.</p>
+<p><strong>Exemplo de cadeia completa (o carro elétrico):</strong> ferro
+e carvão viram aço; cobre vira fios e chapas; areia vira vidro, que com
+um circuito vira tela; petróleo vira plástico, que com chapa de cobre
+vira bateria. Engrenagem, fios e aço viram motor. Por fim, motor,
+baterias, aço e tela viram o carro. São 5 minérios e 12 tipos de máquina
+trabalhando juntos.</p>
+<h2 id="progressão">Progressão</h2>
+<p>O jogador sobe de nível vendendo: cada $1 vendido dá 1 ponto de
+experiência (⭐), e cada contrato concluído dá a recompensa em dinheiro
+e a mesma quantidade em experiência.</p>
+<p><strong>Níveis do jogador (1 a 40).</strong> O nível 2 chega com 150
+pontos, o 5 com 2.500, o 10 com 36.000, o 15 com 200.000, o 20 com
+800.000, o 30 com 12,8 milhões e o 40 com 206 milhões. Cada nível
+traz:</p>
+<ul>
+<li>novas máquinas liberadas, com a explicação de cada uma no aviso de
+nível;</li>
+<li>+3% no preço de venda de tudo;</li>
+<li>um nível a mais de melhoria permitido para as máquinas (até o máximo
+de 10);</li>
+<li>esteiras 50% mais rápidas no nível 7 e duas vezes mais rápidas no
+nível 12.</li>
+</ul>
+<p><strong>Melhorias de máquina (nível 1 a 10).</strong> Toque na
+máquina e em ⬆ Melhorar. Cada nível custa 60% do preço da máquina vezes
+o nível atual, e a máquina passa a valer mais. Os efeitos por nível:</p>
+<div class="tw"><table>
+<thead>
+<tr class="header">
+<th>Tipo de máquina</th>
+<th>Efeito de cada nível</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Mineradoras e fábricas</td>
+<td>+40% de velocidade, +25% de consumo de energia</td>
+</tr>
+<tr class="even">
+<td>Gerador, painel solar, turbina e reator</td>
+<td>+50% de energia gerada</td>
+</tr>
+<tr class="odd">
+<td>Armazém</td>
+<td>+200 itens de capacidade</td>
+</tr>
+<tr class="even">
+<td>Mercado</td>
+<td>+10% no preço de venda</td>
+</tr>
+</tbody>
+</table></div>
+<p>Ao remover uma máquina, o jogador recebe de volta metade do que pagou
+nela, contando as melhorias.</p>
+<p><strong>Preço crescente.</strong> Cada máquina igual comprada deixa a
+próxima 5% mais cara. A mineradora custa $85, depois $89, $94, $98 e
+assim por diante. A barra mostra quantas o jogador já tem de cada uma
+(&quot;Mineradora ×2&quot;).</p>
+<p><strong>Contratos.</strong> O quadro do contrato pede uma quantidade
+de um item, mostra o caminho para fazer (&quot;Como fazer&quot;) e tem o botão 📍
+Ver cristais, que leva a câmera até o minério certo. São 45 contratos
+fixos, de &quot;10 lingotes de ferro por $150&quot; até &quot;10 foguetes por $2
+milhões&quot;. Depois deles os contratos continuam sem fim, 50% maiores a
+cada rodada.</p>
+<p><strong>Conquistas (1.619).</strong> A tela 🏆 tem abas:</p>
+<div class="tw"><table>
+<thead>
+<tr class="header">
+<th>Aba</th>
+<th>Quantas</th>
+<th>Exemplos</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Destaques</td>
+<td>26</td>
+<td>Primeira venda, Explorador, Um Sol na Terra, Lenda da indústria</td>
+</tr>
+<tr class="even">
+<td>Vendas</td>
+<td>540</td>
+<td>Vender de 1 a 100 mil unidades de cada item</td>
+</tr>
+<tr class="odd">
+<td>Fábricas</td>
+<td>376</td>
+<td>Ter de 1 a 100 unidades de cada máquina</td>
+</tr>
+<tr class="even">
+<td>Melhorias</td>
+<td>297</td>
+<td>Ter cada máquina nos níveis 2 a 10</td>
+</tr>
+<tr class="odd">
+<td>Dinheiro</td>
+<td>68</td>
+<td>Ter ou ganhar de $1 mil até $10 trilhões</td>
+</tr>
+<tr class="even">
+<td>Níveis</td>
+<td>39</td>
+<td>Chegar a cada nível, do 2 ao 40</td>
+</tr>
+<tr class="odd">
+<td>Contratos</td>
+<td>200</td>
+<td>Concluir de 1 a 200 contratos</td>
+</tr>
+<tr class="even">
+<td>Outras</td>
+<td>73</td>
+<td>Tempo de jogo, cristais renascidos, tipos de item vendidos, frota de
+veículos</td>
+</tr>
+</tbody>
+</table></div>
+<p>Cada conquista dá um prêmio em dinheiro, e a tela mostra o progresso
+até a próxima.</p>
+<p><strong>Cristais que renascem.</strong> Quando um quadrado de minério
+se esgota, o chão fica rachado e o cristal volta a crescer aos poucos.
+Depois de 10 minutos de tempo de jogo ele está cheio de novo. O painel
+da mineradora mostra quanto falta (&quot;🌱 Os cristais voltam em 4
+min&quot;).</p>
+<h2 id="recursos-do-jogo">Recursos do jogo</h2>
+<p>O jogo funciona igual no computador e no celular, salva sozinho e não
+precisa de conta nem de internet depois de aberto.</p>
+<div class="tw"><table>
+<thead>
+<tr class="header">
+<th>Recurso</th>
+<th>Como funciona</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Modo computador</strong></td>
+<td>Barra com as 10 primeiras máquinas e o botão 🏗 Mais; atalhos de
+teclado; botões de velocidade, salvar e conquistas no topo</td>
+</tr>
+<tr class="even">
+<td><strong>Modo celular</strong></td>
+<td>Topo numa linha só com o menu ☰; barra com Selecionar, Remover,
+Esteira e 🏗 Máquinas; contrato recolhível; painel da máquina como gaveta
+embaixo</td>
+</tr>
+<tr class="odd">
+<td><strong>Escolha do modo</strong></td>
+<td>Na primeira vez o jogo pergunta &quot;Celular ou Computador?&quot; e lembra a
+resposta; dá para trocar no menu</td>
+</tr>
+<tr class="even">
+<td><strong>Salvamento automático</strong></td>
+<td>Salva no navegador a cada 15 segundos e ao fechar a página; botão
+Salvar para salvar na hora</td>
+</tr>
+<tr class="odd">
+<td><strong>🔗 Link do jogo</strong></td>
+<td>Transforma o jogo inteiro num link compactado (cerca de 1.300
+caracteres para uma fábrica grande). Abrindo o link em outro aparelho, o
+jogo continua de lá. Se o aparelho já tiver outro jogo, ele pergunta
+antes de substituir</td>
+</tr>
+<tr class="even">
+<td><strong>Tutorial</strong></td>
+<td>8 passos com círculos no mapa mostrando onde construir; pode ser
+refeito pelo menu</td>
+</tr>
+<tr class="odd">
+<td><strong>Dicas &quot;Como usar&quot;</strong></td>
+<td>Na primeira vez que cada máquina é colocada, aparece o que ela faz,
+o que entra e o que sai, com uma curiosidade &quot;Você sabia?&quot;</td>
+</tr>
+<tr class="even">
+<td><strong>🗺 Minimapa</strong></td>
+<td>Mostra o mapa inteiro com as jazidas e as máquinas; tocar nele leva
+a câmera até o ponto</td>
+</tr>
+<tr class="odd">
+<td><strong>🏆 Conquistas</strong></td>
+<td>Tela com abas, contagem por categoria e progresso de cada série</td>
+</tr>
+<tr class="even">
+<td><strong>Sons</strong></td>
+<td>Efeitos criados pelo próprio navegador (construir, remover,
+melhorar, subir de nível, conquista, contrato, falta de dinheiro); botão
+🔊 / 🔇 para desligar</td>
+</tr>
+<tr class="odd">
+<td><strong>⚡ Gráficos leves</strong></td>
+<td>Tira nuvens, árvores, fumaça e faíscas e limita a 30 quadros por
+segundo. Liga sozinho quando o computador é lento; dá para trocar no
+menu ☰</td>
+</tr>
+<tr class="even">
+<td><strong>Efeitos visuais</strong></td>
+<td>&quot;+$&quot; subindo dos mercados, faíscas ao construir, estrelas ao
+melhorar, veículos saindo dos mercados quando são vendidos</td>
+</tr>
+<tr class="odd">
+<td><strong>Contas online e Top global</strong></td>
+<td>Prontos no código, mas desligados: só funcionam depois de configurar
+um projeto Firebase</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Sem internet:</strong> o jogo inteiro é um arquivo só.
+Copiado num pen drive, ele abre direto no navegador, o que é útil numa
+feira com Wi-Fi ruim.</p>
+<h2 id="como-foi-feito">Como foi feito</h2>
+<p>O jogo inteiro é um único arquivo <code>index.html</code> de cerca de
+110 KB, escrito em HTML, CSS e JavaScript puro, sem nenhuma biblioteca.
+Todo o desenho é feito por código num <code>&lt;canvas&gt;</code>: não
+há nenhuma imagem pronta.</p>
+<div class="tw"><table>
+<thead>
+<tr class="header">
+<th>Parte</th>
+<th>Como funciona</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Desenho</strong></td>
+<td>Canvas 2D. Máquinas, itens, esteiras, árvores e efeitos são
+desenhados com formas e animações a cada quadro</td>
+</tr>
+<tr class="even">
+<td><strong>Mapa</strong></td>
+<td>Grade de 180 × 130 quadrados de 32 pixels. As jazidas são geradas
+sempre nos mesmos lugares</td>
+</tr>
+<tr class="odd">
+<td><strong>Simulação</strong></td>
+<td>Roda em passos fixos de 0,05 segundo, separada do desenho. Nas
+velocidades 3x e 8x, só roda mais passos por quadro</td>
+</tr>
+<tr class="even">
+<td><strong>Dados do jogo</strong></td>
+<td>Tabelas no código: máquinas (preço, energia, nível), itens (nome,
+valor, cor), receitas e contratos. Uma máquina nova é basicamente uma
+linha nova nessas tabelas</td>
+</tr>
+<tr class="odd">
+<td><strong>Esteiras</strong></td>
+<td>Cada esteira sabe para onde aponta e quem a alimenta; o desenho vira
+curva, T ou cruzamento sozinho</td>
+</tr>
+<tr class="even">
+<td><strong>Salvamento</strong></td>
+<td>O estado do jogo vira texto (JSON) guardado no navegador. Se o
+navegador bloquear o armazenamento, o jogo continua funcionando só na
+memória</td>
+</tr>
+<tr class="odd">
+<td><strong>Link do jogo</strong></td>
+<td>O salvamento é compactado (deflate) e transformado em texto seguro
+para links (base64). Ao abrir, o jogo confere os dados e descarta o que
+for inválido</td>
+</tr>
+<tr class="even">
+<td><strong>Sons</strong></td>
+<td>Gerados na hora pela Web Audio API, sem arquivos de áudio</td>
+</tr>
+<tr class="odd">
+<td><strong>Desempenho</strong></td>
+<td>Só desenha o que aparece na tela; o chão é uma imagem pequena
+ampliada; o modo leve liga sozinho em computador fraco</td>
+</tr>
+<tr class="even">
+<td><strong>Celular</strong></td>
+<td>Toques, arrasto e pinça tratados à parte; a interface muda de layout
+no modo celular</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Testes automáticos.</strong> Cada versão foi testada com o
+Playwright, que abre o jogo num navegador Chromium controlado por
+código. Os testes montam fábricas completas e conferem as vendas;
+simulam celulares (iPhone SE, iPhone 13, Galaxy S9+) com toque e pinça;
+conferem se nenhum painel cobre outro; testam o link do jogo entre
+vários aparelhos; e verificam que não há erros no console.</p>
+<p><strong>Teste de desempenho.</strong> Num computador simulado 6 vezes
+mais lento, com uma fábrica de 236 construções em tela 1366 × 768, a
+versão 12 rodava a 11 quadros por segundo. A versão 13 roda a 26, e a 44
+com os gráficos leves. O tempo de desenho de cada quadro caiu de 44,6 ms
+para 6,4 ms.</p>
+<p><strong>Publicação.</strong> O código fica no GitHub, e o GitHub
+Pages publica o site de graça, sem anúncios nem selos. Cada mudança
+enviada ao repositório atualiza o site em 1 ou 2 minutos.</p>
+<p><strong>Ferramentas.</strong> O jogo foi desenvolvido com a ajuda do
+Claude, um assistente de inteligência artificial da Anthropic, usado
+para escrever o código, os testes automáticos e esta documentação a
+partir das ideias e dos pedidos do autor.</p>
+<h2 id="roteiro-para-a-feira">Roteiro para a feira</h2>
+<p>A melhor forma de apresentar o jogo é deixar o visitante construir a
+própria linha de produção em 2 minutos, enquanto você explica o que cada
+peça representa na indústria.</p>
+<p><strong>Fala de 1 minuto (para quem está passando):</strong></p>
+<blockquote>
+<p>Esse é o Ferrugem, um jogo que eu fiz para ensinar automação
+industrial. Você monta uma fábrica que funciona sozinha: a mineradora é
+o sensor, que reconhece o minério; a esteira é o atuador, que leva o
+material; e cada máquina decide sozinha quando trabalhar, como um CLP.
+Você começa fazendo lingote de ferro e vai até carro elétrico, trem e
+foguete. Quer tentar montar a primeira linha?</p>
+</blockquote>
+<p><strong>Fala de 3 minutos (para quem parou para ouvir):</strong></p>
+<ol type="1">
+<li><strong>O problema (30 s):</strong> automação industrial é um
+assunto importante, mas difícil de visualizar só lendo. O jogo deixa a
+pessoa ver uma fábrica funcionando e montar a sua.</li>
+<li><strong>A ideia (30 s):</strong> o jogador não produz cada peça; ele
+planeja e conecta as máquinas. É exatamente o papel de quem trabalha com
+automação.</li>
+<li><strong>A ponte com a indústria (1 min):</strong> sensores,
+atuadores e CLPs aparecem como mineradora, esteira e máquinas que param
+sozinhas. Energia, gargalos e custo de investimento também aparecem, e o
+jogo cita empresas do Vale do Taquari como Fruki, Atlas Calçados e
+Baldo.</li>
+<li><strong>O tamanho do projeto (30 s):</strong> 34 máquinas, 36 itens,
+40 níveis e 1.619 conquistas, tudo num arquivo só, que roda no
+computador e no celular.</li>
+<li><strong>O convite (30 s):</strong> o link está no QR code; dá para
+jogar no seu celular agora.</li>
+</ol>
+<p><strong>Demonstração ao vivo (cerca de 2 minutos):</strong></p>
+<ol type="1">
+<li>Abra o jogo e escolha <strong>Computador</strong> (ou Celular, se
+for mostrar no celular).</li>
+<li>Siga o tutorial: mineradora no ferro, gerador, mineradora de carvão
+ligada ao gerador.</li>
+<li>Coloque forno e mercado e ligue tudo com esteiras. Mostre a luz
+verde: &quot;funciona sozinho, isso é automação&quot;.</li>
+<li>Aperte <strong>8x</strong> e mostre o dinheiro subindo, o &quot;+$&quot;
+saindo do mercado e o contrato sendo concluído.</li>
+<li>Clique no forno: mostre o painel com estado, energia e receitas, e
+use ⬆ <strong>Melhorar</strong>.</li>
+<li>Desligue o gerador removendo-o: as máquinas ficam com luz vermelha.
+&quot;Sem energia, a linha para.&quot;</li>
+<li>Abra o 🗺 minimapa e a tela 🏆 de conquistas para mostrar o tamanho
+do jogo.</li>
+</ol>
+<p><strong>Desafio para visitantes:</strong> &quot;Consegue vender 10
+lingotes de ferro em 2 minutos?&quot; É o primeiro contrato do jogo, e todo
+mundo consegue com o tutorial.</p>
+<p><strong>Checklist antes da feira:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>Abrir o site e conferir se o topo
+mostra a versão mais recente</label></li>
+<li><label><input type="checkbox"></input>Copiar o <code>index.html</code> num
+pen drive (plano B sem internet)</label></li>
+<li><label><input type="checkbox"></input>Imprimir um QR code com o link do
+site para os visitantes jogarem no celular</label></li>
+<li><label><input type="checkbox"></input>Em cada computador da feira, clicar
+em <strong>Novo jogo</strong> para começar do zero</label></li>
+<li><label><input type="checkbox"></input>Se o computador for fraco, ligar
+<strong>⚡ Gráficos leves</strong> no menu ☰</label></li>
+<li><label><input type="checkbox"></input>Deixar um jogo avançado salvo como
+🔗 link, para mostrar as fábricas de veículos sem esperar</label></li>
+<li><label><input type="checkbox"></input>Testar o som e levar fone, ou
+desligar o som com 🔇</label></li>
+<li><label><input type="checkbox"></input>Ensaiar a fala de 1 minuto e a
+demonstração</label></li>
+</ul>
+<p><strong>Perguntas frequentes:</strong></p>
+<div class="tw"><table>
+<thead>
+<tr class="header">
+<th>Pergunta</th>
+<th>Resposta</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Você fez o jogo sozinho?</td>
+<td>Eu criei a ideia, as regras e todas as mudanças, e usei o Claude,
+uma inteligência artificial, para escrever o código e os testes
+comigo</td>
+</tr>
+<tr class="even">
+<td>Precisa instalar alguma coisa?</td>
+<td>Não. Abre no navegador, no computador ou no celular</td>
+</tr>
+<tr class="odd">
+<td>Funciona sem internet?</td>
+<td>Sim. É um arquivo só; copiado num pen drive, abre direto</td>
+</tr>
+<tr class="even">
+<td>É de graça?</td>
+<td>Sim, e o código é aberto no GitHub</td>
+</tr>
+<tr class="odd">
+<td>O que o jogo ensina?</td>
+<td>Como sensores, atuadores e controladores trabalham juntos, e como
+energia, gargalos, custos e produtividade afetam uma fábrica</td>
+</tr>
+<tr class="even">
+<td>Como o jogo salva?</td>
+<td>No próprio navegador, a cada 15 segundos. Para levar para outro
+aparelho, use o 🔗 Link do jogo</td>
+</tr>
+<tr class="odd">
+<td>Quanto tempo leva para zerar?</td>
+<td>Chegar ao foguete leva horas; as 1.619 conquistas e os contratos sem
+fim fazem o jogo continuar depois disso</td>
+</tr>
+<tr class="even">
+<td>Quais linguagens foram usadas?</td>
+<td>HTML, CSS e JavaScript, sem bibliotecas</td>
+</tr>
+<tr class="odd">
+<td>Funciona em computador fraco?</td>
+<td>Sim. O modo Gráficos leves liga sozinho quando o jogo fica
+lento</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="histórico-de-versões">Histórico de versões</h2>
+<p>O jogo passou por 13 versões. A versão aparece no topo da tela (no
+celular, no menu ☰).</p>
+<div class="tw"><table>
+<thead>
+<tr class="header">
+<th>Versão</th>
+<th>Data</th>
+<th>O que mudou</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>v13</td>
+<td>04/11/2026</td>
+<td>Desenho 7 vezes mais rápido, modo ⚡ Gráficos leves automático, menu
+☰ também no computador, espaço livre para o selo da Netlify, publicação
+no GitHub</td>
+</tr>
+<tr class="even">
+<td>v12</td>
+<td>03/11/2026</td>
+<td>14 fábricas novas com veículos (bicicleta a foguete), bauxita e
+alumínio, borracha e pneus, 40 níveis, máquinas até o nível 10, 1.619
+conquistas com abas, botão 🏗 Mais no computador</td>
+</tr>
+<tr class="odd">
+<td>v11</td>
+<td>27/10/2026</td>
+<td>Petróleo, refinaria, baterias, carro elétrico e reator de fusão;
+cristais que renascem; mapa 180 × 130; painel do celular em gaveta;
+sons; árvores, nuvens e efeitos; esteiras mais rápidas por nível</td>
+</tr>
+<tr class="even">
+<td>v10</td>
+<td>27/10/2026</td>
+<td>🔗 Link do jogo para levar o salvamento a outro aparelho; painel de
+máquina com botões fixos; barra do topo numa linha</td>
+</tr>
+<tr class="odd">
+<td>v9</td>
+<td>22/10/2026</td>
+<td>Contas online e Top global (prontos, aguardando configuração do
+Firebase)</td>
+</tr>
+<tr class="even">
+<td>v8</td>
+<td>22/10/2026</td>
+<td>20 conquistas, tela inicial &quot;Celular ou Computador?&quot;, modo celular
+simplificado, barra do computador em duas linhas</td>
+</tr>
+<tr class="odd">
+<td>v7</td>
+<td>21/10/2026</td>
+<td>Mapa maior, areia e vidro, aço, telas, motores, robôs, turbina
+eólica, 10 níveis, minimapa, preço 5% maior a cada máquina igual</td>
+</tr>
+<tr class="even">
+<td>v6</td>
+<td>21/10/2026</td>
+<td>&quot;Como fazer&quot; e 📍 Ver cristais nos contratos</td>
+</tr>
+<tr class="odd">
+<td>v5</td>
+<td>21/10/2026</td>
+<td>Dicas &quot;Como usar&quot; para cada máquina</td>
+</tr>
+<tr class="even">
+<td>v4</td>
+<td>21/10/2026</td>
+<td>Níveis do jogador, melhorias de máquina, trefiladora, painel solar,
+montadora, 15 contratos, entrega direta entre máquinas</td>
+</tr>
+<tr class="odd">
+<td>v3</td>
+<td>21/10/2026</td>
+<td>Tutorial e painel posicionados abaixo da barra do topo, sem cobrir
+os botões</td>
+</tr>
+<tr class="even">
+<td>v2</td>
+<td>antes de 21/10/2026</td>
+<td>Esteiras ligadas com curvas, máquinas com visual realista, suporte a
+toque no celular, economia ajustada</td>
+</tr>
+<tr class="odd">
+<td>v1</td>
+<td>antes de 21/10/2026</td>
+<td>Versão original: esteira, mineradora, forno, prensa, gerador,
+armazém e mercado, tutorial e contratos</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="créditos-links-e-referência-técnica">Créditos, links e
+referência técnica</h2>
+<p><strong>Autor:</strong> Pedro Otávio Antoniazzi, com desenvolvimento
+assistido pelo Claude (Anthropic).</p>
+<p><strong>Links:</strong></p>
+<div class="tw"><table>
+<thead>
+<tr class="header">
+<th>Para quê</th>
+<th>Endereço</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Jogar (site público)</td>
+<td><a href="https://pedrootavioantoniazzi-dev.github.io/Ferrugem/">pedrootavioantoniazzi-dev.github.io/Ferrugem</a></td>
+</tr>
+<tr class="even">
+<td>Esta documentação (página)</td>
+<td><a href="https://pedrootavioantoniazzi-dev.github.io/Ferrugem/documentacao.html">pedrootavioantoniazzi-dev.github.io/Ferrugem/documentacao.html</a></td>
+</tr>
+<tr class="odd">
+<td>Esta documentação (PDF)</td>
+<td><a href="Documentacao-Ferrugem.pdf">Documentacao-Ferrugem.pdf</a></td>
+</tr>
+<tr class="even">
+<td>Código-fonte</td>
+<td><a href="https://github.com/pedrootavioantoniazzi-dev/Ferrugem">github.com/pedrootavioantoniazzi-dev/Ferrugem</a></td>
+</tr>
+<tr class="odd">
+<td>Versão antiga na Netlify</td>
+<td><a href="https://dancing-kataifi-3377a4.netlify.app">dancing-kataifi-3377a4.netlify.app</a></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Referência técnica rápida:</strong></p>
+<div class="tw"><table>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Arquivo</td>
+<td><code>index.html</code> (único, cerca de 110 KB)</td>
+</tr>
+<tr class="even">
+<td>Tecnologias</td>
+<td>HTML5, CSS3, JavaScript, Canvas 2D, Web Audio API,
+CompressionStream</td>
+</tr>
+<tr class="odd">
+<td>Bibliotecas externas</td>
+<td>Nenhuma</td>
+</tr>
+<tr class="even">
+<td>Navegadores</td>
+<td>Chrome, Edge, Firefox e Safari atuais, no computador e no
+celular</td>
+</tr>
+<tr class="odd">
+<td>Onde o jogo salva</td>
+<td>Armazenamento local do navegador (<code>localStorage</code>), chave
+<code>ferrugem_v1</code></td>
+</tr>
+<tr class="even">
+<td>Dinheiro inicial</td>
+<td>$650</td>
+</tr>
+<tr class="odd">
+<td>Passo da simulação</td>
+<td>0,05 segundo, com velocidades 1x, 3x e 8x</td>
+</tr>
+<tr class="even">
+<td>Tempo para o cristal renascer</td>
+<td>10 minutos de tempo de jogo</td>
+</tr>
+<tr class="odd">
+<td>Testes</td>
+<td>Playwright com Chromium, no computador e em celulares simulados</td>
+</tr>
+<tr class="even">
+<td>Publicação</td>
+<td>GitHub Pages, atualizado a cada envio ao repositório</td>
+</tr>
+</tbody>
+</table></div>
+</body>
+</html>
