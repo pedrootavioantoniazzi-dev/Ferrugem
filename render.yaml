@@ -1,0 +1,12 @@
+# Configuração para publicar o jogo no Render como site estático.
+# No Render: New > Blueprint > escolha este repositório > Apply.
+services:
+  - type: web
+    name: ferrugem
+    runtime: static
+    buildCommand: echo "Sem etapa de build: o jogo é um único index.html"
+    staticPublishPath: .
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
