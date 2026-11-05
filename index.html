@@ -582,4 +582,14 @@ function loop(ts){const dt=Math.min(.25,(ts-prev)/1000);prev=ts;fEma=fEma*.95+dt
  if(!lite||ts-lastDraw>=31){lastDraw=ts;draw(ts)}ui_t+=dt;if(ui_t>.2){ui_t=0;ui();$('bp').classList.toggle('on',paused);$('bp').textContent=paused?'▶':'⏸'}sv+=dt;if(sv>15){sv=0;save(true)}csv+=dt;if(csv>60){csv=0;cloudSave()}
  requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
-</script></body></html>
+</script>
+<div id="splash" onclick="splashOff()"><div class="sp-in"><div class="sp-logo">FERRUGEM</div><div class="sp-sub">FÁBRICA</div><div class="sp-by">Um jogo <b>Nexora</b> · criado por Pedro Otávio Antoniazzi</div><div class="sp-hm">🏅 <b>Menção honrosa</b><br><span>Israel</span> e <span>Francesco</span><small>colegas que ajudaram do início ao fim do projeto</small></div><div class="sp-tap">toque para começar</div></div></div>
+<style>#splash{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse 90% 60% at 50% 115%,#c2410c66,transparent 70%),#0b0f14;cursor:pointer;transition:opacity .6s;padding:16px;text-align:center}#splash.off{opacity:0;pointer-events:none}
+.sp-in{animation:spIn .7s ease-out both}@keyframes spIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.sp-logo{font:900 clamp(48px,13vw,110px)/.9 "Trebuchet MS",Verdana,sans-serif;letter-spacing:-2px;background:linear-gradient(180deg,#ffe0a8,#ff9f1c 55%,#c2410c);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sp-sub{font-weight:700;font-size:clamp(14px,3.5vw,22px);letter-spacing:.6em;margin:8px 0 14px;padding-left:.6em;color:var(--t)}
+.sp-by{color:var(--m);font-size:13px;margin-bottom:22px}.sp-by b{color:var(--a)}
+.sp-hm{display:inline-block;border:1px solid var(--a);border-radius:12px;padding:12px 22px;background:#18212ccc;font-size:14px;max-width:340px}.sp-hm b{color:var(--a)}.sp-hm span{font-weight:700;font-size:22px;color:var(--a)}.sp-hm small{display:block;color:var(--m);margin-top:4px}
+.sp-tap{margin-top:26px;color:var(--m);font-size:12px;animation:spB 1.6s ease-in-out infinite}@keyframes spB{50%{opacity:.35}}</style>
+<script>// tela de abertura com a menção honrosa: some sozinha em alguns segundos ou com um toque
+function splashOff(){const e=$('splash');if(!e||e.classList.contains('off'))return;e.classList.add('off');setTimeout(()=>e.remove(),700)}setTimeout(splashOff,5000);</script></body></html>
