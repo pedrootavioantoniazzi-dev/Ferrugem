@@ -378,7 +378,9 @@ O jogo passou por 13 versões. A versão aparece no topo da tela (no celular, no
 
 ## Créditos, links e referência técnica
 
-**Autor:** Pedro Otávio Antoniazzi, com desenvolvimento assistido pelo Claude (Anthropic).
+**Autor:** Pedro Otávio Antoniazzi (Nexora), com desenvolvimento assistido pelo Claude (Anthropic).
+
+**🏅 Menção honrosa:** aos colegas **Israel** e **Francesco**, que ajudaram do início ao fim do projeto. Muito obrigado!
 
 **Links:**
 
