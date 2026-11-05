@@ -6,7 +6,7 @@
 | `Ferrugem-itch.zip` | O jogo (é só enviar este ZIP) |
 | `capa-630x500.png` | Imagem de capa (Cover image) |
 | `tela1-fabrica.png` … `tela5-celular.png` | Capturas de tela (Screenshots) |
-| Trailer | Envie o `Trailer-Ferrugem.mp4` ao YouTube e cole o link no campo "Gameplay video or trailer" |
+| Trailer | Já está no YouTube: https://youtu.be/cyXfUx24iXM (cole no campo "Gameplay video or trailer") |
 
 ---
 
@@ -29,7 +29,7 @@
 7. **Details:** cole a descrição completa abaixo em "Description".
 8. **Genre:** `Simulation`. **Tags:** `automation`, `factory`, `educational`, `simulation`, `management`, `idle`, `2d`, `singleplayer`, `brazil`, `portuguese`.
 9. **App store links:** pode deixar vazio. **Custom noun:** vazio.
-10. **Cover image:** `capa-630x500.png`. **Screenshots:** as 5 telas. **Trailer:** link do YouTube.
+10. **Cover image:** `capa-630x500.png`. **Screenshots:** as 5 telas. **Gameplay video or trailer:** https://youtu.be/cyXfUx24iXM
 11. **Visibility & access:** primeiro deixe **`Draft`**, clique em **Save & view page** e teste. Se estiver tudo certo, volte em "Edit game", mude para **`Public`** e salve.
 
 > Dica: na página do jogo, "Edit theme" muda as cores. Fica bonito com fundo `#0b0f14`, texto `#e6edf3` e links/botões `#ff9f1c` (o laranja do jogo).

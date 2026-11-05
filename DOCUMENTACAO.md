@@ -2,7 +2,7 @@
 
 Versão 13 · novembro de 2026 · autor: Pedro Otávio Antoniazzi
 
-**Jogar agora:** [pedrootavioantoniazzi-dev.github.io/Ferrugem](https://pedrootavioantoniazzi-dev.github.io/Ferrugem/)
+**Jogar agora:** [pedrootavioantoniazzi-dev.github.io/Ferrugem](https://pedrootavioantoniazzi-dev.github.io/Ferrugem/) · **Trailer:** [youtu.be/cyXfUx24iXM](https://youtu.be/cyXfUx24iXM)
 
 ## Sumário
 
@@ -385,6 +385,7 @@ O jogo passou por 13 versões. A versão aparece no topo da tela (no celular, no
 | Para quê | Endereço |
 | --- | --- |
 | Jogar (site público) | [pedrootavioantoniazzi-dev.github.io/Ferrugem](https://pedrootavioantoniazzi-dev.github.io/Ferrugem/) |
+| Trailer (YouTube) | [youtu.be/cyXfUx24iXM](https://youtu.be/cyXfUx24iXM) |
 | Esta documentação (página) | [pedrootavioantoniazzi-dev.github.io/Ferrugem/documentacao.html](https://pedrootavioantoniazzi-dev.github.io/Ferrugem/documentacao.html) |
 | Esta documentação (PDF) | [Documentacao-Ferrugem.pdf](Documentacao-Ferrugem.pdf) |
 | Código-fonte | [github.com/pedrootavioantoniazzi-dev/Ferrugem](https://github.com/pedrootavioantoniazzi-dev/Ferrugem) |
