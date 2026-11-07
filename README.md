@@ -19,5 +19,5 @@ O jogador extrai minérios, transforma em produtos cada vez mais complexos e lig
 
 ## Créditos
 
-- Criado por Pedro Otávio Antoniazzi (Nexora), com ajuda de IA (Claude, da Anthropic).
+- Criado por Pedro Otávio Antoniazzi (Nexvora), com ajuda de IA (Claude, da Anthropic).
 - 🏅 **Menção honrosa:** Israel e Francesco, colegas que ajudaram do início ao fim do projeto.
