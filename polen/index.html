@@ -332,8 +332,8 @@ const FERAS = [
   // ===== FERAS DESENHADAS À MÃO =====
   // Desenhe no Piskel (ou outro site), salve em PNG com fundo transparente,
   // com o bicho virado para a direita, e coloque o arquivo na pasta polen/feras/.
-  // Depois escreva img: 'feras/nome-do-arquivo.png' no lugar do look.
-  { id: 'cascudo', nome: 'Cascudo', tipo: 'agua', extra: 'rocha', base: [52, 48, 62, 42], tam: .85, img: 'feras/cascudo.png' },
+  // Depois escreva img: 'feras/nome-do-arquivo.png' no lugar do look. Exemplo:
+  // { id: 'meubicho', nome: 'Meu Bicho', tipo: 'agua', extra: 'rocha', base: [52, 48, 62, 42], tam: .85, img: 'feras/meubicho.png' },
 
   { id: 'ferrugor', nome: 'Ferrugor', tipo: 'rocha', extra: 'fogo', base: [110, 118, 115, 80], tam: 1.42, taxa: .22, lenda: 1,
     look: { cor: '#a8431f', cor2: '#e0a05a', det: '#3a2620', bw: .92, bh: .76, hw: .62, hh: .48, chifre: 'coroa', crista: 6, asa: 'morcego', cauda: 'clava', braco: 2, presas: 2, marca: 'rachas', aura: 1, luz: '#ffd23f' } }
@@ -577,7 +577,7 @@ CHEFES.forEach((ch, i) => { ch.g = 1; ch.i = i; ch.premio = 500 + i * 400; });
 const TREINS = [ // treinadores rivais espalhados pelas rotas
   { nome: 'Recruta Dudu', cor: '#57c84d', ...achaLivre(CX - 7, CY - 6), time: [['cipoal', 4], ['faiscao', 5]], fala: 'Acabei de pegar minhas feras. Bora testar!' },
   { nome: 'Caçadora Lia', cor: '#9a5cf0', ...achaLivre(CX - 12, CY + 4), time: [['garragua', 7], ['vultinho', 7]], fala: 'Te vi de longe. Não tem como fugir!' },
-  { nome: 'Mergulhador Tito', cor: '#3fa0ff', ...achaLivre(CX - 6, CY + 12), time: [['cascudo', 9], ['marulho', 10], ['garragua', 11]], fala: 'Minhas feras vieram do fundo do lago!' },
+  { nome: 'Mergulhador Tito', cor: '#3fa0ff', ...achaLivre(CX - 6, CY + 12), time: [['marulho', 10], ['garragua', 11]], fala: 'Minhas feras vieram do fundo do lago!' },
   { nome: 'Lenhador Braz', cor: '#b08a6a', ...achaLivre(CX + 4, CY - 13), time: [['cipoal', 12], ['espinhel', 13], ['cascalho', 13]], fala: 'Esse bosque é meu território.' },
   { nome: 'Ferreira Nara', cor: '#ff6a2a', ...achaLivre(CX + 13, CY + 2), time: [['cinzal', 17], ['cascalho', 18], ['fornalho', 18]], fala: 'Forjei meu time no calor do vulcão!' },
   { nome: 'Vulto Kael', cor: '#4b2f7a', ...achaLivre(CX + 14, CY - 10), time: [['umbrakar', 20], ['voltarok', 21]], fala: 'Poucos me enxergam antes de perder.' },
@@ -598,7 +598,7 @@ const LOJA = { x: CX + 3.1, y: CY + .2 };
 const TITA = { ...achaLivre(CX + 21, CY - 14), nv: 30 };
 const TAB = { // quem aparece em cada lugar: [fera, peso, só à noite?]
   campo: [['faiscao', 6], ['cipoal', 6], ['cascalho', 2], ['vultinho', 6, 1], ['corvex', 3, 1], ['cactusco', 1]],
-  lago: [['garragua', 7], ['cascudo', 4], ['marulho', 1.5], ['faiscao', 2], ['vultinho', 3, 1], ['friozim', 2], ['friozim', 4, 1]],
+  lago: [['garragua', 7], ['marulho', 1.5], ['faiscao', 2], ['vultinho', 3, 1], ['friozim', 2], ['friozim', 4, 1]],
   bosque: [['cipoal', 5], ['espinhel', 1.5], ['vultinho', 2], ['vultinho', 6, 1], ['faiscao', 1], ['corvex', 2], ['friozim', 1]],
   vulcao: [['cinzal', 6], ['cascalho', 5], ['brasito', 1.5], ['vultinho', 3, 1], ['cactusco', 4]]
 };
