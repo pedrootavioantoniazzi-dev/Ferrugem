@@ -12,7 +12,7 @@ O jogador extrai minérios, transforma em produtos cada vez mais complexos e lig
 
 ## Outros jogos
 
-- **Pólen — Jardim dos Polinis** ([`polen/`](polen/index.html)): jogo 2D fofinho de colher pólen e fazer amizade com 12 criaturinhas originais. Jogar: https://pedrootavioantoniazzi-dev.github.io/Ferrugem/polen/
+- **Feras de Ferrugem** ([`polen/`](polen/index.html)): jogo 2D de capturar, treinar e batalhar com 22 feras originais, 3 Guardiões e o titã Ferrugor. Jogar: https://pedrootavioantoniazzi-dev.github.io/Ferrugem/polen/
 
 ## Em resumo
 
