@@ -329,11 +329,18 @@ const FERAS = [
   { id: 'espinhorn', nome: 'Espinhorn', tipo: 'planta', extra: 'rocha', base: [90, 96, 108, 46], tam: 1.2,
     look: { cor: '#3a8a4a', cor2: '#e8c870', det: '#24582e', bw: .88, bh: .74, hw: .6, hh: .46, chifre: 'coroa', crista: 7, cauda: 'clava', braco: 2, presas: 2, marca: 'listras', aura: 1 } },
 
+  // ===== FERAS DESENHADAS À MÃO =====
+  // Desenhe no Piskel (ou outro site), salve em PNG com fundo transparente,
+  // com o bicho virado para a direita, e coloque o arquivo na pasta polen/feras/.
+  // Depois escreva img: 'feras/nome-do-arquivo.png' no lugar do look.
+  { id: 'cascudo', nome: 'Cascudo', tipo: 'agua', extra: 'rocha', base: [52, 48, 62, 42], tam: .85, img: 'feras/cascudo.png' },
+
   { id: 'ferrugor', nome: 'Ferrugor', tipo: 'rocha', extra: 'fogo', base: [110, 118, 115, 80], tam: 1.42, taxa: .22, lenda: 1,
     look: { cor: '#a8431f', cor2: '#e0a05a', det: '#3a2620', bw: .92, bh: .76, hw: .62, hh: .48, chifre: 'coroa', crista: 6, asa: 'morcego', cauda: 'clava', braco: 2, presas: 2, marca: 'rachas', aura: 1, luz: '#ffd23f' } }
 ];
 const F = Object.fromEntries(FERAS.map(f => [f.id, f]));
 for (const f of FERAS) { f.fase = 1; }
+for (const f of FERAS) if (f.img) { f.im = new Image(); f.im.src = f.img; } // carrega os desenhos feitos à mão
 for (const f of FERAS) if (f.evo) F[f.evo[0]].fase = f.fase + 1;
 for (const f of FERAS) if (f.taxa === undefined) f.taxa = [0, .85, .5, .3][f.fase];
 
@@ -376,11 +383,19 @@ function raio(c, x1, y1, x2, y2, seed, cor, lw) {
 // (x, y) são os pés; s é a escala; o: {flip, ph, semSombra}
 function desenhaFera(c, f, x, y, s, t, o) {
   o = o || {};
-  const L = f.look, ph = o.ph || 0, b = Math.sin(t * 2.6 + ph), T2 = TIPO[f.tipo], luz = L.luz || T2.luz;
+  const L = f.look || { bw: .8 }, ph = o.ph || 0, b = Math.sin(t * 2.6 + ph), T2 = TIPO[f.tipo], luz = L.luz || T2.luz;
   s *= f.tam;
   c.save(); c.translate(x, y);
   if (!o.semSombra) { c.fillStyle = 'rgba(0,0,0,.32)'; ell(c, 0, 0, s * L.bw * 1.15, s * .2); c.fill(); }
   if (o.flip) c.scale(-1, 1);
+  if (f.img) { // fera desenhada à mão: usa a imagem PNG
+    if (f.im.naturalWidth) {
+      const w = s * 2.2, h = w * f.im.naturalHeight / f.im.naturalWidth;
+      c.imageSmoothingEnabled = false; // deixa os pixels nítidos
+      c.drawImage(f.im, -w / 2, -h - s * .05 + b * s * .04, w, h);
+    }
+    c.restore(); return;
+  }
   const lw = Math.max(1.5, s * .075);
   c.lineWidth = lw; c.lineJoin = c.lineCap = 'round'; c.strokeStyle = TRACO;
   const bw = L.bw * s, bh = L.bh * s, hw = L.hw * s, hh = L.hh * s;
@@ -562,7 +577,7 @@ CHEFES.forEach((ch, i) => { ch.g = 1; ch.i = i; ch.premio = 500 + i * 400; });
 const TREINS = [ // treinadores rivais espalhados pelas rotas
   { nome: 'Recruta Dudu', cor: '#57c84d', ...achaLivre(CX - 7, CY - 6), time: [['cipoal', 4], ['faiscao', 5]], fala: 'Acabei de pegar minhas feras. Bora testar!' },
   { nome: 'Caçadora Lia', cor: '#9a5cf0', ...achaLivre(CX - 12, CY + 4), time: [['garragua', 7], ['vultinho', 7]], fala: 'Te vi de longe. Não tem como fugir!' },
-  { nome: 'Mergulhador Tito', cor: '#3fa0ff', ...achaLivre(CX - 6, CY + 12), time: [['marulho', 10], ['garragua', 11]], fala: 'Minhas feras vieram do fundo do lago!' },
+  { nome: 'Mergulhador Tito', cor: '#3fa0ff', ...achaLivre(CX - 6, CY + 12), time: [['cascudo', 9], ['marulho', 10], ['garragua', 11]], fala: 'Minhas feras vieram do fundo do lago!' },
   { nome: 'Lenhador Braz', cor: '#b08a6a', ...achaLivre(CX + 4, CY - 13), time: [['cipoal', 12], ['espinhel', 13], ['cascalho', 13]], fala: 'Esse bosque é meu território.' },
   { nome: 'Ferreira Nara', cor: '#ff6a2a', ...achaLivre(CX + 13, CY + 2), time: [['cinzal', 17], ['cascalho', 18], ['fornalho', 18]], fala: 'Forjei meu time no calor do vulcão!' },
   { nome: 'Vulto Kael', cor: '#4b2f7a', ...achaLivre(CX + 14, CY - 10), time: [['umbrakar', 20], ['voltarok', 21]], fala: 'Poucos me enxergam antes de perder.' },
@@ -583,7 +598,7 @@ const LOJA = { x: CX + 3.1, y: CY + .2 };
 const TITA = { ...achaLivre(CX + 21, CY - 14), nv: 30 };
 const TAB = { // quem aparece em cada lugar: [fera, peso, só à noite?]
   campo: [['faiscao', 6], ['cipoal', 6], ['cascalho', 2], ['vultinho', 6, 1], ['corvex', 3, 1], ['cactusco', 1]],
-  lago: [['garragua', 7], ['marulho', 1.5], ['faiscao', 2], ['vultinho', 3, 1], ['friozim', 2], ['friozim', 4, 1]],
+  lago: [['garragua', 7], ['cascudo', 4], ['marulho', 1.5], ['faiscao', 2], ['vultinho', 3, 1], ['friozim', 2], ['friozim', 4, 1]],
   bosque: [['cipoal', 5], ['espinhel', 1.5], ['vultinho', 2], ['vultinho', 6, 1], ['faiscao', 1], ['corvex', 2], ['friozim', 1]],
   vulcao: [['cinzal', 6], ['cascalho', 5], ['brasito', 1.5], ['vultinho', 3, 1], ['cactusco', 4]]
 };
