@@ -223,10 +223,12 @@ const TIPO = {
   planta: { nome: 'Planta', cor: '#57c84d', luz: '#c8ff6a' },
   trovao: { nome: 'Trovão', cor: '#ffd21f', luz: '#fff79a' },
   rocha:  { nome: 'Rocha',  cor: '#b08a6a', luz: '#ffb07a' },
-  sombra: { nome: 'Sombra', cor: '#9a5cf0', luz: '#d9a8ff' }
+  sombra: { nome: 'Sombra', cor: '#9a5cf0', luz: '#d9a8ff' },
+  gelo:   { nome: 'Gelo',   cor: '#7fe0ff', luz: '#e6fbff' }  // tipo novo
 };
-const FORTE = { fogo: ['planta'], agua: ['fogo', 'rocha'], planta: ['agua', 'rocha'], trovao: ['agua', 'sombra'], rocha: ['fogo', 'trovao'], sombra: ['planta', 'sombra'] };
-const FRACO = { fogo: ['agua', 'rocha', 'fogo'], agua: ['planta', 'agua'], planta: ['fogo', 'planta'], trovao: ['rocha', 'trovao', 'planta'], rocha: ['agua', 'planta', 'rocha'], sombra: ['rocha', 'fogo'] };
+// FORTE: contra quem cada tipo dá dano dobrado. FRACO: contra quem dá só metade.
+const FORTE = { fogo: ['planta', 'gelo'], agua: ['fogo', 'rocha'], planta: ['agua', 'rocha'], trovao: ['agua', 'sombra'], rocha: ['fogo', 'trovao', 'gelo'], sombra: ['planta', 'sombra'], gelo: ['planta', 'sombra'] };
+const FRACO = { fogo: ['agua', 'rocha', 'fogo'], agua: ['planta', 'agua'], planta: ['fogo', 'planta'], trovao: ['rocha', 'trovao', 'planta'], rocha: ['agua', 'planta', 'rocha'], sombra: ['rocha', 'fogo'], gelo: ['fogo', 'agua', 'gelo'] };
 const g = (nome, tipo, pot, prec = 1) => ({ nome, tipo, pot, prec });
 const GN = [g('Investida', 'normal', 40), g('Mordida', 'normal', 60)];
 const GT = {
@@ -235,7 +237,8 @@ const GT = {
   planta: [g('Chicote', 'planta', 45), g('Lâmina-Folha', 'planta', 75), g('Fúria Verde', 'planta', 105, .85)],
   trovao: [g('Choque', 'trovao', 45), g('Raio', 'trovao', 75), g('Tempestade', 'trovao', 105, .85)],
   rocha:  [g('Pedrada', 'rocha', 45), g('Avalanche', 'rocha', 75), g('Terremoto', 'rocha', 105, .85)],
-  sombra: [g('Garra Sombria', 'sombra', 45), g('Pulso Negro', 'sombra', 75), g('Eclipse', 'sombra', 105, .85)]
+  sombra: [g('Garra Sombria', 'sombra', 45), g('Pulso Negro', 'sombra', 75), g('Eclipse', 'sombra', 105, .85)],
+  gelo:   [g('Caco de Gelo', 'gelo', 45), g('Nevasca', 'gelo', 75), g('Era do Gelo', 'gelo', 105, .85)]
 };
 
 // ---------- As feras (criaturas originais) ----------
@@ -291,6 +294,40 @@ const FERAS = [
     look: { cor: '#6aa83a', cor2: '#e8e0a0', det: '#3a2a18', bw: .62, bh: .56, hw: .54, hh: .44, chifre: 'galhada', cauda: 'folha', braco: 1, presas: 1 } },
   { id: 'raizante', nome: 'Raizante', tipo: 'planta', extra: 'sombra', base: [88, 84, 104, 44], tam: 1.18,
     look: { cor: '#527f2c', cor2: '#d8cc80', det: '#2e2010', bw: .88, bh: .7, hw: .58, hh: .46, chifre: 'galhada', crista: 5, cauda: 'folha', braco: 2, presas: 2, marca: 'listras', aura: 1 } },
+
+  // ===== FERAS NOVAS =====
+  // Para criar a sua: copie um bloco destes, troque o id (sem acento nem espaço),
+  // o nome, o tipo e as cores. Depois coloque o id na tabela TAB para ele aparecer no mato.
+  //   tipo  = elemento da fera (fogo, agua, planta, trovao, rocha, sombra, gelo)
+  //   extra = tipo do segundo golpe que ela aprende
+  //   base  = [vida, ataque, defesa, velocidade]
+  //   tam   = tamanho (1 = normal)
+  //   evo   = [id da próxima forma, nível em que evolui]
+  //   look  = aparência: cor do corpo, cor2 da barriga, det dos detalhes,
+  //           bw/bh largura e altura do corpo, hw/hh da cabeça,
+  //           chifre: curto, curvo, reto, raio, galhada, coroa, barbatana, cristal
+  //           cauda: chama, ponta, raio, folha, clava · asa: morcego, barbatana
+  //           crista = número de espinhos nas costas · braco: 1 ou 2 (2 = braços grandes)
+  //           presas: 1 ou 2 · marca: placas, listras, rachas · aura: 1 = brilho do elemento
+  //           luz = cor dos olhos (se não tiver, usa a cor do tipo)
+
+  // Friozim → Glaciador (gelo)
+  { id: 'friozim', nome: 'Friozim', tipo: 'gelo', extra: 'agua', base: [48, 50, 52, 58], tam: .8, evo: ['glaciador', 18],
+    look: { cor: '#8fd8f0', cor2: '#f0fbff', det: '#2a5f80', bw: .6, bh: .54, hw: .56, hh: .46, chifre: 'cristal', cauda: 'ponta', braco: 1, presas: 1 } },
+  { id: 'glaciador', nome: 'Glaciador', tipo: 'gelo', extra: 'agua', base: [80, 98, 92, 86], tam: 1.2,
+    look: { cor: '#5fb8e0', cor2: '#e0f6ff', det: '#1e4a6a', bw: .82, bh: .7, hw: .6, hh: .48, chifre: 'cristal', crista: 5, cauda: 'clava', braco: 2, presas: 2, marca: 'placas', aura: 1 } },
+
+  // Corvex → Necrovex (sombra, olhos vermelhos)
+  { id: 'corvex', nome: 'Corvex', tipo: 'sombra', extra: 'trovao', base: [44, 60, 40, 74], tam: .8, evo: ['necrovex', 19],
+    look: { cor: '#2a2a3a', cor2: '#6a6a8a', det: '#101018', bw: .56, bh: .5, hw: .56, hh: .46, chifre: 'reto', asa: 'morcego', cauda: 'ponta', presas: 1, luz: '#ff3a5a' } },
+  { id: 'necrovex', nome: 'Necrovex', tipo: 'sombra', extra: 'trovao', base: [72, 108, 64, 112], tam: 1.2,
+    look: { cor: '#22202e', cor2: '#5a5878', det: '#0a0a10', bw: .7, bh: .66, hw: .6, hh: .48, chifre: 'curvo', crista: 4, asa: 'morcego', cauda: 'ponta', braco: 2, presas: 2, aura: 1, luz: '#ff3a5a' } },
+
+  // Cactusco → Espinhorn (planta do vulcão)
+  { id: 'cactusco', nome: 'Cactusco', tipo: 'planta', extra: 'rocha', base: [56, 54, 66, 36], tam: .82, evo: ['espinhorn', 17],
+    look: { cor: '#4fa860', cor2: '#f0d890', det: '#2f6a38', bw: .62, bh: .6, hw: .54, hh: .44, chifre: 'curto', crista: 5, cauda: 'clava', braco: 1, presas: 1, marca: 'listras' } },
+  { id: 'espinhorn', nome: 'Espinhorn', tipo: 'planta', extra: 'rocha', base: [90, 96, 108, 46], tam: 1.2,
+    look: { cor: '#3a8a4a', cor2: '#e8c870', det: '#24582e', bw: .88, bh: .74, hw: .6, hh: .46, chifre: 'coroa', crista: 7, cauda: 'clava', braco: 2, presas: 2, marca: 'listras', aura: 1 } },
 
   { id: 'ferrugor', nome: 'Ferrugor', tipo: 'rocha', extra: 'fogo', base: [110, 118, 115, 80], tam: 1.42, taxa: .22, lenda: 1,
     look: { cor: '#a8431f', cor2: '#e0a05a', det: '#3a2620', bw: .92, bh: .76, hw: .62, hh: .48, chifre: 'coroa', crista: 6, asa: 'morcego', cauda: 'clava', braco: 2, presas: 2, marca: 'rachas', aura: 1, luz: '#ffd23f' } }
@@ -360,6 +397,11 @@ function desenhaFera(c, f, x, y, s, t, o) {
     if (f.tipo === 'agua') for (let i = 0; i < 6; i++) { const a = t * 1.5 + i / 6 * TAU; c.strokeStyle = TRACO; c.lineWidth = lw * .6; ell(c, Math.cos(a) * s * 1.45, by + Math.sin(a) * s * .5 - s * .2, s * .1, s * .13); pinta(c, luz); }
     if (f.tipo === 'planta') for (let i = 0; i < 7; i++) { const a = -Math.PI * .5 + (i - 3) * .42 + Math.sin(t * 2 + i) * .04; c.lineWidth = lw; c.strokeStyle = TRACO; ell(c, Math.cos(a) * s * 1.05, by + Math.sin(a) * s * 1.05, s * .42, s * .13, a); pinta(c, i % 2 ? T2.cor : luz); }
     if (f.tipo === 'rocha') for (let i = 0; i < 5; i++) { const a = t * .9 + i / 5 * TAU, rx = Math.cos(a) * s * 1.5, ry = by + Math.sin(a) * s * .45 - s * .3; c.lineWidth = lw * .7; c.strokeStyle = TRACO; poli(c, [rx - s * .12, ry, rx - s * .03, ry - s * .13, rx + s * .12, ry - s * .05, rx + s * .08, ry + s * .1, rx - s * .06, ry + s * .11]); pinta(c, L.cor2); }
+    if (f.tipo === 'gelo') for (let i = 0; i < 8; i++) { // flocos de gelo girando
+      const a = t * .8 + i / 8 * TAU, fx = Math.cos(a) * s * 1.4, fy = by + Math.sin(a) * s * .55 - s * .25, r = s * .1;
+      c.lineWidth = lw * .7; c.strokeStyle = TRACO; poli(c, [fx, fy - r * 1.6, fx + r, fy, fx, fy + r * 1.6, fx - r, fy]); pinta(c, i % 2 ? T2.cor : luz);
+    }
+    c.lineWidth = lw; c.strokeStyle = TRACO;
     if (f.tipo === 'sombra') for (let i = 0; i < 6; i++) { const k = (t * .5 + i / 6) % 1; c.globalAlpha = (1 - k) * .55; ell(c, Math.sin(i * 2.3) * s * 1.1, by + s * .5 - k * s * 2, s * (.3 - k * .2), s * (.4 - k * .25)); pinta(c, T2.cor, false); c.globalAlpha = 1; }
     c.lineWidth = lw; c.strokeStyle = TRACO;
   }
@@ -435,6 +477,11 @@ function desenhaFera(c, f, x, y, s, t, o) {
     ell(c, k * hw * 1.0, hy - hh * 2.2, s * .1, s * .14); pinta(c, T2.cor); ell(c, k * hw * 1.6, hy - hh * 1.85, s * .08, s * .11); pinta(c, T2.cor);
   }
   if (ch === 'coroa') for (let i = -2; i <= 2; i++) { const cx = i * hw * .36, al = hh * (1.9 - Math.abs(i) * .35); poli(c, [cx - hw * .17, hy - hh * .7, cx + i * hw * .08, hy - al, cx + hw * .17, hy - hh * .7]); pinta(c, L.cor2); }
+  if (ch === 'cristal') for (const [k, al] of [[-1, 1.55], [0, 2.15], [1, 1.55]]) { // três cristais de gelo
+    const cx = k * hw * .5, tp = hy - hh * al;
+    poli(c, [cx - hw * .16, hy - hh * .7, cx - hw * .1 + k * hw * .08, tp + hh * .25, cx + k * hw * .08, tp, cx + hw * .1 + k * hw * .08, tp + hh * .25, cx + hw * .16, hy - hh * .7]); pinta(c, T2.cor);
+    c.beginPath(); c.moveTo(cx + k * hw * .06, tp + hh * .12); c.lineTo(cx, hy - hh * .78); c.strokeStyle = '#fff'; c.lineWidth = lw * .6; c.stroke(); c.strokeStyle = TRACO; c.lineWidth = lw;
+  }
   if (ch === 'barbatana') {
     c.beginPath(); c.moveTo(hw * .3, hy - hh * .8); c.quadraticCurveTo(0, hy - hh * 1.6, -hw * .5, hy - hh * 2.1); c.quadraticCurveTo(-hw * .25, hy - hh * 1.2, -hw * .45, hy - hh * .7); c.closePath(); pinta(c, TIPO[f.tipo].cor);
     for (const k of [-1, 1]) { poli(c, [k * hw * .8, hy - hh * .4, k * hw * 1.5, hy - hh * .7, k * hw * 1.25, hy - hh * .1, k * hw * 1.45, hy + hh * .3, k * hw * .85, hy + hh * .3]); pinta(c, TIPO[f.tipo].cor); }
@@ -518,7 +565,8 @@ const TREINS = [ // treinadores rivais espalhados pelas rotas
   { nome: 'Mergulhador Tito', cor: '#3fa0ff', ...achaLivre(CX - 6, CY + 12), time: [['marulho', 10], ['garragua', 11]], fala: 'Minhas feras vieram do fundo do lago!' },
   { nome: 'Lenhador Braz', cor: '#b08a6a', ...achaLivre(CX + 4, CY - 13), time: [['cipoal', 12], ['espinhel', 13], ['cascalho', 13]], fala: 'Esse bosque é meu território.' },
   { nome: 'Ferreira Nara', cor: '#ff6a2a', ...achaLivre(CX + 13, CY + 2), time: [['cinzal', 17], ['cascalho', 18], ['fornalho', 18]], fala: 'Forjei meu time no calor do vulcão!' },
-  { nome: 'Vulto Kael', cor: '#4b2f7a', ...achaLivre(CX + 14, CY - 10), time: [['umbrakar', 20], ['voltarok', 21]], fala: 'Poucos me enxergam antes de perder.' }
+  { nome: 'Vulto Kael', cor: '#4b2f7a', ...achaLivre(CX + 14, CY - 10), time: [['umbrakar', 20], ['voltarok', 21]], fala: 'Poucos me enxergam antes de perder.' },
+  { nome: 'Alpinista Neve', cor: '#7fe0ff', ...achaLivre(CX + 9, CY + 13), time: [['friozim', 14], ['corvex', 15], ['cactusco', 16]], fala: 'Achei feras que ninguém nunca viu. Quer ver?' }
 ];
 const CONTRA = { brasito: 'marulho', marulho: 'espinhel', espinhel: 'brasito' }; // o rival pega a fera que vence a sua
 const feraRival = fase => { let id = CONTRA[S.inicial] || 'marulho'; for (let i = 1; i < fase; i++) id = F[id].evo[0]; return id; };
@@ -534,10 +582,10 @@ const vencido = o => o.g ? S.chefes[o.i] : S.trein[o.i];
 const LOJA = { x: CX + 3.1, y: CY + .2 };
 const TITA = { ...achaLivre(CX + 21, CY - 14), nv: 30 };
 const TAB = { // quem aparece em cada lugar: [fera, peso, só à noite?]
-  campo: [['faiscao', 6], ['cipoal', 6], ['cascalho', 2], ['vultinho', 6, 1]],
-  lago: [['garragua', 7], ['marulho', 1.5], ['faiscao', 2], ['vultinho', 3, 1]],
-  bosque: [['cipoal', 5], ['espinhel', 1.5], ['vultinho', 2], ['vultinho', 6, 1], ['faiscao', 1]],
-  vulcao: [['cinzal', 6], ['cascalho', 5], ['brasito', 1.5], ['vultinho', 3, 1]]
+  campo: [['faiscao', 6], ['cipoal', 6], ['cascalho', 2], ['vultinho', 6, 1], ['corvex', 3, 1], ['cactusco', 1]],
+  lago: [['garragua', 7], ['marulho', 1.5], ['faiscao', 2], ['vultinho', 3, 1], ['friozim', 2], ['friozim', 4, 1]],
+  bosque: [['cipoal', 5], ['espinhel', 1.5], ['vultinho', 2], ['vultinho', 6, 1], ['faiscao', 1], ['corvex', 2], ['friozim', 1]],
+  vulcao: [['cinzal', 6], ['cascalho', 5], ['brasito', 1.5], ['vultinho', 3, 1], ['cactusco', 4]]
 };
 
 // ---------- Estado e salvamento ----------
