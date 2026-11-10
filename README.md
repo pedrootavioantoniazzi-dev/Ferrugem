@@ -10,6 +10,10 @@ O jogador extrai minérios, transforma em produtos cada vez mais complexos e lig
 - **Trailer:** https://youtu.be/cyXfUx24iXM
 - **Documentação completa:** [DOCUMENTACAO.md](DOCUMENTACAO.md) · [versão em página](https://pedrootavioantoniazzi-dev.github.io/Ferrugem/documentacao.html) · [PDF para imprimir](Documentacao-Ferrugem.pdf)
 
+## Outros jogos
+
+- **Pólen — Jardim dos Polinis** ([`polen/`](polen/index.html)): jogo 2D fofinho de colher pólen e fazer amizade com 12 criaturinhas originais. Jogar: https://pedrootavioantoniazzi-dev.github.io/Ferrugem/polen/
+
 ## Em resumo
 
 - 34 máquinas, 36 itens, 40 níveis e 1.619 conquistas.

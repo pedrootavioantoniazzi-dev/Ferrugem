@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Pólen — Jardim dos Polinis</title>
+<meta name="description" content="Passeie pelo jardim, colha pólen e faça amizade com os Polinis.">
+<meta name="theme-color" content="#9fdc7c">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#9fdc7c;
+  font-family:ui-rounded,"Hiragino Maru Gothic ProN",Quicksand,Nunito,"Trebuchet MS",system-ui,sans-serif;
+  color:#4a3b52;user-select:none;-webkit-user-select:none;touch-action:none}
+#jogo{position:fixed;inset:0;width:100%;height:100%;display:block}
+button{font:inherit;color:inherit;cursor:pointer;border:0}
+
+/* ---------- HUD ---------- */
+#hud{position:fixed;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:flex-start;
+  gap:8px;padding:calc(10px + env(safe-area-inset-top)) 10px 0;pointer-events:none}
+.grupo{display:flex;flex-wrap:wrap;gap:6px;pointer-events:auto}
+.chip{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.9);border-radius:999px;
+  padding:6px 12px 6px 8px;font-weight:800;font-size:15px;box-shadow:0 3px 0 rgba(74,59,82,.15);min-width:58px}
+.chip.pulo{animation:pulo .35s}
+@keyframes pulo{40%{transform:scale(1.18) translateY(-3px)}}
+.bola{width:18px;height:18px;border-radius:50%;flex:none;box-shadow:inset -2px -3px 0 rgba(0,0,0,.12),inset 2px 2px 0 rgba(255,255,255,.6)}
+.bola.sol{background:#ffd23f}.bola.rosa{background:#ff8fc0}.bola.ceu{background:#7db8ff}
+.bola.ouro{background:radial-gradient(circle at 35% 30%,#fff,#ffe07a 55%,#f5b83d);box-shadow:0 0 8px #ffe07a}
+.btn{background:rgba(255,255,255,.92);border-radius:999px;padding:8px 14px;font-weight:800;font-size:15px;
+  box-shadow:0 3px 0 rgba(74,59,82,.15);transition:transform .1s}
+.btn:active{transform:translateY(2px)}
+#dica{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);
+  background:rgba(255,255,255,.9);border-radius:999px;padding:8px 16px;font-weight:700;font-size:14px;
+  box-shadow:0 3px 0 rgba(74,59,82,.15);pointer-events:none;transition:opacity .5s;text-align:center;max-width:92vw}
+#avisos{position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top));transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;z-index:5}
+.aviso{background:#fff;border-radius:999px;padding:8px 16px;font-weight:800;font-size:15px;
+  box-shadow:0 4px 0 rgba(74,59,82,.15);animation:aviso 2.8s forwards;white-space:nowrap}
+@keyframes aviso{0%{opacity:0;transform:translateY(-10px) scale(.9)}10%,80%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-8px)}}
+
+/* ---------- Janelas ---------- */
+.tela{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:14px;z-index:10;
+  background:rgba(86,62,110,.38);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.tela.on{display:flex}
+.cartao{background:#fffaf3;border-radius:28px;padding:20px;width:min(440px,100%);max-height:100%;overflow:auto;
+  box-shadow:0 8px 0 rgba(74,59,82,.18),0 20px 50px rgba(74,59,82,.25);text-align:center;animation:entra .3s;touch-action:pan-y}
+@keyframes entra{from{transform:scale(.85) translateY(20px);opacity:0}}
+.cartao h1{margin:0;font-size:44px;line-height:1;color:#ff8fb3;letter-spacing:1px;text-shadow:0 3px 0 #ffe1ec}
+.cartao h2{margin:0 0 4px;font-size:26px}
+.sub{font-weight:700;color:#9a86a6;margin:4px 0 10px}
+.cartao canvas{display:block;margin:0 auto;border-radius:20px;max-width:100%}
+.grande{background:#ff9ec0;color:#fff;border-radius:999px;padding:13px 28px;font-weight:900;font-size:19px;
+  box-shadow:0 5px 0 #e97aa3;margin-top:12px;transition:transform .1s,box-shadow .1s}
+.grande:active{transform:translateY(4px);box-shadow:0 1px 0 #e97aa3}
+.grande.verde{background:#7fd08a;box-shadow:0 5px 0 #5fb06c}
+.grande.verde:active{box-shadow:0 1px 0 #5fb06c}
+.leve{background:#f1e8f5;border-radius:999px;padding:10px 20px;font-weight:800;margin-top:10px}
+.leve:disabled,.grande:disabled{opacity:.45;cursor:default}
+.passos{list-style:none;padding:0;margin:12px 0 0;text-align:left;font-weight:700;font-size:15px;display:grid;gap:7px}
+.passos li{background:#fff;border-radius:14px;padding:9px 12px;display:flex;gap:10px;align-items:center}
+.passos b{font-size:20px}
+.rodape{font-size:12px;color:#b3a3bd;margin-top:12px;font-weight:700}
+
+/* Encontro */
+#barra{height:22px;background:#f3e3ea;border-radius:999px;overflow:hidden;margin:12px 0 4px;position:relative}
+#barra i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffb3cf,#ff7fae);border-radius:999px;transition:width .5s cubic-bezier(.3,1.5,.5,1)}
+#barra span{position:absolute;inset:0;font-size:13px;font-weight:900;color:#7b4a63;line-height:22px}
+#paciencia{font-size:18px;letter-spacing:3px;height:24px}
+#fala{font-weight:800;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:16px}
+#ofertas{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.oferta{background:#fff;border-radius:18px;padding:10px 4px;font-weight:900;display:flex;flex-direction:column;align-items:center;gap:5px;
+  box-shadow:0 4px 0 rgba(74,59,82,.14);transition:transform .1s}
+.oferta:active{transform:translateY(3px)}
+.oferta:disabled{opacity:.35;box-shadow:none}
+.oferta .bola{width:28px;height:28px}
+.oferta small{font-size:11px;color:#9a86a6}
+
+/* Álbum */
+#album .cartao{width:min(620px,100%)}
+#grade{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+@media(max-width:460px){#grade{grid-template-columns:repeat(3,1fr)}}
+.ficha{background:#fff;border-radius:18px;padding:6px 2px 8px;font-weight:800;font-size:13px;box-shadow:0 3px 0 rgba(74,59,82,.12);position:relative}
+.ficha.sel{outline:3px solid #ff9ec0}
+.ficha canvas{width:100%;height:auto;border-radius:12px}
+.ficha .selo{position:absolute;top:4px;right:6px;font-size:14px}
+#detalhe{background:#fff;border-radius:20px;padding:14px;margin-top:10px;text-align:left;font-weight:700;font-size:14px;line-height:1.45}
+#detalhe h3{margin:0 0 2px;font-size:20px}
+#detalhe .linha{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+#detalhe .leve,#detalhe .grande{margin-top:0;font-size:15px;padding:10px 16px}
+.etq{display:inline-flex;align-items:center;gap:5px;background:#f6eef9;border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;font-size:13px}
+.etq .bola{width:13px;height:13px}
+</style>
+</head>
+<body>
+<canvas id="jogo"></canvas>
+
+<div id="hud">
+  <div class="grupo" id="bolsa">
+    <div class="chip" data-t="sol"><span class="bola sol"></span><span>0</span></div>
+    <div class="chip" data-t="rosa"><span class="bola rosa"></span><span>0</span></div>
+    <div class="chip" data-t="ceu"><span class="bola ceu"></span><span>0</span></div>
+    <div class="chip" data-t="ouro"><span class="bola ouro"></span><span>0</span></div>
+  </div>
+  <div class="grupo" style="justify-content:flex-end">
+    <button class="btn" id="bRelogio" title="Hora do dia">☀️</button>
+    <button class="btn" id="bSom" title="Som">🔊</button>
+    <button class="btn" id="bAlbum">📖 <span id="conta">0/12</span></button>
+  </div>
+</div>
+<div id="avisos"></div>
+<div id="dica">Ande com as setas, WASD ou arrastando o dedo 🌼</div>
+
+<!-- Tela inicial -->
+<div class="tela on" id="inicio">
+  <div class="cartao">
+    <h1>Pólen</h1>
+    <div class="sub">Jardim dos Polinis</div>
+    <canvas id="cvInicio" width="720" height="300" style="width:360px;background:linear-gradient(#cdeffd,#e9fbd8)"></canvas>
+    <ul class="passos">
+      <li><b>🌼</b> Passeie pelo jardim e colha pólen das flores.</li>
+      <li><b>💗</b> Encoste em um Polini e ofereça o pólen de que ele gosta.</li>
+      <li><b>🌙</b> Alguns só aparecem à noite, no bosque ou perto do lago.</li>
+    </ul>
+    <button class="grande" id="bJogar">Jogar</button>
+    <div class="rodape">Um joguinho da Nexvora · salva sozinho no navegador</div>
+  </div>
+</div>
+
+<!-- Encontro -->
+<div class="tela" id="encontro">
+  <div class="cartao">
+    <h2 id="eNome">Polini</h2>
+    <div class="sub" id="eRar">★</div>
+    <canvas id="cvEnc" width="640" height="400" style="width:320px"></canvas>
+    <div id="barra"><i></i><span>Amizade</span></div>
+    <div id="paciencia"></div>
+    <div id="fala"></div>
+    <div id="ofertas"></div>
+    <button class="leve" id="bTchau">Dar tchauzinho 👋</button>
+  </div>
+</div>
+
+<!-- Álbum -->
+<div class="tela" id="album">
+  <div class="cartao">
+    <h2>Álbum dos Polinis</h2>
+    <div class="sub" id="aSub"></div>
+    <div id="grade"></div>
+    <div id="detalhe"></div>
+    <button class="grande verde" id="bFechar">Voltar ao jardim</button>
+    <div><button class="leve" id="bZerar" style="font-size:12px;padding:6px 14px;color:#b3a3bd">Recomeçar do zero</button></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+   PÓLEN — Jardim dos Polinis
+   Jogo 2D de colher pólen e fazer amizade com criaturinhas originais.
+   Arquivo único, sem bibliotecas. Tudo é desenhado no canvas.
+   ===================================================================== */
+
+// ---------- Utilidades ----------
+const $ = s => document.querySelector(s);
+const TAU = Math.PI * 2;
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, t) => a + (b - a) * t;
+const rnd = (a = 1, b) => b === undefined ? Math.random() * a : a + Math.random() * (b - a);
+const sorteia = l => l[Math.floor(Math.random() * l.length)];
+function h2(x, y, s) { const n = Math.sin(x * 127.1 + y * 311.7 + s * 74.7) * 43758.5453; return n - Math.floor(n); }
+function ruido(x, y, s) {
+  const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+  const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+  return lerp(lerp(h2(xi, yi, s), h2(xi + 1, yi, s), u), lerp(h2(xi, yi + 1, s), h2(xi + 1, yi + 1, s), u), v);
+}
+function tom(hex, a) { // clareia (a>0) ou escurece (a<0) uma cor
+  const n = parseInt(hex.slice(1), 16), alvo = a > 0 ? 255 : 0, k = Math.abs(a);
+  const f = v => Math.round(v + (alvo - v) * k);
+  return `rgb(${f(n >> 16)},${f(n >> 8 & 255)},${f(n & 255)})`;
+}
+function ell(c, x, y, rx, ry, rot = 0) { c.beginPath(); c.ellipse(x, y, Math.abs(rx), Math.abs(ry), rot, 0, TAU); }
+function pinta(c, cor, borda) { c.fillStyle = cor; c.fill(); if (borda) { c.strokeStyle = borda; c.stroke(); } }
+
+// ---------- Pólen ----------
+const POLEN = {
+  sol:  { nome: 'Pólen-sol',   cor: '#ffd23f', miolo: '#f79a2e' },
+  rosa: { nome: 'Pólen-rosa',  cor: '#ff8fc0', miolo: '#ffe27a' },
+  ceu:  { nome: 'Pólen-céu',   cor: '#7db8ff', miolo: '#fff3b0' },
+  ouro: { nome: 'Pólen-estrela', cor: '#ffe07a', miolo: '#ffffff' }
+};
+const TIPOS = ['sol', 'rosa', 'ceu', 'ouro'];
+
+// ---------- Os Polinis (criaturas originais) ----------
+const HAB = { campo: 'campo florido', lago: 'beira do lago', bosque: 'bosque' };
+const HORA = { dia: 'de dia', noite: 'à noite', ambos: 'a qualquer hora' };
+const POLINIS = [
+  { id: 'polinho', nome: 'Polinho', cor: '#ffd65c', cor2: '#fff3c4', det: '#8a5a2b', topo: 'antena', asa: 'abelha', listras: 1,
+    hab: 'campo', hora: 'dia', rar: 1, ama: 'sol', odeia: 'ceu',
+    desc: 'Uma bolinha zumbidora que cochila dentro das flores e acorda toda empoeirada de pólen.' },
+  { id: 'brotinho', nome: 'Brotinho', cor: '#a6e07c', cor2: '#e6f9cf', det: '#5fb85a', topo: 'broto', cauda: 'folha',
+    hab: 'campo', hora: 'ambos', rar: 1, ama: 'ceu', odeia: 'rosa',
+    desc: 'Nasceu de uma semente esquecida. O brotinho na cabeça gira para o lado de onde vem a chuva.' },
+  { id: 'petalim', nome: 'Pétalim', cor: '#ffb3d1', cor2: '#fff0f6', det: '#ff7fae', orelha: 'petala', cauda: 'bolinha',
+    hab: 'campo', hora: 'dia', rar: 1, ama: 'rosa', odeia: 'sol',
+    desc: 'Tem orelhas macias como pétalas e fica vermelhinho quando recebe um elogio.' },
+  { id: 'dentelim', nome: 'Dentelim', cor: '#f4f1ea', cor2: '#ffffff', det: '#c9c2b4', topo: 'pompom', cauda: 'bolinha',
+    hab: 'campo', hora: 'dia', rar: 2, ama: 'sol', odeia: 'rosa',
+    desc: 'Leve como um sopro. Quando espirra, espalha sementinhas voadoras por todo o campo.' },
+  { id: 'girassolito', nome: 'Girassolito', cor: '#f6a54a', cor2: '#ffe2b0', det: '#ffd23f', topo: 'coroa',
+    hab: 'campo', hora: 'dia', rar: 2, ama: 'sol', odeia: 'ceu',
+    desc: 'Passa o dia inteiro virado para o sol. Dizem que o sorriso dele esquenta as mãos.' },
+  { id: 'orvalim', nome: 'Orvalim', cor: '#8fd3ff', cor2: '#e3f6ff', det: '#5aa9e6', topo: 'gota',
+    hab: 'lago', hora: 'ambos', rar: 1, ama: 'ceu', odeia: 'sol',
+    desc: 'Uma gotinha de orvalho que criou coragem e saiu rolando para conhecer o mundo.' },
+  { id: 'nenufofo', nome: 'Nenufofo', cor: '#8fe0c0', cor2: '#e2faf0', det: '#4fb58f', topo: 'vitoria', orelha: 'redonda',
+    hab: 'lago', hora: 'dia', rar: 2, ama: 'rosa', odeia: 'sol',
+    desc: 'Carrega uma vitória-régia na cabeça como chapéu e nunca, jamais, a deixa molhar.' },
+  { id: 'musguito', nome: 'Musguito', cor: '#8fbf7a', cor2: '#d9efc9', det: '#5d9150', orelha: 'redonda', cauda: 'folha',
+    hab: 'bosque', hora: 'ambos', rar: 1, ama: 'ceu', odeia: 'rosa',
+    desc: 'Fofinho como musgo e muito tímido. Se esconde atrás das árvores e espia com um olho só.' },
+  { id: 'cogumiau', nome: 'Cogumiau', cor: '#ffe9c9', cor2: '#fff8ec', det: '#f0705a', orelha: 'pontuda', topo: 'cogumelo', cauda: 'bolinha',
+    hab: 'bosque', hora: 'ambos', rar: 2, ama: 'rosa', odeia: 'ceu',
+    desc: 'Ronrona baixinho debaixo do seu chapéu de cogumelo. Adora tirar sonecas na sombra.' },
+  { id: 'lavandino', nome: 'Lavandino', cor: '#c9a8f0', cor2: '#f1e6ff', det: '#8e6ad1', orelha: 'longa', topo: 'lavanda',
+    hab: 'campo', hora: 'noite', rar: 2, ama: 'ceu', odeia: 'sol',
+    desc: 'Tem um cheirinho que dá sono. Aparece quando o céu escurece para ninar as flores.' },
+  { id: 'borbolume', nome: 'Borbolume', cor: '#ffc7a6', cor2: '#fff1e6', det: '#ff8a6b', topo: 'antena', asa: 'borboleta', brilho: '#fff2a8',
+    hab: 'bosque', hora: 'noite', rar: 3, ama: 'rosa', odeia: 'ceu',
+    desc: 'Suas asas acendem no escuro e desenham caminhos de luz entre as árvores.' },
+  { id: 'luarim', nome: 'Luarim', cor: '#7f8fe0', cor2: '#dfe4ff', det: '#fff2a8', orelha: 'pontuda', topo: 'lua', cauda: 'bolinha', brilho: '#cfd8ff',
+    hab: 'lago', hora: 'noite', rar: 3, ama: 'sol', odeia: 'rosa',
+    desc: 'Desce para beber o reflexo da lua no lago. Quem o encontra ganha um desejo — dizem.' }
+];
+const PORID = Object.fromEntries(POLINIS.map(p => [p.id, p]));
+
+// ---------- Desenho de uma florzinha ----------
+function florzinha(c, x, y, r, cor, miolo, giro = 0, n = 5) {
+  c.fillStyle = cor;
+  for (let i = 0; i < n; i++) {
+    const a = giro + i / n * TAU;
+    ell(c, x + Math.cos(a) * r * .62, y + Math.sin(a) * r * .62, r * .5, r * .5); c.fill();
+  }
+  c.fillStyle = miolo; ell(c, x, y, r * .38, r * .38); c.fill();
+}
+
+// ---------- Desenho de um Polini ----------
+// (x, y) é o ponto dos pezinhos; s é o raio do corpo; st é a fase (1 bebê, 2 florescido)
+function desenhaPolini(c, sp, x, y, s, t, st, o) {
+  o = o || {};
+  const ph = o.ph || 0, b = Math.sin(t * 3 + ph);
+  if (st > 1) s *= 1.15;
+  c.save(); c.translate(x, y);
+  if (!o.semSombra) { c.fillStyle = 'rgba(40,70,50,.2)'; ell(c, 0, 0, s * .75, s * .2); c.fill(); }
+  const hop = o.hop ? Math.abs(Math.sin(t * 7 + ph)) * s * .32 : 0;
+  c.translate(0, -s * .72 - hop);
+  if (o.flip) c.scale(-1, 1);
+  c.scale(1 - b * .03, 1 + b * .03);
+  const borda = tom(sp.cor, -.25), bdet = tom(sp.det, -.2);
+  c.lineWidth = Math.max(1.2, s * .07); c.lineJoin = c.lineCap = 'round';
+
+  if (sp.brilho) { // brilho suave das criaturas noturnas
+    const g = c.createRadialGradient(0, 0, s * .3, 0, 0, s * 1.9);
+    g.addColorStop(0, sp.brilho + '88'); g.addColorStop(1, sp.brilho + '00');
+    c.fillStyle = g; ell(c, 0, 0, s * 1.9, s * 1.9); c.fill();
+  }
+  // --- atrás do corpo ---
+  if (sp.topo === 'coroa') {
+    for (let i = 0; i < 12; i++) {
+      const a = i / 12 * TAU + Math.sin(t + ph) * .08;
+      ell(c, Math.cos(a) * s * .82, Math.sin(a) * s * .76, s * .3, s * .17, a); pinta(c, sp.det, bdet);
+    }
+  }
+  if (sp.asa === 'abelha') {
+    const f = Math.sin(t * 22) * .25;
+    c.globalAlpha = .8;
+    ell(c, -s * .5, -s * .62, s * .36, s * .22, -.7 + f); pinta(c, '#fff', '#cfe6f5');
+    ell(c, s * .5, -s * .62, s * .36, s * .22, .7 - f); pinta(c, '#fff', '#cfe6f5');
+    c.globalAlpha = 1;
+  }
+  if (sp.asa === 'borboleta') {
+    const f = .65 + Math.abs(Math.sin(t * 5 + ph)) * .35;
+    for (const k of [-1, 1]) {
+      ell(c, k * s * .85 * f, -s * .32, s * .62 * f, s * .58, k * .35); pinta(c, sp.det, bdet);
+      ell(c, k * s * .7 * f, s * .32, s * .42 * f, s * .36, -k * .4); pinta(c, tom(sp.det, .25), bdet);
+      c.fillStyle = sp.brilho; ell(c, k * s * .95 * f, -s * .36, s * .2 * f, s * .2); c.fill();
+      ell(c, k * s * .72 * f, s * .34, s * .12 * f, s * .12); c.fill();
+    }
+  }
+  if (sp.cauda === 'folha') { ell(c, -s * .82, s * .3, s * .32, s * .16, -.7 + b * .1); pinta(c, sp.det, bdet); }
+  if (sp.cauda === 'bolinha') { ell(c, -s * .78, s * .34, s * .2, s * .2); pinta(c, sp.cor2, borda); }
+  if (sp.orelha === 'redonda') for (const k of [-1, 1]) {
+    ell(c, k * s * .52, -s * .56, s * .26, s * .26); pinta(c, sp.cor, borda);
+    ell(c, k * s * .52, -s * .54, s * .13, s * .13); pinta(c, sp.cor2);
+  }
+  if (sp.orelha === 'pontuda') for (const k of [-1, 1]) {
+    c.beginPath(); c.moveTo(k * s * .68, -s * .3); c.quadraticCurveTo(k * s * .78, -s * .95, k * s * .5, -s * 1.02);
+    c.quadraticCurveTo(k * s * .3, -s * .85, k * s * .2, -s * .6); c.closePath(); pinta(c, sp.cor, borda);
+  }
+  if (sp.orelha === 'petala') for (const k of [-1, 1]) {
+    ell(c, k * s * .6, -s * .68, s * .22, s * .42, k * (.5 + b * .05)); pinta(c, sp.det, bdet);
+    ell(c, k * s * .6, -s * .66, s * .1, s * .26, k * .5); pinta(c, tom(sp.det, .4));
+  }
+  if (sp.orelha === 'longa') for (const k of [-1, 1]) {
+    ell(c, k * s * .36, -s * .95, s * .17, s * .5, k * (.18 + b * .06)); pinta(c, sp.cor, borda);
+    ell(c, k * s * .36, -s * .93, s * .08, s * .34, k * .18); pinta(c, sp.cor2);
+  }
+  if (sp.topo === 'gota') {
+    c.beginPath(); c.moveTo(-s * .5, -s * .5); c.quadraticCurveTo(-s * .1, -s * .9, s * .12, -s * 1.3);
+    c.quadraticCurveTo(s * .3, -s * .9, s * .55, -s * .45); c.closePath(); pinta(c, sp.cor, borda);
+  }
+  // --- corpo ---
+  ell(c, 0, 0, s * .8, s * .72); pinta(c, sp.cor, borda);
+  c.save(); ell(c, 0, 0, s * .8, s * .72); c.clip();
+  ell(c, 0, s * .3, s * .52, s * .44); pinta(c, sp.cor2);
+  if (sp.listras) { c.strokeStyle = sp.det; c.lineWidth = s * .13; c.globalAlpha = .75;
+    for (const yy of [.38, .62]) { c.beginPath(); c.arc(0, -s * 1.2, s * (1.2 + yy), .9, 2.24); c.stroke(); }
+    c.globalAlpha = 1; }
+  c.fillStyle = 'rgba(255,255,255,.35)'; ell(c, -s * .34, -s * .42, s * .26, s * .14, -.5); c.fill();
+  c.restore();
+  c.lineWidth = Math.max(1.2, s * .07);
+  // --- em cima da cabeça ---
+  const ty = -s * .7;
+  if (sp.topo === 'broto') {
+    c.strokeStyle = bdet; c.beginPath(); c.moveTo(0, ty); c.quadraticCurveTo(s * .05, ty - s * .25, 0, ty - s * .4); c.stroke();
+    for (const k of [-1, 1]) { ell(c, k * s * .2, ty - s * .46, s * .24, s * .12, k * (-.5 + b * .12)); pinta(c, sp.det, bdet); }
+  }
+  if (sp.topo === 'antena') for (const k of [-1, 1]) {
+    c.strokeStyle = sp.asa === 'borboleta' ? bdet : sp.det; c.beginPath(); c.moveTo(k * s * .2, ty + s * .05);
+    c.quadraticCurveTo(k * s * .25, ty - s * .35, k * s * (.42 + b * .03), ty - s * .4); c.stroke();
+    ell(c, k * s * (.42 + b * .03), ty - s * .42, s * .08, s * .08); pinta(c, sp.brilho || sp.det);
+  }
+  if (sp.topo === 'pompom') {
+    c.strokeStyle = '#d9d2c4'; c.lineWidth = s * .03;
+    for (let i = 0; i < 14; i++) { const a = i / 14 * TAU + t * .3, r = s * .46;
+      c.beginPath(); c.moveTo(0, ty - s * .3); c.lineTo(Math.cos(a) * r, ty - s * .3 + Math.sin(a) * r); c.stroke();
+      ell(c, Math.cos(a) * r, ty - s * .3 + Math.sin(a) * r, s * .07, s * .07); pinta(c, '#fff'); }
+    c.lineWidth = Math.max(1.2, s * .07);
+    ell(c, 0, ty - s * .3, s * .12, s * .12); pinta(c, '#fff6d6', '#d9d2c4');
+  }
+  if (sp.topo === 'vitoria') {
+    ell(c, 0, ty + s * .02, s * .6, s * .16); pinta(c, '#6fca7a', '#4a9d57');
+    florzinha(c, s * .12, ty - s * .12, s * .17, '#ffc4dd', '#ffe27a', t * .4);
+  }
+  if (sp.topo === 'cogumelo') {
+    c.beginPath(); c.moveTo(-s * .72, ty + s * .16); c.quadraticCurveTo(-s * .7, ty - s * .62, 0, ty - s * .62);
+    c.quadraticCurveTo(s * .7, ty - s * .62, s * .72, ty + s * .16); c.quadraticCurveTo(0, ty + s * .3, -s * .72, ty + s * .16);
+    pinta(c, sp.det, bdet);
+    c.fillStyle = '#fff'; ell(c, -s * .3, ty - s * .2, s * .13, s * .1); c.fill(); ell(c, s * .28, ty - s * .3, s * .1, s * .08); c.fill();
+    ell(c, s * .05, ty - s * .02, s * .09, s * .07); c.fill();
+  }
+  if (sp.topo === 'lavanda') for (const k of [-1, 0, 1]) {
+    c.strokeStyle = '#7fae6d'; c.beginPath(); c.moveTo(k * s * .1, ty); c.lineTo(k * s * .26, ty - s * .5); c.stroke();
+    for (let i = 0; i < 4; i++) { ell(c, k * s * (.16 + i * .035), ty - s * (.22 + i * .11), s * (.1 - i * .012), s * .08); pinta(c, sp.det); }
+  }
+  if (sp.topo === 'lua') {
+    const ly = ty - s * .5 + b * s * .04;
+    c.save(); c.beginPath(); c.arc(0, ly, s * .28, 0, TAU); c.arc(s * .13, ly - s * .06, s * .24, 0, TAU, true);
+    c.fillStyle = sp.det; c.shadowColor = sp.det; c.shadowBlur = s * .4; c.fill('evenodd'); c.restore();
+    c.fillStyle = '#fff'; ell(c, s * .5, ly + s * .1, s * .05, s * .05); c.fill(); ell(c, -s * .48, ly - s * .1, s * .035, s * .035); c.fill();
+  }
+  if (st > 1) { // coroa de flores de quem floresceu
+    const p = POLEN[sp.ama];
+    florzinha(c, -s * .42, -s * .58, s * .15, p.cor, p.miolo, t * .5);
+    florzinha(c, s * .42, -s * .58, s * .15, p.cor, p.miolo, -t * .5);
+    florzinha(c, 0, -s * .7, s * .18, '#fff', p.cor, t * .3);
+  }
+  // --- rostinho ---
+  const pisca = ((t + ph * 1.7) % 3.6) < .13 || o.feliz === 2;
+  c.fillStyle = 'rgba(255,120,150,.42)';
+  ell(c, -s * .5, s * .12, s * .13, s * .09); c.fill(); ell(c, s * .5, s * .12, s * .13, s * .09); c.fill();
+  c.strokeStyle = '#4a3b52'; c.fillStyle = '#4a3b52'; c.lineWidth = Math.max(1.2, s * .06);
+  for (const k of [-1, 1]) {
+    if (pisca) { c.beginPath(); c.arc(k * s * .3, -s * .02, s * .1, Math.PI * 1.1, Math.PI * 1.9); c.stroke(); }
+    else {
+      ell(c, k * s * .3, -s * .04, s * .11, s * .14); c.fill();
+      c.fillStyle = '#fff'; ell(c, k * s * .3 - s * .035, -s * .09, s * .045, s * .05); c.fill();
+      ell(c, k * s * .3 + s * .04, s * .02, s * .02, s * .02); c.fill(); c.fillStyle = '#4a3b52';
+    }
+  }
+  c.beginPath();
+  if (o.triste) c.arc(0, s * .22, s * .08, Math.PI * 1.15, Math.PI * 1.85);
+  else if (o.feliz) { c.arc(0, s * .1, s * .11, 0, Math.PI); c.closePath(); c.fillStyle = '#e8627f'; c.fill(); }
+  else c.arc(0, s * .08, s * .08, Math.PI * .15, Math.PI * .85);
+  c.stroke();
+  c.restore();
+}
+
+// ---------- Mundo ----------
+const MW = 56, MH = 44;              // tamanho do mapa em quadradinhos
+const GRAMA = 0, MATO = 1, AGUA = 2, ARVORE = 3;
+const mapa = [], bioma = [], flores = [];
+const CX = MW / 2, CY = MH / 2;
+(function geraMundo() {
+  for (let y = 0; y < MH; y++) {
+    mapa.push([]); bioma.push([]);
+    for (let x = 0; x < MW; x++) {
+      const w = ruido(x / 7, y / 7, 1), f = ruido(x / 5 + 40, y / 5, 2), dc = Math.hypot(x - CX, y - CY);
+      let t = GRAMA;
+      if (w < .3) t = AGUA; else if (f > .64) t = ARVORE; else if (f > .52 || h2(x, y, 5) < .08) t = MATO;
+      if (x < 1 || y < 1 || x > MW - 2 || y > MH - 2) t = ARVORE;
+      else if (dc < 3.2) t = GRAMA;
+      mapa[y].push(t);
+      bioma[y].push(w < .42 ? 'lago' : f > .52 ? 'bosque' : 'campo');
+    }
+  }
+  for (let y = 2; y < MH - 2; y++) for (let x = 2; x < MW - 2; x++) {
+    if (mapa[y][x] > MATO || Math.hypot(x - CX, y - CY) < 1.5) continue;
+    const r = h2(x, y, 9);
+    if (r > .15) continue;
+    const bi = bioma[y][x], q = h2(x, y, 11);
+    let tipo = bi === 'lago' ? (q < .7 ? 'ceu' : q < .85 ? 'rosa' : 'sol')
+             : bi === 'bosque' ? (q < .6 ? 'rosa' : q < .85 ? 'ceu' : 'sol')
+             : (q < .55 ? 'sol' : q < .8 ? 'rosa' : 'ceu');
+    if (r < .006) tipo = 'ouro';
+    flores.push({ x: x + .25 + h2(x, y, 3) * .5, y: y + .35 + h2(x, y, 4) * .5, tipo, pronta: true, volta: 0, ph: r * 99 });
+  }
+})();
+const tile = (x, y) => (x < 0 || y < 0 || x >= MW || y >= MH) ? ARVORE : mapa[y | 0][x | 0];
+const livre = (x, y) => tile(x, y) < AGUA;
+function cabe(x, y, r) { return livre(x - r, y - r) && livre(x + r, y - r) && livre(x - r, y + r) && livre(x + r, y + r); }
+
+// ---------- Estado e salvamento ----------
+const CHAVE = 'polen-jardim-v1';
+let S = novoJogo();
+function novoJogo() {
+  return { polen: { sol: 0, rosa: 0, ceu: 0, ouro: 0 }, amigos: {}, sabe: {}, comp: null, x: CX + .5, y: CY + .5, hora: .12, som: true, fim: 0 };
+}
+function carrega() {
+  try { const d = JSON.parse(localStorage.getItem(CHAVE)); if (d && d.polen) S = Object.assign(novoJogo(), d); } catch (e) {}
+  if (!cabe(S.x, S.y, .28)) { S.x = CX + .5; S.y = CY + .5; }
+}
+function salva() { try { localStorage.setItem(CHAVE, JSON.stringify(S)); } catch (e) {} }
+carrega();
+
+// ---------- Som (bipes simples) ----------
+let ac = null;
+function nota(f, quando = 0, dur = .12, tipo = 'sine', vol = .08) {
+  if (!S.som) return;
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain(), t0 = ac.currentTime + quando;
+    o.type = tipo; o.frequency.value = f; g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(.001, t0 + dur);
+    o.connect(g).connect(ac.destination); o.start(t0); o.stop(t0 + dur + .02);
+  } catch (e) {}
+}
+const somColhe = () => { nota(880, 0, .09, 'triangle'); nota(1320, .06, .12, 'triangle'); };
+const somFeliz = () => [523, 659, 784, 1047].forEach((f, i) => nota(f, i * .09, .18, 'triangle'));
+const somTriste = () => { nota(392, 0, .2); nota(311, .16, .3); };
+const somOi = () => { nota(660, 0, .08); nota(990, .08, .1); };
+
+// ---------- Canvas e tela ----------
+const cv = $('#jogo'), c = cv.getContext('2d');
+let W = 0, H = 0, T = 48, dpr = 1;
+function ajusta() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  T = clamp(Math.min(W, H) / 10, 38, 60);
+}
+addEventListener('resize', ajusta); ajusta();
+
+// ---------- Controles ----------
+const teclas = {};
+addEventListener('keydown', e => { teclas[e.key.toLowerCase()] = true; if (e.key.startsWith('Arrow') || e.key === ' ') e.preventDefault(); });
+addEventListener('keyup', e => { teclas[e.key.toLowerCase()] = false; });
+addEventListener('blur', () => { for (const k in teclas) teclas[k] = false; joy = null; });
+let joy = null; // controle de arrastar (dedo ou mouse)
+cv.addEventListener('pointerdown', e => { joy = { id: e.pointerId, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener('pointermove', e => { if (joy && joy.id === e.pointerId) { joy.x = e.clientX; joy.y = e.clientY; } });
+const solta = e => { if (joy && joy.id === e.pointerId) joy = null; };
+cv.addEventListener('pointerup', solta); cv.addEventListener('pointercancel', solta);
+
+// ---------- Entidades vivas ----------
+const J = { vx: 0, vy: 0, lado: 1, passo: 0, andando: false };  // jogador (posição fica em S.x, S.y)
+const comp = { x: S.x - 1, y: S.y, lado: 1, anda: false };
+let selvagens = [], parts = [], brotaEm = 0, tempo = 0, pausado = true, andou = 0;
+const vaga = Array.from({ length: 26 }, () => ({ x: rnd(), y: rnd(), ph: rnd(TAU), v: rnd(.4, 1) }));
+const motes = Array.from({ length: 30 }, () => ({ x: rnd(), y: rnd(), ph: rnd(TAU), r: rnd(1.2, 3) }));
+
+const escuro = () => { // 0 = dia claro, 1 = noite fechada
+  const h = S.hora; const sub = clamp((h - .52) / .08, 0, 1), desce = clamp((h - .92) / .08, 0, 1);
+  return sub * sub * (3 - 2 * sub) - desce * desce * (3 - 2 * desce);
+};
+const eNoite = () => escuro() > .5;
+
+function solta_parts(x, y, cor, n = 8, forca = 1.6) {
+  for (let i = 0; i < n; i++) { const a = rnd(TAU), v = rnd(.4, forca);
+    parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 1, vida: rnd(.5, 1), cor, r: rnd(.04, .09) }); }
+}
+function coracoes(x, y, n = 5) {
+  for (let i = 0; i < n; i++) parts.push({ x: x + rnd(-.3, .3), y: y - .5, vx: rnd(-.3, .3), vy: -rnd(.8, 1.6), vida: rnd(.8, 1.3), cor: '#ff7fae', r: .12, cora: 1 });
+}
+
+function brota() { // faz surgir um Polini selvagem perto do jogador
+  for (let k = 0; k < 12; k++) {
+    const a = rnd(TAU), d = rnd(6, 11), x = S.x + Math.cos(a) * d, y = S.y + Math.sin(a) * d;
+    if (!cabe(x, y, .3)) continue;
+    const bi = bioma[y | 0][x | 0], noite = eNoite();
+    const lista = [];
+    for (const sp of POLINIS) {
+      if (sp.hab !== bi) continue;
+      if (sp.hora === 'dia' && noite || sp.hora === 'noite' && !noite) continue;
+      const peso = [0, 6, 3, 1.4][sp.rar] * (S.amigos[sp.id] ? .5 : 1);
+      for (let i = 0; i < peso * 5; i++) lista.push(sp);
+    }
+    if (!lista.length) continue;
+    const sp = sorteia(lista);
+    selvagens.push({ sp, x, y, tx: x, ty: y, espera: rnd(1, 3), ph: rnd(TAU), lado: 1, nasce: 0, some: 0, pausa: 0 });
+    return;
+  }
+}
+
+// ---------- Atualização ----------
+function atualiza(dt) {
+  tempo += dt;
+  S.hora = (S.hora + dt / 210) % 1;
+
+  // movimento do jogador
+  let dx = 0, dy = 0;
+  if (teclas.arrowleft || teclas.a) dx--; if (teclas.arrowright || teclas.d) dx++;
+  if (teclas.arrowup || teclas.w) dy--; if (teclas.arrowdown || teclas.s) dy++;
+  if (joy) { const jx = joy.x - joy.x0, jy = joy.y - joy.y0, m = Math.hypot(jx, jy);
+    if (m > 10) { const f = Math.min(1, m / 50); dx = jx / m * f; dy = jy / m * f; } }
+  const m = Math.hypot(dx, dy); if (m > 1) { dx /= m; dy /= m; }
+  const vel = 3.7;
+  J.andando = m > .05;
+  if (J.andando) {
+    const nx = S.x + dx * vel * dt, ny = S.y + dy * vel * dt;
+    if (cabe(nx, S.y, .26)) S.x = nx;
+    if (cabe(S.x, ny, .26)) S.y = ny;
+    if (Math.abs(dx) > .1) J.lado = dx > 0 ? 1 : -1;
+    J.passo += dt * 10; andou += dt;
+    if (andou > 1.5) $('#dica').style.opacity = 0;
+  }
+
+  // companheiro segue atrás
+  if (S.comp) {
+    const d = Math.hypot(S.x - comp.x, S.y - comp.y);
+    comp.anda = d > .95;
+    if (d > 8) { comp.x = S.x - J.lado * .8; comp.y = S.y; }
+    else if (comp.anda) { const v = Math.min(d * 3, 4.2) * dt / d; comp.lado = S.x > comp.x ? 1 : -1; comp.x += (S.x - comp.x) * v; comp.y += (S.y - comp.y) * v; }
+  }
+
+  // flores: colher e renascer
+  for (const f of flores) {
+    if (!f.pronta) { if (tempo > f.volta) f.pronta = true; continue; }
+    if (Math.abs(f.x - S.x) < .62 && Math.abs(f.y - .25 - S.y) < .62) {
+      f.pronta = false; f.volta = tempo + (f.tipo === 'ouro' ? rnd(120, 180) : rnd(25, 45));
+      const c2 = S.comp ? S.amigos[S.comp] : 0;
+      const q = f.tipo === 'ouro' ? 1 : 1 + (c2 || 0);
+      ganha(f.tipo, q); somColhe();
+      solta_parts(f.x, f.y - .4, POLEN[f.tipo].cor, f.tipo === 'ouro' ? 18 : 9);
+    }
+  }
+
+  // Polinis selvagens
+  if (tempo > brotaEm) { brotaEm = tempo + 1.2; if (selvagens.length < 9) brota(); }
+  const noite = eNoite();
+  for (const s of selvagens) {
+    s.nasce = Math.min(1, s.nasce + dt * 3);
+    if (s.some) { s.some += dt * 3; continue; }
+    const d = Math.hypot(s.x - S.x, s.y - S.y);
+    if (d > 17 || (s.sp.hora === 'dia' && noite) || (s.sp.hora === 'noite' && !noite)) { s.some = .01; continue; }
+    if (s.pausa > 0) { s.pausa -= dt; if (s.pausa <= 0) s.some = .01; continue; }
+    if (d < .75) { toca(s); continue; }
+    s.espera -= dt;
+    const tx = s.tx - s.x, ty = s.ty - s.y, td = Math.hypot(tx, ty);
+    s.anda = td > .08;
+    if (s.anda) { const v = 1.1 * dt / td; s.x += tx * v; s.y += ty * v; s.lado = tx > 0 ? 1 : -1; }
+    else if (s.espera < 0) {
+      s.espera = rnd(1.5, 4);
+      const nx = s.x + rnd(-2.5, 2.5), ny = s.y + rnd(-2.5, 2.5);
+      let ok = cabe(nx, ny, .3);
+      for (let i = 1; ok && i < 6; i++) ok = cabe(lerp(s.x, nx, i / 6), lerp(s.y, ny, i / 6), .3);
+      if (ok) { s.tx = nx; s.ty = ny; }
+    }
+  }
+  selvagens = selvagens.filter(s => s.some < 1);
+
+  for (const p of parts) { p.vida -= dt; p.x += p.vx * dt; p.y += p.vy * dt; if (!p.cora) p.vy += 2.4 * dt; }
+  parts = parts.filter(p => p.vida > 0);
+}
+
+function ganha(tipo, q) {
+  S.polen[tipo] += q; pintaBolsa();
+  const ch = document.querySelector(`.chip[data-t="${tipo}"]`);
+  ch.classList.remove('pulo'); void ch.offsetWidth; ch.classList.add('pulo');
+}
+function toca(s) {
+  if (S.amigos[s.sp.id]) { // já é amigo: dá um presentinho e segue a vida
+    s.pausa = 2.2; s.feliz = true; ganha(s.sp.ama, 2); coracoes(s.x, s.y); somOi();
+    avisa(`${s.sp.nome} te deu 2 de ${POLEN[s.sp.ama].nome.toLowerCase()} 💝`);
+  } else abreEncontro(s);
+}
+
+// ---------- Desenho do mundo ----------
+function jardineiro(c, x, y, s, t) {
+  const anda = J.andando, p = anda ? Math.sin(J.passo) : 0, sobe = anda ? Math.abs(Math.cos(J.passo)) * s * .06 : Math.sin(t * 2.5) * s * .015;
+  c.save(); c.translate(x, y);
+  c.fillStyle = 'rgba(40,70,50,.22)'; ell(c, 0, 0, s * .5, s * .15); c.fill();
+  c.scale(J.lado, 1); c.lineWidth = Math.max(1.2, s * .05); c.lineJoin = c.lineCap = 'round';
+  // perninhas e botas
+  for (const k of [-1, 1]) { ell(c, k * s * .17 + p * k * s * .1, -s * .06 - (k * p > 0 ? s * .06 : 0), s * .14, s * .1); pinta(c, '#b5651d', '#7a4312'); }
+  c.translate(0, -sobe);
+  // macacão
+  c.beginPath(); c.roundRect(-s * .34, -s * .62, s * .68, s * .56, s * .22); pinta(c, '#6fb7e8', '#3f86bd');
+  c.fillStyle = '#fff6d6'; ell(c, 0, -s * .3, s * .09, s * .09); c.fill();
+  // bracinhos
+  for (const k of [-1, 1]) { ell(c, k * s * .38, -s * .38 + p * k * s * .06, s * .1, s * .14, k * .3); pinta(c, '#ffd9b8', '#d9a47e'); }
+  // cabeça
+  ell(c, 0, -s * .92, s * .4, s * .37); pinta(c, '#ffd9b8', '#d9a47e');
+  c.fillStyle = 'rgba(255,120,150,.45)'; ell(c, -s * .2, -s * .82, s * .08, s * .055); c.fill(); ell(c, s * .3, -s * .82, s * .08, s * .055); c.fill();
+  c.fillStyle = '#4a3b52'; ell(c, -s * .06, -s * .92, s * .05, s * .07); c.fill(); ell(c, s * .22, -s * .92, s * .05, s * .07); c.fill();
+  c.strokeStyle = '#4a3b52'; c.beginPath(); c.arc(s * .09, -s * .82, s * .06, .2, Math.PI - .2); c.stroke();
+  // chapéu de palha com fita e florzinha
+  ell(c, 0, -s * 1.14, s * .62, s * .16); pinta(c, '#f6d77a', '#c9a23f');
+  c.beginPath(); c.moveTo(-s * .34, -s * 1.16); c.quadraticCurveTo(-s * .32, -s * 1.56, 0, -s * 1.56); c.quadraticCurveTo(s * .32, -s * 1.56, s * .34, -s * 1.16); c.closePath(); pinta(c, '#f6d77a', '#c9a23f');
+  c.strokeStyle = '#ff8fb3'; c.lineWidth = s * .09; c.beginPath(); c.moveTo(-s * .32, -s * 1.2); c.quadraticCurveTo(0, -s * 1.13, s * .32, -s * 1.2); c.stroke();
+  florzinha(c, s * .22, -s * 1.24, s * .1, '#fff', '#ffd23f');
+  c.restore();
+}
+function arvore(c, x, y, s, v, t) {
+  const bal = Math.sin(t * 1.2 + v * 20) * s * .02;
+  c.fillStyle = 'rgba(40,70,50,.2)'; ell(c, x, y, s * .55, s * .16); c.fill();
+  c.fillStyle = '#a9744a'; c.beginPath(); c.roundRect(x - s * .11, y - s * .5, s * .22, s * .52, s * .08); c.fill();
+  const verde = v < .33 ? '#6cc47a' : v < .66 ? '#7ccf83' : '#5fb98a', claro = tom(verde, .18);
+  c.fillStyle = tom(verde, -.14); ell(c, x + bal, y - s * .78, s * .62, s * .5); c.fill();
+  c.fillStyle = verde; ell(c, x - s * .2 + bal, y - s * .95, s * .44, s * .4); c.fill(); ell(c, x + s * .24 + bal, y - s * .9, s * .4, s * .38); c.fill();
+  c.fillStyle = claro; ell(c, x - s * .05 + bal, y - s * 1.16, s * .36, s * .3); c.fill();
+  if (v > .72) { c.fillStyle = '#ffc4dd'; for (let i = 0; i < 5; i++) { ell(c, x + bal + Math.cos(i * 2.3 + v * 9) * s * .38, y - s * .95 + Math.sin(i * 1.7 + v * 5) * s * .3, s * .055, s * .055); c.fill(); } }
+}
+function flor(c, f, x, y, s, t) {
+  const p = POLEN[f.tipo], bal = Math.sin(t * 1.8 + f.ph) * s * .05;
+  c.strokeStyle = '#5fb06c'; c.lineWidth = s * .07; c.lineCap = 'round';
+  const alt = f.pronta ? s * .5 : s * .28;
+  c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + bal * .5, y - alt * .5, x + bal, y - alt); c.stroke();
+  c.fillStyle = '#6cc47a'; ell(c, x + s * .1, y - alt * .35, s * .12, s * .06, -.5); c.fill();
+  if (!f.pronta) { c.fillStyle = tom(p.cor, -.1); ell(c, x + bal, y - alt, s * .07, s * .09); c.fill(); return; }
+  if (f.tipo === 'ouro') {
+    const g = c.createRadialGradient(x + bal, y - alt, 0, x + bal, y - alt, s * .7);
+    g.addColorStop(0, 'rgba(255,236,150,.75)'); g.addColorStop(1, 'rgba(255,236,150,0)');
+    c.fillStyle = g; ell(c, x + bal, y - alt, s * .7, s * .7); c.fill();
+    florzinha(c, x + bal, y - alt, s * .26, p.cor, p.miolo, t * .8, 8);
+  } else florzinha(c, x + bal, y - alt, s * .22, p.cor, p.miolo, f.ph + Math.sin(t + f.ph) * .15);
+}
+
+function desenha() {
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const t = tempo, esc = escuro();
+  const camx = MW * T > W ? clamp(S.x * T - W / 2, 0, MW * T - W) : (MW * T - W) / 2;
+  const camy = MH * T > H ? clamp(S.y * T - H / 2, 0, MH * T - H) : (MH * T - H) / 2;
+  const x0 = Math.max(0, Math.floor(camx / T)), x1 = Math.min(MW - 1, Math.ceil((camx + W) / T));
+  const y0 = Math.max(0, Math.floor(camy / T)), y1 = Math.min(MH - 1, Math.ceil((camy + H) / T) + 1);
+  c.fillStyle = '#7ccf83'; c.fillRect(0, 0, W, H);
+  c.save(); c.translate(-Math.round(camx), -Math.round(camy));
+
+  // chão
+  const verdes = ['#a8e085', '#a0db7e', '#acE38a'];
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    const k = h2(x, y, 7);
+    c.fillStyle = verdes[(k * 3) | 0]; c.fillRect(x * T, y * T, T + 1, T + 1);
+    const tp = mapa[y][x];
+    if (tp === MATO) {
+      c.fillStyle = 'rgba(88,170,96,.28)'; c.beginPath(); c.roundRect(x * T + 2, y * T + 2, T - 4, T - 4, T * .3); c.fill();
+      c.strokeStyle = '#69bb6f'; c.lineWidth = T * .05; c.lineCap = 'round';
+      for (let i = 0; i < 4; i++) { const gx = x * T + T * (.2 + h2(x + i, y, 21) * .6), gy = y * T + T * (.4 + h2(x, y + i, 22) * .5), b = Math.sin(t * 2 + x + y + i) * T * .05;
+        c.beginPath(); c.moveTo(gx - T * .06, gy); c.lineTo(gx - T * .08 + b, gy - T * .2); c.moveTo(gx, gy); c.lineTo(gx + b, gy - T * .27); c.moveTo(gx + T * .06, gy); c.lineTo(gx + T * .09 + b, gy - T * .19); c.stroke(); }
+    } else if (tp === GRAMA && k > .82) { // pontinhos de enfeite
+      c.fillStyle = 'rgba(255,255,255,.55)'; ell(c, x * T + T * k * .9, y * T + T * .5, T * .03, T * .03); c.fill();
+      ell(c, x * T + T * .3, y * T + T * k * .8, T * .025, T * .025); c.fill();
+    }
+  }
+  // água com cantinhos arredondados
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    if (mapa[y][x] !== AGUA) continue;
+    const u = tile(x, y - 1) !== AGUA, d = tile(x, y + 1) !== AGUA, l = tile(x - 1, y) !== AGUA, r = tile(x + 1, y) !== AGUA, R = T * .42;
+    c.fillStyle = '#e9dfb5'; c.beginPath(); c.roundRect(x * T - 3, y * T - 3, T + 6, T + 6, [u && l ? R : 0, u && r ? R : 0, d && r ? R : 0, d && l ? R : 0]); c.fill();
+  }
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    if (mapa[y][x] !== AGUA) continue;
+    const u = tile(x, y - 1) !== AGUA, d = tile(x, y + 1) !== AGUA, l = tile(x - 1, y) !== AGUA, r = tile(x + 1, y) !== AGUA, R = T * .4;
+    c.fillStyle = '#86d6f5'; c.beginPath(); c.roundRect(x * T, y * T, T + 1, T + 1, [u && l ? R : 0, u && r ? R : 0, d && r ? R : 0, d && l ? R : 0]); c.fill();
+    const k = h2(x, y, 13);
+    c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = T * .045; c.lineCap = 'round';
+    const ox = Math.sin(t * .8 + k * 9) * T * .1;
+    c.beginPath(); c.moveTo(x * T + T * .25 + ox, y * T + T * (.3 + k * .4)); c.lineTo(x * T + T * .5 + ox, y * T + T * (.3 + k * .4)); c.stroke();
+    if (k > .8) { // vitória-régia
+      c.fillStyle = '#7fd08a'; ell(c, x * T + T * .6, y * T + T * .65, T * .2, T * .13); c.fill();
+      if (k > .9) florzinha(c, x * T + T * .6, y * T + T * .62, T * .08, '#ffc4dd', '#ffe27a');
+    }
+  }
+
+  // tudo que tem altura, ordenado de trás para a frente
+  const fila = [];
+  for (let y = y0; y <= Math.min(MH - 1, y1 + 1); y++) for (let x = Math.max(0, x0 - 1); x <= Math.min(MW - 1, x1 + 1); x++)
+    if (mapa[y][x] === ARVORE) fila.push({ y: y + .8, f: () => arvore(c, (x + .5) * T, (y + .8) * T, T * .95, h2(x, y, 17), t) });
+  for (const f of flores) if (f.x > x0 - 1 && f.x < x1 + 2 && f.y > y0 - 1 && f.y < y1 + 2) fila.push({ y: f.y, f: () => flor(c, f, f.x * T, f.y * T, T, t) });
+  for (const s of selvagens) {
+    const sc = s.some ? Math.max(0, 1 - s.some) : s.nasce;
+    fila.push({ y: s.y, f: () => desenhaPolini(c, s.sp, s.x * T, s.y * T, T * .38 * sc, t, 1, { ph: s.ph, flip: s.lado < 0, hop: s.anda || s.feliz, feliz: s.feliz }) });
+  }
+  if (S.comp) fila.push({ y: comp.y, f: () => desenhaPolini(c, PORID[S.comp], comp.x * T, comp.y * T, T * .36, t, S.amigos[S.comp], { flip: comp.lado < 0, hop: comp.anda, feliz: true }) });
+  fila.push({ y: S.y, f: () => jardineiro(c, S.x * T, S.y * T, T * .62, t) });
+  fila.sort((a, b) => a.y - b.y);
+  for (const o of fila) o.f();
+
+  // partículas
+  for (const p of parts) {
+    c.globalAlpha = clamp(p.vida * 2, 0, 1); c.fillStyle = p.cor;
+    if (p.cora) { const r = p.r * T, x = p.x * T, y = p.y * T;
+      c.beginPath(); c.moveTo(x, y + r * .9); c.bezierCurveTo(x - r * 1.6, y - r * .3, x - r * .6, y - r * 1.3, x, y - r * .4); c.bezierCurveTo(x + r * .6, y - r * 1.3, x + r * 1.6, y - r * .3, x, y + r * .9); c.fill();
+    } else { ell(c, p.x * T, p.y * T, p.r * T, p.r * T); c.fill(); }
+  }
+  c.globalAlpha = 1;
+  c.restore();
+
+  // grãozinhos de pólen flutuando
+  for (const m of motes) {
+    const x = ((m.x * W + Math.sin(t * .3 + m.ph) * 40 + t * 8) % (W + 20)) - 10, y = ((m.y * H + Math.cos(t * .4 + m.ph) * 30 - t * 5) % (H + 20) + H + 20) % (H + 20) - 10;
+    c.fillStyle = `rgba(255,246,190,${.35 + Math.sin(t * 2 + m.ph) * .2})`; ell(c, x, y, m.r, m.r); c.fill();
+  }
+  // noite: véu azul, luz em volta do jardineiro e vaga-lumes
+  if (esc > .01) {
+    const px = S.x * T - camx, py = S.y * T - camy - T * .5;
+    const g = c.createRadialGradient(px, py, T * .8, px, py, Math.max(W, H) * .75);
+    g.addColorStop(0, `rgba(38,36,96,${.12 * esc})`); g.addColorStop(.35, `rgba(38,36,96,${.46 * esc})`); g.addColorStop(1, `rgba(24,22,70,${.62 * esc})`);
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    c.globalCompositeOperation = 'lighter';
+    for (const v of vaga) {
+      const x = (v.x * W + Math.sin(t * v.v + v.ph) * 60 + W) % W, y = (v.y * H + Math.cos(t * v.v * .8 + v.ph) * 50 + H) % H;
+      const a = (.5 + Math.sin(t * 3 * v.v + v.ph) * .5) * esc;
+      const gg = c.createRadialGradient(x, y, 0, x, y, 12); gg.addColorStop(0, `rgba(255,244,150,${a})`); gg.addColorStop(1, 'rgba(255,244,150,0)');
+      c.fillStyle = gg; ell(c, x, y, 12, 12); c.fill();
+    }
+    c.globalCompositeOperation = 'source-over';
+  }
+  // rodinha do controle de arrastar
+  if (joy && Math.hypot(joy.x - joy.x0, joy.y - joy.y0) > 10) {
+    c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 3; ell(c, joy.x0, joy.y0, 42, 42); c.stroke();
+    const jx = joy.x - joy.x0, jy = joy.y - joy.y0, m = Math.hypot(jx, jy), f = Math.min(m, 42) / m;
+    c.fillStyle = 'rgba(255,255,255,.75)'; ell(c, joy.x0 + jx * f, joy.y0 + jy * f, 18, 18); c.fill();
+  }
+}
+
+// ---------- HUD ----------
+function pintaBolsa() {
+  for (const ch of document.querySelectorAll('#bolsa .chip')) ch.lastElementChild.textContent = S.polen[ch.dataset.t];
+  $('#conta').textContent = `${Object.keys(S.amigos).length}/${POLINIS.length}`;
+}
+function avisa(txt) {
+  const d = document.createElement('div'); d.className = 'aviso'; d.textContent = txt;
+  $('#avisos').appendChild(d); setTimeout(() => d.remove(), 2900);
+  while ($('#avisos').children.length > 3) $('#avisos').firstChild.remove();
+}
+let relogioAntes = '';
+function pintaRelogio() {
+  const e = escuro(), i = e > .5 ? '🌙' : e > .02 ? (S.hora < .7 ? '🌇' : '🌅') : '☀️';
+  if (i !== relogioAntes) { $('#bRelogio').textContent = relogioAntes = i; if (i === '🌙') avisa('A noite chegou… novos Polinis acordaram 🌙'); }
+}
+$('#bRelogio').onclick = () => avisa(eNoite() ? 'É noite no jardim 🌙' : 'É dia no jardim ☀️');
+$('#bSom').onclick = () => { S.som = !S.som; $('#bSom').textContent = S.som ? '🔊' : '🔇'; salva(); };
+$('#bSom').textContent = S.som ? '🔊' : '🔇';
+
+// ---------- Encontro ----------
+let enc = null;
+const cvE = $('#cvEnc'), cE = cvE.getContext('2d');
+function abreEncontro(s) {
+  const sp = s.sp;
+  enc = { s, sp, am: 0, meta: [0, 80, 110, 150][sp.rar], pac: 5, humor: 0, fim: 0, t0: tempo };
+  pausado = true; joy = null; for (const k in teclas) teclas[k] = false;
+  $('#eNome').textContent = sp.nome;
+  $('#eRar').textContent = '★'.repeat(sp.rar) + '☆'.repeat(3 - sp.rar) + ' · ' + HAB[sp.hab];
+  $('#fala').textContent = `Um ${sp.nome} curioso apareceu! Que pólen será que ele gosta?`;
+  $('#bTchau').textContent = 'Dar tchauzinho 👋'; $('#bTchau').className = 'leve';
+  pintaEncontro(); $('#encontro').classList.add('on'); somOi();
+}
+function pintaEncontro() {
+  const sp = enc.sp, sabe = S.sabe[sp.id] || {};
+  $('#barra i').style.width = clamp(enc.am / enc.meta * 100, 0, 100) + '%';
+  $('#paciencia').textContent = enc.fim ? '' : '🌸'.repeat(enc.pac) + '·'.repeat(5 - enc.pac);
+  const o = $('#ofertas'); o.innerHTML = '';
+  if (enc.fim) return;
+  for (const tp of TIPOS) {
+    const b = document.createElement('button'); b.className = 'oferta'; b.disabled = S.polen[tp] < 1;
+    const marca = tp === 'ouro' ? '✨' : sabe[tp] === 2 ? '💗' : sabe[tp] === 1 ? '🙂' : sabe[tp] === -1 ? '😖' : '?';
+    b.innerHTML = `<span class="bola ${tp}"></span>${S.polen[tp]}<small>${marca}</small>`;
+    b.onclick = () => oferece(tp); o.appendChild(b);
+  }
+}
+function oferece(tp) {
+  if (!enc || enc.fim || S.polen[tp] < 1) return;
+  const sp = enc.sp; S.polen[tp]--; pintaBolsa();
+  const sabe = S.sabe[sp.id] = S.sabe[sp.id] || {};
+  let g, fala;
+  if (tp === 'ouro') { g = 70; fala = 'Os olhinhos dele brilharam como estrelas! ✨'; enc.humor = 1; }
+  else if (tp === sp.ama) { g = 40; sabe[tp] = 2; fala = `${sp.nome} amou! É o favorito dele 💗`; enc.humor = 1; }
+  else if (tp === sp.odeia) { g = -12; sabe[tp] = -1; fala = `${sp.nome} fez careta… desse ele não gosta 😖`; enc.humor = -1; }
+  else { g = 18; sabe[tp] = 1; fala = `${sp.nome} comeu e achou gostosinho 🙂`; enc.humor = 0; }
+  if (S.comp && g > 0) g += 6;
+  enc.am = Math.max(0, enc.am + g); enc.pac--; enc.pulo = tempoReal;
+  if (g > 0) nota(660 + g * 6, 0, .12, 'triangle'); else somTriste();
+  if (enc.am >= enc.meta) {
+    enc.fim = 1; enc.humor = 1; S.amigos[sp.id] = 1; if (!S.comp) S.comp = sp.id, comp.x = S.x, comp.y = S.y;
+    fala = `🎉 ${sp.nome} agora é seu amigo!`; somFeliz();
+    $('#bTchau').textContent = 'Que alegria! Continuar'; $('#bTchau').className = 'grande verde';
+    enc.s.some = 1;
+  } else if (enc.pac <= 0) {
+    enc.fim = 2; enc.humor = -1; fala = `${sp.nome} ficou cheio e saiu saltitando. Tente de novo depois!`;
+    $('#bTchau').textContent = 'Tudo bem, até logo'; enc.s.some = .01;
+  }
+  $('#fala').textContent = fala; pintaEncontro(); pintaBolsa(); salva();
+}
+$('#bTchau').onclick = () => {
+  const e = enc; if (!e) return;
+  if (!e.fim) e.s.pausa = 1.5;
+  $('#encontro').classList.remove('on'); enc = null; pausado = false;
+  if (e.fim === 1) {
+    coracoes(S.x, S.y, 8);
+    const n = Object.keys(S.amigos).length;
+    if (n === POLINIS.length && !S.fim) { S.fim = 1; avisa('🌈 Jardim completo! Todos os Polinis são seus amigos!'); somFeliz(); }
+    else avisa(`Novo amigo no álbum: ${e.sp.nome} 📖`);
+    salva();
+  }
+};
+function desenhaEncontro(tr) {
+  const w = cvE.width, h = cvE.height, sp = enc.sp, n = eNoite();
+  const g = cE.createLinearGradient(0, 0, 0, h);
+  if (n) { g.addColorStop(0, '#3b3a8a'); g.addColorStop(.62, '#6a62b8'); g.addColorStop(.63, '#4f9a76'); g.addColorStop(1, '#3f8263'); }
+  else { g.addColorStop(0, '#bfe9ff'); g.addColorStop(.62, '#eafbff'); g.addColorStop(.63, '#b4e88f'); g.addColorStop(1, '#98d977'); }
+  cE.fillStyle = g; cE.fillRect(0, 0, w, h);
+  for (let i = 0; i < 9; i++) { // florzinhas ou estrelas ao fundo
+    const x = (i * 83 + 30) % w;
+    if (n) { cE.fillStyle = `rgba(255,255,255,${.5 + Math.sin(tr * 2 + i) * .4})`; ell(cE, x, 20 + (i * 47) % 190, 2.5, 2.5); cE.fill(); }
+    florzinha(cE, x + 20, h * .68 + (i * 37) % 110, 11, POLEN[TIPOS[i % 3]].cor, POLEN[TIPOS[i % 3]].miolo, tr * .3 + i);
+  }
+  const dp = tr - (enc.pulo || -9), pulinho = dp < .5 ? Math.sin(dp / .5 * Math.PI) * 30 * (enc.humor < 0 ? -.2 : 1) : 0;
+  desenhaPolini(cE, sp, w / 2, h * .82 - pulinho, 105, tr, 1, { feliz: enc.humor > 0 ? (enc.fim === 1 ? 2 : 1) : 0, triste: enc.humor < 0, hop: enc.fim === 1 });
+  if (enc.humor > 0 && dp < 1.2) { cE.font = '40px serif'; cE.globalAlpha = 1 - dp / 1.2; cE.fillText('💗', w / 2 + 110, h * .4 - dp * 50); cE.fillText('💗', w / 2 - 160, h * .5 - dp * 40); cE.globalAlpha = 1; }
+}
+
+// ---------- Álbum ----------
+let sel = null, fichas = [];
+function abreAlbum() {
+  if (enc) return;
+  pausado = true; sel = sel || S.comp || POLINIS[0].id;
+  const g = $('#grade'); g.innerHTML = ''; fichas = [];
+  for (const sp of POLINIS) {
+    const b = document.createElement('button'); b.className = 'ficha';
+    const cv2 = document.createElement('canvas'); cv2.width = 180; cv2.height = 150;
+    const nome = document.createElement('div');
+    b.append(cv2, nome); b.onclick = () => { sel = sp.id; pintaAlbum(); nota(700, 0, .06); };
+    g.appendChild(b); fichas.push({ sp, b, cv2, nome });
+  }
+  pintaAlbum(); $('#album').classList.add('on');
+}
+function etqPolen(tp) { return `<span class="etq"><span class="bola ${tp}"></span>${POLEN[tp].nome}</span>`; }
+function pintaAlbum() {
+  const n = Object.keys(S.amigos).length, flor = Object.values(S.amigos).filter(v => v > 1).length;
+  $('#aSub').textContent = `${n} de ${POLINIS.length} amigos · ${flor} ${flor === 1 ? "florescido" : "florescidos"}`;
+  for (const f of fichas) {
+    const st = S.amigos[f.sp.id];
+    f.b.classList.toggle('sel', sel === f.sp.id);
+    f.nome.textContent = st ? f.sp.nome : '???';
+    f.b.querySelector('.selo')?.remove();
+    if (st) { const s = document.createElement('span'); s.className = 'selo'; s.textContent = (S.comp === f.sp.id ? '🧡' : '') + (st > 1 ? '🌸' : ''); f.b.appendChild(s); }
+  }
+  const sp = PORID[sel], st = S.amigos[sp.id], sabe = S.sabe[sp.id] || {}, d = $('#detalhe');
+  if (!st) {
+    d.innerHTML = `<h3>???</h3>Você ainda não fez amizade com este Polini.<br>
+      <span class="etq">📍 ${HAB[sp.hab]}</span><span class="etq">🕐 ${HORA[sp.hora]}</span><span class="etq">${'★'.repeat(sp.rar)}</span>
+      ${sabe[sp.ama] === 2 ? '<br>Você já descobriu o favorito: ' + etqPolen(sp.ama) : ''}`;
+    return;
+  }
+  const custo = 12, pode = S.polen[sp.ama] >= custo;
+  d.innerHTML = `<h3>${sp.nome}${st > 1 ? ' florescido 🌸' : ''}</h3>${sp.desc}<br>
+    <span class="etq">📍 ${HAB[sp.hab]}</span><span class="etq">🕐 ${HORA[sp.hora]}</span><span class="etq">${'★'.repeat(sp.rar)}</span><br>
+    Favorito: ${etqPolen(sp.ama)}
+    <div class="linha">
+      <button class="grande" id="bComp">${S.comp === sp.id ? 'Deixar descansar' : 'Passear comigo 🧡'}</button>
+      ${st > 1 ? '' : `<button class="leve" id="bFlor" ${pode ? '' : 'disabled'}>Florescer 🌸 (${custo} <span class="bola ${sp.ama}" style="display:inline-block;width:13px;height:13px;vertical-align:-1px"></span>)</button>`}
+    </div>
+    <div style="color:#9a86a6;font-size:12px;margin-top:8px">Quem passeia com você ajuda a colher: +${st} de pólen por flor${st > 1 ? '' : ' (florescido: +2)'}.</div>`;
+  $('#bComp').onclick = () => { S.comp = S.comp === sp.id ? null : sp.id; comp.x = S.x; comp.y = S.y; nota(800, 0, .08); salva(); pintaAlbum(); };
+  const bf = $('#bFlor');
+  if (bf) bf.onclick = () => {
+    if (S.polen[sp.ama] < custo) return;
+    S.polen[sp.ama] -= custo; S.amigos[sp.id] = 2; somFeliz(); pintaBolsa(); salva(); pintaAlbum();
+    avisa(`🌸 ${sp.nome} floresceu!`);
+    if (Object.values(S.amigos).filter(v => v > 1).length === POLINIS.length && S.fim < 2) { S.fim = 2; avisa('🏵️ Jardim em flor! Todos floresceram!'); }
+  };
+}
+function desenhaAlbum(tr) {
+  for (const f of fichas) {
+    const x = f.cv2.getContext('2d'), st = S.amigos[f.sp.id];
+    x.globalCompositeOperation = 'source-over'; x.clearRect(0, 0, 180, 150);
+    desenhaPolini(x, f.sp, 90, 128, 50, st ? tr : 0, st || 1, { ph: f.sp.rar, semSombra: !st, feliz: sel === f.sp.id && st, hop: sel === f.sp.id && st });
+    if (!st) { x.globalCompositeOperation = 'source-in'; x.fillStyle = '#d9cfe0'; x.fillRect(0, 0, 180, 150); }
+    x.globalCompositeOperation = 'destination-over'; x.fillStyle = st ? '#f3fbe9' : '#f6f1f8'; x.fillRect(0, 0, 180, 150);
+  }
+}
+$('#bAlbum').onclick = abreAlbum;
+$('#bFechar').onclick = () => { $('#album').classList.remove('on'); pausado = false; };
+$('#bZerar').onclick = () => {
+  if (!confirm('Apagar todo o progresso e começar um jardim novo?')) return;
+  const som = S.som; S = novoJogo(); S.som = som; selvagens = []; sel = null; salva(); pintaBolsa(); pintaAlbum();
+};
+addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if ($('#album').classList.contains('on')) $('#bFechar').click(); }
+  if (e.key.toLowerCase() === 'e' && !pausado) abreAlbum();
+});
+
+// ---------- Tela inicial ----------
+const cvI = $('#cvInicio'), cI = cvI.getContext('2d');
+function desenhaInicio(tr) {
+  cI.clearRect(0, 0, 720, 300);
+  cI.fillStyle = '#b4e88f'; ell(cI, 360, 330, 520, 110); cI.fill();
+  for (let i = 0; i < 8; i++) florzinha(cI, 40 + i * 92, 262 + (i % 3) * 12, 12, POLEN[TIPOS[i % 3]].cor, POLEN[TIPOS[i % 3]].miolo, tr * .4 + i);
+  desenhaPolini(cI, PORID.petalim, 150, 240, 62, tr, 1, { ph: 1, feliz: true });
+  desenhaPolini(cI, PORID.polinho, 360, 222, 74, tr, 1, { ph: 2, hop: true, feliz: true });
+  desenhaPolini(cI, PORID.brotinho, 570, 240, 62, tr, 1, { ph: 3, flip: true });
+}
+$('#bJogar').onclick = () => { $('#inicio').classList.remove('on'); pausado = false; somOi(); };
+if (Object.keys(S.amigos).length) $('#bJogar').textContent = 'Continuar';
+
+// ---------- Laço principal ----------
+let antes = performance.now(), tempoReal = 0, salvaEm = 0;
+function quadro(agora) {
+  const dt = Math.min(.05, (agora - antes) / 1000); antes = agora; tempoReal += dt;
+  if (!pausado) { atualiza(dt); pintaRelogio(); if (tempoReal > salvaEm) { salvaEm = tempoReal + 5; salva(); } }
+  else tempo += dt * .0001;
+  desenha();
+  if (enc) desenhaEncontro(tempoReal);
+  if ($('#album').classList.contains('on')) desenhaAlbum(tempoReal);
+  if ($('#inicio').classList.contains('on')) desenhaInicio(tempoReal);
+  requestAnimationFrame(quadro);
+}
+addEventListener('pagehide', salva);
+document.addEventListener('visibilitychange', () => { if (document.hidden) salva(); });
+pintaBolsa();
+requestAnimationFrame(quadro);
+</script>
+</body>
+</html>
