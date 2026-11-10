@@ -69,6 +69,8 @@ button{font:inherit;color:inherit;cursor:pointer;border:0}
 .arena{width:min(760px,100%);max-height:100%;display:flex;flex-direction:column;position:relative}
 #palco{position:relative;border-bottom:4px solid #ff7a1a}
 #cvB{width:100%;height:auto;display:block}
+#batalha.on .arena{animation:clarao .55s steps(1)}
+@keyframes clarao{0%,50%{filter:brightness(9)}25%,75%{filter:brightness(0)}100%{filter:none}}
 .placa{position:absolute;background:rgba(27,20,36,.92);border:2px solid #f4efe6;border-radius:10px;padding:6px 10px;width:46%;max-width:290px;text-align:left;font-size:14px}
 .placa.ini{left:2%;top:4%}.placa.eu{right:2%;bottom:4%}
 .placa .l1{display:flex;justify-content:space-between;gap:6px;align-items:center;white-space:nowrap}
@@ -110,6 +112,7 @@ h3{margin:16px 0 0;font-size:15px;color:#ff7a1a;text-align:left;text-transform:u
   <div class="grupo">
     <div class="chip" id="cNuc" title="Núcleos de captura"><span class="ic nuc"></span><span>0</span></div>
     <div class="chip" id="cPoc" title="Poções"><span class="ic poc"></span><span>0</span></div>
+    <div class="chip" id="cDin" title="Dinheiro" style="color:#ffd23f">$ <span>0</span></div>
     <div class="chip" id="cEmb" title="Emblemas dos Guardiões">★ <span>0/3</span></div>
   </div>
   <div class="grupo" style="justify-content:flex-end">
@@ -127,7 +130,8 @@ h3{margin:16px 0 0;font-size:15px;color:#ff7a1a;text-align:left;text-transform:u
     <canvas id="cvInicio" width="760" height="330" style="width:380px"></canvas>
     <ul class="passos">
       <li>Ande com as setas, WASD ou arrastando o dedo.</li>
-      <li>Encoste numa fera selvagem para batalhar. Enfraqueça e lance um núcleo para capturar.</li>
+      <li>Ande pelo mato alto para achar feras selvagens. Enfraqueça e lance um núcleo para capturar.</li>
+      <li>Treinadores rivais te desafiam nas rotas. Vencer dá dinheiro para a loja do acampamento.</li>
       <li>Treine, evolua, vença os 3 Guardiões e desperte o titã Ferrugor.</li>
     </ul>
     <button class="grande tit" id="bJogar">Jogar</button>
@@ -154,6 +158,16 @@ h3{margin:16px 0 0;font-size:15px;color:#ff7a1a;text-align:left;text-transform:u
     </div>
     <div id="bMsg"></div>
     <div id="bMenu"></div>
+  </div>
+</div>
+
+<!-- Loja -->
+<div class="tela" id="loja">
+  <div class="cartao">
+    <h2 class="tit">Loja do acampamento</h2>
+    <div class="sub" id="lojaDin"></div>
+    <div id="lojaItens" style="display:grid;gap:8px"></div>
+    <button class="grande tit" id="bLojaSai">Sair</button>
   </div>
 </div>
 
@@ -465,7 +479,7 @@ const CX = MW / 2, CY = MH / 2;
       const w = ruido(x / 7, y / 7, 1), f = ruido(x / 5 + 40, y / 5, 2), v = ruido(x / 9 + 80, y / 9 + 30, 3) * .45 + (x / MW) * .62;
       const dc = Math.hypot(x - CX, y - CY), vul = v > .76;
       let t = GRAMA;
-      if (vul) t = w < .3 ? LAVA : f > .66 ? ROCHA : PEDRA;
+      if (vul) t = w < .3 ? LAVA : f > .66 ? ROCHA : (f > .5 || h2(x, y, 5) < .1) ? MATO : PEDRA;
       else if (w < .3) t = AGUA; else if (f > .64) t = ARVORE; else if (f > .5 || h2(x, y, 5) < .1) t = MATO;
       if (x < 1 || y < 1 || x > MW - 2 || y > MH - 2) t = vul ? ROCHA : ARVORE;
       else if (dc < 3.4) t = GRAMA;
@@ -496,6 +510,19 @@ const CHEFES = [
   { nome: 'Guardião Cinza', dica: 'no vulcão, ao leste', cor: '#ff6a2a', ...achaLivre(CX + 22, CY + 8), time: [['magmorra', 22], ['umbrakar', 23], ['monolitan', 24]],
     fala: 'O vulcão não perdoa os fracos.' }
 ];
+CHEFES.forEach((ch, i) => { ch.g = 1; ch.i = i; ch.premio = 500 + i * 400; });
+const TREINS = [ // treinadores rivais espalhados pelas rotas
+  { nome: 'Recruta Dudu', cor: '#57c84d', ...achaLivre(CX - 7, CY - 6), time: [['cipoal', 4], ['faiscao', 5]], fala: 'Acabei de pegar minhas feras. Bora testar!' },
+  { nome: 'Caçadora Lia', cor: '#9a5cf0', ...achaLivre(CX - 12, CY + 4), time: [['garragua', 7], ['vultinho', 7]], fala: 'Te vi de longe. Não tem como fugir!' },
+  { nome: 'Mergulhador Tito', cor: '#3fa0ff', ...achaLivre(CX - 6, CY + 12), time: [['marulho', 10], ['garragua', 11]], fala: 'Minhas feras vieram do fundo do lago!' },
+  { nome: 'Lenhador Braz', cor: '#b08a6a', ...achaLivre(CX + 4, CY - 13), time: [['cipoal', 12], ['espinhel', 13], ['cascalho', 13]], fala: 'Esse bosque é meu território.' },
+  { nome: 'Ferreira Nara', cor: '#ff6a2a', ...achaLivre(CX + 13, CY + 2), time: [['cinzal', 17], ['cascalho', 18], ['fornalho', 18]], fala: 'Forjei meu time no calor do vulcão!' },
+  { nome: 'Vulto Kael', cor: '#4b2f7a', ...achaLivre(CX + 14, CY - 10), time: [['umbrakar', 20], ['voltarok', 21]], fala: 'Poucos me enxergam antes de perder.' }
+];
+TREINS.forEach((tr, i) => { tr.i = i; tr.premio = tr.time[tr.time.length - 1][1] * 30; });
+const FIXOS = [...CHEFES, ...TREINS];
+const vencido = o => o.g ? S.chefes[o.i] : S.trein[o.i];
+const LOJA = { x: CX + 3.1, y: CY + .2 };
 const TITA = { ...achaLivre(CX + 21, CY - 14), nv: 30 };
 const TAB = { // quem aparece em cada lugar: [fera, peso, só à noite?]
   campo: [['faiscao', 6], ['cipoal', 6], ['cascalho', 2], ['vultinho', 6, 1]],
@@ -507,7 +534,7 @@ const TAB = { // quem aparece em cada lugar: [fera, peso, só à noite?]
 // ---------- Estado e salvamento ----------
 const CHAVE = 'feras-ferrugem-v1';
 let S = novoJogo();
-function novoJogo() { return { feras: [], dex: {}, nuc: 6, poc: 3, chefes: [0, 0, 0], x: CX + .5, y: CY + 1.6, hora: .1, som: true, fim: 0 }; }
+function novoJogo() { return { feras: [], dex: {}, nuc: 6, poc: 3, chefes: [0, 0, 0], trein: [], din: 300, x: CX + .5, y: CY + 1.6, hora: .1, som: true, fim: 0 }; }
 function carrega() {
   try { const d = JSON.parse(localStorage.getItem(CHAVE)); if (d && Array.isArray(d.feras)) S = Object.assign(novoJogo(), d); } catch (e) {}
   S.feras = S.feras.filter(m => F[m.id]);
@@ -555,26 +582,21 @@ function paraTudo() { joy = null; for (const k in teclas) teclas[k] = false; }
 // ---------- Entidades do mundo ----------
 const J = { lado: 1, passo: 0, andando: false };
 const seg = { x: S.x - 1, y: S.y, lado: 1, anda: false }; // a líder segue você
-let selvagens = [], parts = [], brotaEm = 0, tempo = 0, pausado = true, fixoPerto = null, curouEm = 0;
+let parts = [], matoAnda = 0, semEncontro = 0, lojaPerto = false, tempo = 0, pausado = true, fixoPerto = null, curouEm = 0;
 const vaga = Array.from({ length: 24 }, () => ({ x: rnd(), y: rnd(), ph: rnd(TAU), v: rnd(.4, 1) }));
 const escuro = () => { const h = S.hora, a = clamp((h - .55) / .08, 0, 1), d = clamp((h - .92) / .08, 0, 1); return a * a * (3 - 2 * a) - d * d * (3 - 2 * d); };
 const eNoite = () => escuro() > .5;
 function faisca(x, y, cor, n = 8) { for (let i = 0; i < n; i++) { const a = rnd(TAU), v = rnd(.5, 2); parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 1, vida: rnd(.4, .9), cor, r: rnd(.04, .09) }); } }
 
 function nivelSelvagem(x, y) { return clamp(Math.round(1 + Math.hypot(x - CX, y - CY) / 3 + emblemas() * 4 + rnd(-1, 1)), 2, 40); }
-function brota() {
-  for (let k = 0; k < 12; k++) {
-    const a = rnd(TAU), d = rnd(6, 11), x = S.x + Math.cos(a) * d, y = S.y + Math.sin(a) * d;
-    if (!cabe(x, y, .3) || Math.hypot(x - CX, y - CY) < 4) continue;
-    const noite = eNoite(), op = TAB[bioma[y | 0][x | 0]].filter(o => !o[2] || noite);
-    let soma = 0; for (const o of op) soma += o[1];
-    let r = rnd(soma), id = op[0][0];
-    for (const o of op) { r -= o[1]; if (r <= 0) { id = o[0]; break; } }
-    const nv = nivelSelvagem(x, y);
-    while (F[id].evo && nv >= F[id].evo[1] + 2) id = F[id].evo[0];
-    selvagens.push({ id, nv, x, y, tx: x, ty: y, espera: rnd(1, 3), ph: rnd(TAU), lado: 1, nasce: 0, some: 0 });
-    return;
-  }
+function sorteiaSelvagem(x, y) { // qual fera sai do mato aqui
+  const noite = eNoite(), op = TAB[bioma[y | 0][x | 0]].filter(o => !o[2] || noite);
+  let soma = 0; for (const o of op) soma += o[1];
+  let r = rnd(soma), id = op[0][0];
+  for (const o of op) { r -= o[1]; if (r <= 0) { id = o[0]; break; } }
+  const nv = nivelSelvagem(x, y);
+  while (F[id].evo && nv >= F[id].evo[1] + 2) id = F[id].evo[0];
+  return novaFera(id, nv);
 }
 
 function atualiza(dt) {
@@ -611,38 +633,28 @@ function atualiza(dt) {
       pintaHud();
     }
   }
-  // feras selvagens
-  if (tempo > brotaEm) { brotaEm = tempo + 1.1; if (selvagens.length < 9) brota(); }
-  for (const s of selvagens) {
-    s.nasce = Math.min(1, s.nasce + dt * 3);
-    if (s.some) { s.some += dt * 3; continue; }
-    const ds = Math.hypot(s.x - S.x, s.y - S.y);
-    if (ds > 17) { s.some = .01; continue; }
-    if (ds < .8) { iniciaBatalha({ tipo: 'selv', ent: s, ini: novaFera(s.id, s.nv) }); return; }
-    s.espera -= dt;
-    let tx = s.tx - s.x, ty = s.ty - s.y, td = Math.hypot(tx, ty);
-    s.anda = td > .08;
-    if (s.anda) { const v = 1.2 * dt / td; s.x += tx * v; s.y += ty * v; s.lado = tx > 0 ? 1 : -1; }
-    else if (s.espera < 0) {
-      s.espera = rnd(1.2, 3.5);
-      const nx = s.x + rnd(-2.5, 2.5), ny = s.y + rnd(-2.5, 2.5);
-      let ok = cabe(nx, ny, .3);
-      for (let i = 1; ok && i < 6; i++) ok = cabe(lerp(s.x, nx, i / 6), lerp(s.y, ny, i / 6), .3);
-      if (ok) { s.tx = nx; s.ty = ny; }
-    }
+  // mato alto: a cada passo, chance de uma fera selvagem pular em você
+  if (J.andando && tile(S.x, S.y) === MATO) {
+    matoAnda += 3.9 * dt * Math.min(1, m);
+    if (Math.random() < dt * 7) faisca(S.x + rnd(-.3, .3), S.y - .1, bioma[S.y | 0][S.x | 0] === 'vulcao' ? '#3a2626' : '#2f7a3c', 1);
+    if (matoAnda > .55) { matoAnda = 0; if (tempo > semEncontro && Math.random() < .14) { iniciaBatalha({ tipo: 'selv', ini: sorteiaSelvagem(S.x, S.y) }); return; } }
   }
-  selvagens = selvagens.filter(s => s.some < 1);
   // guardiões e titã (não disparam de novo até você se afastar)
   if (fixoPerto && Math.hypot(fixoPerto.x - S.x, fixoPerto.y - S.y) > 1.8) fixoPerto = null;
   if (!fixoPerto) {
-    CHEFES.forEach((ch, i) => {
-      if (pausado || Math.hypot(ch.x - S.x, ch.y - S.y) > .95) return;
-      fixoPerto = ch;
-      if (S.chefes[i]) avisa(`${ch.nome}: "Você já provou seu valor."`);
-      else { const fila = ch.time.map(([id, nv]) => novaFera(id, nv)); iniciaBatalha({ tipo: 'chefe', chefe: i, ini: fila.shift(), fila }); }
-    });
+    for (const o of FIXOS) {
+      const d2 = Math.hypot(o.x - S.x, o.y - S.y), ja = vencido(o);
+      if (pausado || d2 > (o.g || ja ? .95 : 2.3)) continue;
+      fixoPerto = o;
+      if (ja) avisa(`${o.nome}: "${o.g ? 'Você já provou seu valor.' : 'Boa luta! Ainda vou te alcançar.'}"`);
+      else { const fila = o.time.map(([id, nv]) => novaFera(id, nv)); iniciaBatalha({ tipo: 'dono', dono: o, ini: fila.shift(), fila }); }
+      break;
+    }
     if (!pausado && titaSolto() && Math.hypot(TITA.x - S.x, TITA.y - S.y) < 1.3) { fixoPerto = TITA; iniciaBatalha({ tipo: 'lenda', ini: novaFera('ferrugor', TITA.nv) }); }
   }
+  const dl = Math.hypot(LOJA.x - S.x, LOJA.y + .3 - S.y);
+  if (dl > 1.7) lojaPerto = false;
+  else if (dl < .95 && !lojaPerto && !pausado) { lojaPerto = true; abreLoja(); }
   for (const p of parts) { p.vida -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 2.6 * dt; }
   parts = parts.filter(p => p.vida > 0);
 }
@@ -718,8 +730,8 @@ function desenha() {
     const k = h2(x, y, 7), tp = mapa[y][x], vul = bioma[y][x] === 'vulcao';
     c.fillStyle = (vul ? pedras : verdes)[(k * 3) | 0]; c.fillRect(x * T, y * T, T + 1, T + 1);
     if (tp === MATO) {
-      c.fillStyle = 'rgba(20,80,40,.35)'; c.beginPath(); c.roundRect(x * T + 2, y * T + 2, T - 4, T - 4, T * .25); c.fill();
-      c.strokeStyle = '#2f7a3c'; c.lineWidth = T * .06; c.lineCap = 'round';
+      c.fillStyle = vul ? 'rgba(20,8,8,.42)' : 'rgba(20,80,40,.35)'; c.beginPath(); c.roundRect(x * T + 2, y * T + 2, T - 4, T - 4, T * .25); c.fill();
+      c.strokeStyle = vul ? '#3a2626' : '#2f7a3c'; c.lineWidth = T * .06; c.lineCap = 'round';
       for (let i = 0; i < 4; i++) { const gx = x * T + T * (.2 + h2(x + i, y, 21) * .6), gy = y * T + T * (.45 + h2(x, y + i, 22) * .5), bb = Math.sin(t * 2 + x + y + i) * T * .05;
         c.beginPath(); c.moveTo(gx - T * .07, gy); c.lineTo(gx - T * .1 + bb, gy - T * .24); c.moveTo(gx, gy); c.lineTo(gx + bb, gy - T * .32); c.moveTo(gx + T * .07, gy); c.lineTo(gx + T * .1 + bb, gy - T * .22); c.stroke(); }
     } else if (vul && k > .7) { c.strokeStyle = 'rgba(30,20,20,.45)'; c.lineWidth = T * .04; c.beginPath(); c.moveTo(x * T + T * .2, y * T + T * k * .7); c.lineTo(x * T + T * .5, y * T + T * .5); c.lineTo(x * T + T * .75, y * T + T * k * .9); c.stroke(); }
@@ -746,13 +758,23 @@ function desenha() {
     poli(c, [fx - T * 1.9, fy - T * .1, fx - T * 1.3, fy - T * 1.1, fx - T * .7, fy - T * .1]); pinta(c, '#c94f2a'); poli(c, [fx - T * 1.42, fy - T * .1, fx - T * 1.3, fy - T * .6, fx - T * 1.18, fy - T * .1]); pinta(c, '#2a1c24');
     for (const k of [-1, 1]) { c.save(); c.translate(fx, fy); c.rotate(k * .5); c.beginPath(); c.roundRect(-T * .3, -T * .06, T * .6, T * .12, T * .05); pinta(c, '#6a4428'); c.restore(); }
     chama(c, fx, fy - T * .04, T * .2, T * .6, t, '#ff6a2a', '#ffd23f'); } });
-  for (const s of selvagens) { const sc = s.some ? Math.max(0, 1 - s.some) : s.nasce;
-    fila.push({ y: s.y, f: () => desenhaFera(c, F[s.id], s.x * T, s.y * T, T * .4 * sc, t, { ph: s.ph, flip: s.lado < 0 }) }); }
-  CHEFES.forEach((ch, i) => fila.push({ y: ch.y, f: () => {
-    treinador(c, ch.x * T, ch.y * T, T * .68, t, { jaqueta: S.chefes[i] ? '#5a5060' : '#2a2233', faixa: ch.cor, bone: ch.cor, capa: S.chefes[i] ? '#5a5060' : ch.cor, lado: S.x < ch.x ? -1 : 1 });
+  for (const ch of FIXOS) fila.push({ y: ch.y, f: () => {
+    const ja = vencido(ch);
+    treinador(c, ch.x * T, ch.y * T, T * (ch.g ? .68 : .62), t, { jaqueta: ja ? '#5a5060' : ch.g ? '#2a2233' : ch.cor, faixa: ja ? '#8a8090' : ch.g ? ch.cor : '#f4efe6', bone: ja ? '#5a5060' : ch.g ? ch.cor : '#2a2233', capa: ch.g ? (ja ? '#5a5060' : ch.cor) : null, lado: S.x < ch.x ? -1 : 1 });
+    const tx = ja ? (ch.g ? '★' : '') : '!';
+    if (!tx) return;
     c.font = `900 ${T * .5}px system-ui`; c.textAlign = 'center'; c.lineWidth = 4; c.strokeStyle = TRACO;
-    const tx = S.chefes[i] ? '★' : '!', yy = ch.y * T - T * 1.35 + Math.sin(t * 4) * 3;
-    c.strokeText(tx, ch.x * T, yy); c.fillStyle = ch.cor; c.fillText(tx, ch.x * T, yy); } }));
+    const yy = ch.y * T - T * 1.35 + Math.sin(t * 4) * 3;
+    c.strokeText(tx, ch.x * T, yy); c.fillStyle = ch.cor; c.fillText(tx, ch.x * T, yy); } });
+  fila.push({ y: LOJA.y, f: () => { const lx = LOJA.x * T, ly = LOJA.y * T; // barraca da loja
+    c.lineWidth = T * .05; c.strokeStyle = TRACO; c.lineJoin = 'round';
+    c.fillStyle = '#6a4428'; c.fillRect(lx - T * .62, ly - T * .95, T * .1, T * .95); c.fillRect(lx + T * .52, ly - T * .95, T * .1, T * .95);
+    c.beginPath(); c.roundRect(lx - T * .7, ly - T * .5, T * 1.4, T * .5, T * .06); pinta(c, '#8a5a34');
+    poli(c, [lx - T * .85, ly - T * .9, lx - T * .6, ly - T * 1.3, lx + T * .6, ly - T * 1.3, lx + T * .85, ly - T * .9]); pinta(c, '#ff7a1a');
+    for (let i = -1; i <= 1; i++) { poli(c, [lx + i * T * .5 - T * .12, ly - T * .9, lx + i * T * .42 - T * .1, ly - T * 1.3, lx + i * T * .42 + T * .1, ly - T * 1.3, lx + i * T * .5 + T * .12, ly - T * .9]); pinta(c, '#f4efe6', false); }
+    nucleo(c, lx - T * .3, ly - T * .62, T * .13, t);
+    c.beginPath(); c.roundRect(lx + T * .18, ly - T * .72, T * .22, T * .22, T * .06); pinta(c, '#4be07a');
+    c.font = `900 ${T * .26}px system-ui`; c.textAlign = 'center'; c.lineWidth = 3; c.strokeText('LOJA', lx, ly - T * 1.4); c.fillStyle = '#f4efe6'; c.fillText('LOJA', lx, ly - T * 1.4); } });
   if (titaSolto()) fila.push({ y: TITA.y, f: () => desenhaFera(c, F.ferrugor, TITA.x * T, TITA.y * T, T * .62, t, {}) });
   if (S.feras[0]) fila.push({ y: seg.y, f: () => desenhaFera(c, F[S.feras[0].id], seg.x * T, seg.y * T, T * .36, t, { flip: seg.lado < 0 }) });
   fila.push({ y: S.y, f: () => treinador(c, S.x * T, S.y * T, T * .64, t, { jaqueta: '#2a2233', faixa: '#ff7a1a', bone: '#d8321e', anda: J.andando, passo: J.passo, lado: J.lado }) });
@@ -781,7 +803,7 @@ function desenha() {
 // ---------- HUD ----------
 function pintaHud() {
   $('#cNuc').lastElementChild.textContent = S.nuc; $('#cPoc').lastElementChild.textContent = S.poc;
-  $('#cEmb').lastElementChild.textContent = emblemas() + '/3';
+  $('#cEmb').lastElementChild.textContent = emblemas() + '/3'; $('#cDin').lastElementChild.textContent = S.din;
 }
 function pulaChip(q) { const e = $(q); e.classList.remove('pulo'); void e.offsetWidth; e.classList.add('pulo'); }
 function avisa(txt) {
@@ -820,9 +842,9 @@ async function iniciaBatalha(cfg) {
   S.dex[B.ini.id] = S.dex[B.ini.id] || 1;
   menu(null); pintaPlacas(); $('#batalha').classList.add('on'); somBatalha();
   B.anim.ini = { tipo: 'entra', t0: tempoReal }; B.anim.eu = { tipo: 'entra', t0: tempoReal };
-  if (B.tipo === 'chefe') { const ch = CHEFES[B.chefe]; await diz(`${ch.nome} quer batalhar!`); await diz(`"${ch.fala}"`, 1500); await diz(`${ch.nome} mandou ${F[B.ini.id].nome}!`); }
+  if (B.dono) { const ch = B.dono; await diz(`${ch.nome} quer batalhar!`); await diz(`"${ch.fala}"`, 1500); await diz(`${ch.nome} mandou ${F[B.ini.id].nome}!`); }
   else if (B.tipo === 'lenda') { await diz('O chão treme…', 1300); await diz('FERRUGOR, o titã de ferrugem, despertou!', 1600); }
-  else await diz(`Um ${nomeIni()} apareceu!`);
+  else await diz(`Um ${nomeIni()} pulou do mato!`);
   await diz(`Vai, ${F[meu().id].nome}!`, 800);
   B.ocup = false; menu('raiz');
 }
@@ -841,10 +863,10 @@ function menu(modo, forcado) {
   if (modo === 'raiz') {
     $('#bMsg').textContent = `O que ${F[meu().id].nome} vai fazer?`;
     bt('LUTAR', 'luta', () => menu('golpes'));
-    bt(`NÚCLEO <small>capturar · ${S.nuc}</small>`, '', () => turno({ t: 'nucleo' }), S.nuc < 1 || B.tipo === 'chefe');
+    bt(`NÚCLEO <small>capturar · ${S.nuc}</small>`, '', () => turno({ t: 'nucleo' }), S.nuc < 1 || !!B.dono);
     bt(`POÇÃO <small>curar · ${S.poc}</small>`, '', () => turno({ t: 'pocao' }), S.poc < 1 || meu().hp >= stat(meu()).hp);
     bt('TROCAR', '', () => menu('troca'), time().filter(m => m.hp > 0).length < 2);
-    bt('FUGIR', 'larga', () => turno({ t: 'fuga' }), B.tipo === 'chefe');
+    bt('FUGIR', 'larga', () => turno({ t: 'fuga' }), !!B.dono);
   } else if (modo === 'golpes') {
     for (const gp of golpes(meu())) {
       const ef = efeito(gp.tipo, F[B.ini.id].tipo), dica = ef > 1 ? ' · forte!' : ef < 1 ? ' · fraco' : '';
@@ -901,7 +923,7 @@ async function checaQueda() {
     }
     if (B.fila && B.fila.length) {
       B.ini = B.fila.shift(); S.dex[B.ini.id] = S.dex[B.ini.id] || 1; B.anim.ini = { tipo: 'entra', t0: tempoReal }; pintaPlacas();
-      await diz(`${CHEFES[B.chefe].nome} mandou ${F[B.ini.id].nome}!`); return 1;
+      await diz(`${B.dono.nome} mandou ${F[B.ini.id].nome}!`); return 1;
     }
     await fimBatalha('vitoria'); return 2;
   }
@@ -959,15 +981,19 @@ async function fimBatalha(res) {
   const b = B;
   if (res === 'derrota') {
     somDerrota(); await diz('Todas as suas feras caíram…', 1300); await diz('Você correu de volta para a fogueira.', 1300);
-    curaTudo(); S.x = CX + .5; S.y = CY + 1.6; seg.x = S.x - 1; seg.y = S.y; selvagens = [];
-  } else if (res === 'vitoria' && b.tipo === 'chefe') {
-    const ch = CHEFES[b.chefe]; S.chefes[b.chefe] = 1; S.nuc += 4; S.poc += 3; somVitoria();
-    await diz(`Você venceu ${ch.nome}!`, 1400); await diz('Ganhou um emblema, 4 núcleos e 3 poções!', 1500);
-    if (emblemas() === 3) await diz('Um rugido de metal ecoa ao nordeste…', 1800);
+    curaTudo(); S.x = CX + .5; S.y = CY + 1.6; seg.x = S.x - 1; seg.y = S.y;
+  } else if (res === 'vitoria' && b.dono) {
+    const ch = b.dono; S.din += ch.premio; somVitoria();
+    await diz(`Você venceu ${ch.nome}!`, 1400);
+    if (ch.g) {
+      S.chefes[ch.i] = 1; S.nuc += 4; S.poc += 3;
+      await diz(`Ganhou um emblema, 4 núcleos, 3 poções e $${ch.premio}!`, 1700);
+      if (emblemas() === 3) await diz('Um rugido de metal ecoa ao nordeste…', 1800);
+    } else { S.trein[ch.i] = 1; await diz(`Você ganhou $${ch.premio} pela vitória!`, 1300); }
   } else if (b.tipo === 'lenda' && (res === 'vitoria' || res === 'captura') && !S.fim) {
     S.fim = 1; await diz(res === 'captura' ? 'FERRUGOR agora luta ao seu lado. Você é uma lenda!' : 'Você derrotou o titã! Mas ele voltará… tente capturá-lo.', 2400);
   }
-  if (b.ent) b.ent.some = 1;
+  semEncontro = tempo + 2.5;
   $('#batalha').classList.remove('on'); B = null; pausado = false; paraTudo();
   pintaHud(); salva();
 }
@@ -1015,6 +1041,21 @@ function desenhaBatalha(tr) {
       cB.globalAlpha = 1; }
   }
 }
+
+// ---------- Loja ----------
+const VENDA = [{ nome: 'Núcleo de captura', k: 'nuc', preco: 120, ic: 'nuc' }, { nome: 'Poção (cura 60% da vida)', k: 'poc', preco: 90, ic: 'poc' }];
+function abreLoja() { pausado = true; paraTudo(); pintaLoja(); $('#loja').classList.add('on'); nota(660, 0, .08); }
+function pintaLoja() {
+  $('#lojaDin').textContent = `Você tem $${S.din}. Vença treinadores para ganhar mais.`;
+  const el = $('#lojaItens'); el.innerHTML = '';
+  for (const v of VENDA) {
+    const b = document.createElement('button'); b.className = 'op'; b.disabled = S.din < v.preco; b.style.cssText = 'display:flex;align-items:center;gap:10px;text-align:left';
+    b.innerHTML = `<span class="ic ${v.ic}"></span><span style="flex:1">${v.nome}<small>você tem ${S[v.k]}</small></span><span style="color:#ffd23f">$${v.preco}</span>`;
+    b.onclick = () => { if (S.din < v.preco) return; S.din -= v.preco; S[v.k]++; somPega(); pintaHud(); pintaLoja(); salva(); };
+    el.appendChild(b);
+  }
+}
+$('#bLojaSai').onclick = () => { $('#loja').classList.remove('on'); pausado = false; };
 
 // ---------- Tela das feras e Feradex ----------
 let mini = [];
