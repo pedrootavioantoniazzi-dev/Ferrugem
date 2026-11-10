@@ -234,16 +234,18 @@ const TIPO = {
 // FORTE: contra quem cada tipo dá dano dobrado. FRACO: contra quem dá só metade.
 const FORTE = { fogo: ['planta', 'gelo'], agua: ['fogo', 'rocha'], planta: ['agua', 'rocha'], trovao: ['agua', 'sombra'], rocha: ['fogo', 'trovao', 'gelo'], sombra: ['planta', 'sombra'], gelo: ['planta', 'sombra'] };
 const FRACO = { fogo: ['agua', 'rocha', 'fogo'], agua: ['planta', 'agua'], planta: ['fogo', 'planta'], trovao: ['rocha', 'trovao', 'planta'], rocha: ['agua', 'planta', 'rocha'], sombra: ['rocha', 'fogo'], gelo: ['fogo', 'agua', 'gelo'] };
-const g = (nome, tipo, pot, prec = 1) => ({ nome, tipo, pot, prec });
-const GN = [g('Investida', 'normal', 40), g('Mordida', 'normal', 60)];
+// Cada golpe: nome, tipo, força, estilo da animação e precisão (1 = nunca erra).
+const g = (nome, tipo, pot, anim, prec = 1) => ({ nome, tipo, pot, anim, prec });
+// Normais: aprendidos nos níveis 1, 5, 12 e 28. Do tipo da fera: 1, 8, 16, 24 e 32. Do segundo tipo: 10, 22 e 34.
+const GN = [g('Investida', 'normal', 40, 'investida'), g('Mordida', 'normal', 60, 'mordida'), g('Ataque Rápido', 'normal', 50, 'rapido'), g('Hiper Golpe', 'normal', 95, 'hiper', .9)];
 const GT = {
-  fogo:   [g('Brasa', 'fogo', 45), g('Lança-Chamas', 'fogo', 75), g('Inferno', 'fogo', 105, .85)],
-  agua:   [g('Jato', 'agua', 45), g('Maremoto', 'agua', 75), g('Abismo', 'agua', 105, .85)],
-  planta: [g('Chicote', 'planta', 45), g('Lâmina-Folha', 'planta', 75), g('Fúria Verde', 'planta', 105, .85)],
-  trovao: [g('Choque', 'trovao', 45), g('Raio', 'trovao', 75), g('Tempestade', 'trovao', 105, .85)],
-  rocha:  [g('Pedrada', 'rocha', 45), g('Avalanche', 'rocha', 75), g('Terremoto', 'rocha', 105, .85)],
-  sombra: [g('Garra Sombria', 'sombra', 45), g('Pulso Negro', 'sombra', 75), g('Eclipse', 'sombra', 105, .85)],
-  gelo:   [g('Caco de Gelo', 'gelo', 45), g('Nevasca', 'gelo', 75), g('Era do Gelo', 'gelo', 105, .85)]
+  fogo:   [g('Brasa', 'fogo', 45, 'bola'), g('Garra de Fogo', 'fogo', 60, 'garra'), g('Lança-Chamas', 'fogo', 80, 'feixe'), g('Inferno', 'fogo', 105, 'pilar', .85), g('Meteoro', 'fogo', 120, 'chuva', .8)],
+  agua:   [g('Jato', 'agua', 45, 'gotas'), g('Bolhas', 'agua', 55, 'bolhas'), g('Hidro-Canhão', 'agua', 80, 'feixe'), g('Maremoto', 'agua', 100, 'onda', .9), g('Abismo', 'agua', 115, 'redemoinho', .8)],
+  planta: [g('Folha Navalha', 'planta', 45, 'folhas'), g('Chicote de Cipó', 'planta', 60, 'garra'), g('Chuva de Pétalas', 'planta', 80, 'chuva'), g('Raio Solar', 'planta', 105, 'feixe', .9), g('Fúria Verde', 'planta', 115, 'pilar', .8)],
+  trovao: [g('Choque', 'trovao', 45, 'raio'), g('Faísca', 'trovao', 60, 'rapido'), g('Raio', 'trovao', 80, 'raio'), g('Canhão Elétrico', 'trovao', 100, 'feixe', .9), g('Tempestade', 'trovao', 115, 'chuva', .8)],
+  rocha:  [g('Pedrada', 'rocha', 45, 'bola'), g('Lâmina de Pedra', 'rocha', 65, 'pilar'), g('Avalanche', 'rocha', 80, 'chuva'), g('Desabamento', 'rocha', 100, 'chuva', .9), g('Terremoto', 'rocha', 115, 'terremoto', .8)],
+  sombra: [g('Garra Sombria', 'sombra', 45, 'garra'), g('Bola Sombria', 'sombra', 60, 'bola'), g('Pulso Negro', 'sombra', 80, 'onda'), g('Pesadelo', 'sombra', 100, 'redemoinho', .9), g('Eclipse', 'sombra', 115, 'pilar', .8)],
+  gelo:   [g('Caco de Gelo', 'gelo', 45, 'cacos'), g('Vento Gelado', 'gelo', 60, 'onda'), g('Raio de Gelo', 'gelo', 80, 'feixe'), g('Nevasca', 'gelo', 100, 'chuva', .9), g('Era do Gelo', 'gelo', 115, 'pilar', .8)]
 };
 
 // ---------- As feras (criaturas originais) ----------
@@ -356,13 +358,13 @@ function stat(m) {
   return { hp: Math.floor(b[0] * 2 * n / 100) + n + 10, atk: Math.floor(b[1] * 2 * n / 100) + 5, def: Math.floor(b[2] * 2 * n / 100) + 5, vel: Math.floor(b[3] * 2 * n / 100) + 5 };
 }
 const xpProx = n => 6 * n * n + 10;
-function golpes(m) {
-  const f = F[m.id], n = m.nv, l = [GN[0], GT[f.tipo][0]];
-  if (n >= 7) l.push(GN[1]);
-  if (n >= 10) l.push(GT[f.extra][n >= 22 ? 1 : 0]);
-  if (n >= 15) l.push(GT[f.tipo][1]);
-  if (n >= 27) l.push(GT[f.tipo][2]);
-  return l.slice(-4);
+const NV_TIPO = [1, 8, 16, 24, 32], NV_EXTRA = [10, 22, 34], NV_NORMAL = [1, 5, 12, 28];
+function golpes(m) { // os 4 golpes que a fera usa: os 2 mais fortes do tipo dela, 1 do segundo tipo e 1 normal
+  const f = F[m.id], n = m.nv, forte = l => [...l].sort((a, b) => b.pot - a.pot);
+  const meus = forte(GT[f.tipo].filter((x, i) => n >= NV_TIPO[i])), extra = forte(GT[f.extra].filter((x, i) => i < 3 && n >= NV_EXTRA[i])), norm = forte(GN.filter((x, i) => n >= NV_NORMAL[i]));
+  const l = [...meus.slice(0, 2), ...extra.slice(0, 1), ...norm.slice(0, 1)];
+  for (const x of [...meus, ...norm, ...extra]) if (l.length < 4 && !l.includes(x)) l.push(x);
+  return l;
 }
 function efeito(tipoGolpe, tipoAlvo) { return tipoGolpe === 'normal' ? 1 : FORTE[tipoGolpe].includes(tipoAlvo) ? 2 : FRACO[tipoGolpe].includes(tipoAlvo) ? .5 : 1; }
 function dano(a, d, gp) {
@@ -770,7 +772,7 @@ function sombra(g, x, y, w) {
 // --- Feras em pixel art: a fera é desenhada bem grande e depois reduzida bloco por bloco ---
 // K = tamanho do pixel (quanto maior, mais detalhada e maior a fera fica).
 const SPR = new Map();
-function pixeliza(src, B) { // cada bloco B×B vira um pixel da cor mais comum dele
+function pixeliza(src, B, prio = -1) { // cada bloco B×B vira um pixel da cor mais comum dele (prio = cor dos olhos, que ganha prioridade)
   const w = src.width, h = src.height, d = src.getContext('2d').getImageData(0, 0, w, h).data;
   const N = Math.floor(w / B), M = Math.floor(h / B), cel = new Int32Array(N * M).fill(-1), conta = new Map();
   for (let j = 0; j < M; j++) for (let i = 0; i < N; i++) {
@@ -784,7 +786,7 @@ function pixeliza(src, B) { // cada bloco B×B vira um pixel da cor mais comum d
       conta.set(q, n); if (n > mx) { mx = n; melhor = q; }
     }
     if (transp > B * B * .55) continue;
-    cel[j * N + i] = traco > B * B * .3 || melhor < 0 ? -2 : melhor; // -2 = contorno
+    cel[j * N + i] = prio >= 0 && (conta.get(prio) || 0) >= B * B * .14 ? prio : traco > B * B * .3 || melhor < 0 ? -2 : melhor; // -2 = contorno
   }
   const cheio = (i, j) => i >= 0 && j >= 0 && i < N && j < M && cel[j * N + i] !== -1;
   let x0 = N, y0 = M, x1 = -1, y1 = -1; const borda = [];
@@ -817,53 +819,81 @@ function spriteFera(id, K) {
   } else {
     const s = 8 * K, Z = Math.ceil(s * 7 * f.tam / 8) * 8, big = novaTela(Z, Z);
     desenhaFera(big.getContext('2d'), f, Z / 2, Math.round(Z * .88), s, 1.3, { semSombra: true });
-    out = pixeliza(big, 8);
+    const luz = parseInt(((f.look && f.look.luz) || TIPO[f.tipo].luz || '#ffffff').slice(1), 16);
+    out = pixeliza(big, 8, ((luz >> 16) >> 3) << 10 | ((luz >> 8 & 255) >> 3) << 5 | ((luz & 255) >> 3));
   }
   SPR.set(chave, out); return out;
 }
 const preparar = FERAS.flatMap(f => [[f.id, 6], [f.id, 8]]); // vai preparando os sprites aos poucos
 
-// --- Treinadores: pixel art feita à mão, 16×19 pixels ---
-// Letras: K contorno, H cabelo/boné, h cabelo de baixo, A faixa/aba, S pele, s pele na sombra,
-// E olho, J jaqueta, j jaqueta na sombra, P calça, B bota. As linhas de frente e costas
-// são só a metade esquerda: o jogo espelha para fazer a direita.
-const CABELO = {
-  espetado: { frente: ['...K..K.', '..KHK.KH', '..KHHKHH', '.KHHHHHH', '.KAAAAAA'],
-    lado: ['.....K..K..K....', '....KHKKHKKHK...', '...KHHHHHHHHHK..', '..KHHHHHHHHHHK..', '..KAAAAAAAAAAK..'] },
-  bone: { frente: ['........', '....KKKK', '...KHHHH', '..KHHHHH', '.KAAAAAA'],
-    lado: ['................', '.....KKKKKK.....', '....KHHHHHHK....', '...KHHHHHHHHK...', '..KAAAAAAAAAAAK.'] }
+// --- Treinadores: pixel art feita à mão, 16×24 pixels ---
+// Letras: K contorno, H cabelo/boné, h cabelo na sombra, L brilho do cabelo, A faixa/aba,
+// S pele, s pele na sombra, R bochecha, E olho, T camiseta, J jaqueta, j jaqueta na sombra,
+// Y detalhe da roupa, P calça, p calça na sombra, B bota.
+// Frente e costas são escritas só pela metade esquerda: o jogo espelha para fazer a direita.
+const CABECA = {
+  espetado: {
+    frente: ['......K.', '....KKHK', '...KHLHH', '...KHLHH', '..KHHHHH', '..KAAAAA', '..KhHSHS', '..KhSSSS', '..KhSESS', '..KsSESS', '...KRSSK', '....KKSS'],
+    costas: ['......K.', '....KKHK', '...KHLHH', '...KHLHH', '..KHHHHH', '..KAAAAA', '..KhHHHA', '..KhHLHA', '..KhHHHH', '..KhhHHH', '...KhhHH', '....KKhh'],
+    lado: ['.........K......', '.......KKHK.K...', '......KHLHHKHK..', '.....KHLHHHHHK..', '....KHHHHHHHHK..', '..AKAAAAAAAAAK..', '.A.KhHHHHSHSK...',
+      '....KhhHSSSSSK..', '....KhhSSSSESSK.', '....KhhSSSSESK..', '.....KhsSSRSK...', '......KKSSSK....']
+  },
+  bone: {
+    frente: ['........', '........', '....KKKK', '...KHHHH', '..KHHLHH', '..KAAAAA', '..KhSSSS', '..KhSSSS', '..KhSESS', '..KsSESS', '...KRSSK', '....KKSS'],
+    costas: ['........', '........', '....KKKK', '...KHHHH', '..KHHLHH', '..KHHHHH', '..Khhhhh', '..Khhhhh', '..Khhhhh', '..Khhhhh', '...Khhhh', '....KKhh'],
+    lado: ['................', '................', '.......KKKKK....', '......KHHHHHK...', '.....KHHLHHHHK..', '....KAAAAAAAAAAK', '....KhhSSSSSK...',
+      '....KhhSSSSSSK..', '....KhhSSSSESSK.', '....KhsSSSSESK..', '.....KhsSSRSK...', '......KKSSSK....']
+  },
+  longo: {
+    frente: ['........', '......KK', '....KKHH', '...KHLHH', '..KHLHHH', '..KHHHHH', '.KHHSHHS', '.KHhSSSS', '.KHhSESS', '.KHsSESS', '.KHKRSSK', '.KHHKKSS'],
+    costas: ['........', '......KK', '....KKHH', '...KHLHH', '..KHLHHH', '..KHHHHH', '.KHHHHHH', '.KHhHHHH', '.KHhHLHH', '.KHhHHHH', '.KHhhHHH', '.KHHhhhh'],
+    lado: ['................', '.......KKKKK....', '.....KKHHHHHK...', '....KHLHHHHHHK..', '...KHLHHHHHHHK..', '...KHHHHHHHHHK..', '..KHHhHHSHHSK...',
+      '..KHhhHSSSSSK...', '..KHhhSSSSESSK..', '..KHhhSSSSESK...', '..KHhhKsSRSK....', '..KHHhKKSSK.....']
+  }
 };
-const ROSTO = ['.KhSSSSS', '.KSSESSS', '.KsSESSS', '..KsSSSK', '...KKKKK'];
-const NUCA = ['.KhhhhhA', '.Khhhhhh', '.Khhhhhh', '..Khhhhh', '...KKKKK'];
-const CORPO_F = ['..KJJJJA', '.KJKJJJA', '.KJKJJJA', '.KSKjjjA'];
-const CORPO_C = ['..KJJJJJ', '.KJKJJJJ', '.KJKJJJJ', '.KSKjjjj'];
-const PERNAS = ['..KKPPPP', '...KPPPK', '...KPPPK', '...KBBBK', '...KKKK.'];
-const ANDA = ['..KKPPPPPPPPKK..', '...KPPPKKPPPK...', '...KBBBKKPPPK...', '...KKKK.KBBBK...', '........KKKKK...'];
-const ROSTO_L = ['..KhhhhSSSSSSK..', '..KhhhSSSSSESSK.', '..KhhhSSSSSESSK.', '...KhhSSSSSKKK..', '....KKKKKKKK....'];
-const CORPO_L = ['....KJJJJAK.....', '...KJJJKJJAK....', '...KJJJKJJAK....', '...KjjjKSKjK....'];
-const PE_L = ['....KPPPPPK.....', '....KPPKPPK.....', '....KPPKPPK.....', '....KBBKBBBK....', '....KKKKKKKK....'];
-const ANDA_L = ['....KPPPPPK.....', '...KPPK.KPPK....', '..KPPK...KPPK...', '..KBBK...KBBK...', '..KKK.....KKK...'];
+const CORPO = {
+  frente: ['....KJTT', '...KJJYT', '..KJKJYJ', '..KJKJYJ', '..KJKjjj', '..KSKPPP', '...KKPPP'],
+  costas: ['....KJJJ', '...KJJJJ', '..KJKJJJ', '..KJKJJJ', '..KJKjjj', '..KSKPPP', '...KKPPP'],
+  lado: ['......KJTTK.....', '.....KJJYJK.....', '.....KJKYJK.....', '.....KJKYJK.....', '.....KjKjjK.....', '.....KSKPPK.....']
+};
+const PES = {
+  frente: ['....KPpK', '....KPpK', '....KPpK', '....KBBK', '....KKKK'],
+  andaF: ['....KPpKKpPK....', '....KBBKKpPK....', '....KKKKKpPK....', '........KBBK....', '........KKKK....'],
+  lado: ['......KPPK......', '......KPpK......', '......KPpK......', '......KPpK......', '......KBBBK.....', '......KKKKK.....'],
+  andaL: ['......KPPK......', '.....KPKKPK.....', '....KPK..KPK....', '....KPK..KPK....', '...KBBK..KBBK...', '...KKK...KKKK...']
+};
 const TRN = new Map();
-function spriteTreinador(pal, cab, dir, q) { // q = quadro do andar (0 parado)
+function spriteTreinador(pal, cab, dir, q) { // dir: frente, costas ou lado; q = quadro do andar (0 parado)
   const chave = pal.id + cab + dir + q;
   if (TRN.has(chave)) return TRN.get(chave);
   let L;
-  if (dir === 'lado') L = [...CABELO[cab].lado, ...ROSTO_L, ...CORPO_L, ...(q ? ANDA_L : PE_L)];
+  if (dir === 'lado') L = [...CABECA[cab].lado, ...CORPO.lado, ...(q ? PES.andaL : PES.lado)];
   else {
-    L = [...CABELO[cab].frente, ...(dir === 'frente' ? ROSTO : NUCA), ...(dir === 'frente' ? CORPO_F : CORPO_C), ...PERNAS].map(espelha);
-    if (q) L.splice(14, 5, ...(q === 1 ? ANDA : ANDA.map(inverte)));
+    L = [...CABECA[cab][dir], ...CORPO[dir], ...PES.frente].map(espelha);
+    if (q) L.splice(19, 5, ...(q === 1 ? PES.andaF : PES.andaF.map(inverte)));
   }
   const k = deMapa(L, pal); TRN.set(chave, k); return k;
 }
-const PELE = { K: TRACO, E: TRACO, S: '#f0b890', s: '#c98a64', P: '#2a3450', B: '#7a4a2a' };
-const PAL_HEROI = { ...PELE, id: 'heroi', H: '#5a3420', h: '#3a2014', A: '#ff7a1a', J: '#3b2d4a', j: '#2a2233' };
-function palDe(ch, ja) { // roupa de cada treinador do mundo
-  if (ja) return { ...PELE, id: 'cinza', H: '#7a7080', h: '#5a5060', A: '#9a90a0', J: '#5a5060', j: '#463e4e', P: '#3a3440', B: '#4a4250' };
-  if (ch.rival) return { ...PELE, id: 'rival', H: '#ece8f6', h: '#b0a8c8', A: '#b01030', J: '#b01030', j: '#7a0a20' };
-  if (ch.g) return { ...PELE, id: 'g' + ch.i, H: ch.cor, h: '#3a2418', A: '#f4efe6', J: tom(ch.cor, -.45), j: tom(ch.cor, -.62) };
-  return { ...PELE, id: 't' + ch.i, H: '#2a2233', h: '#5a3a24', A: ch.cor, J: ch.cor, j: tom(ch.cor, -.3) };
+const PELE = { K: TRACO, E: TRACO, S: '#f6c49a', s: '#d89a70', R: '#f08080', T: '#f4efe6', P: '#2a3a5a', p: '#1e2a44', B: '#6a3a22' };
+const PAL_HEROI = { ...PELE, id: 'heroi', H: '#6a3a1e', h: '#4a2412', L: '#a8683a', A: '#ff7a1a', J: '#3b2d4a', j: '#2a2233', Y: '#ff7a1a' };
+const CABELOS = { 'Guardiã Tormenta': '#ffd21f', 'Caçadora Lia': '#4a2a5a', 'Ferreira Nara': '#c84a1e', 'Alpinista Neve': '#eef6ff' }; // treinadoras de cabelo comprido
+function cinza(cor) { // deixa a cor acinzentada (treinador já vencido)
+  let r, g, b;
+  if (cor[0] === '#') { const n = parseInt(cor.slice(1), 16); r = n >> 16; g = n >> 8 & 255; b = n & 255; } else [r, g, b] = cor.match(/\d+/g).map(Number);
+  const y = r * .3 + g * .59 + b * .11, m = v => Math.round(v * .25 + y * .75);
+  return `rgb(${m(r)},${m(g)},${m(b)})`;
 }
-const cabDe = ch => ch.rival ? 'espetado' : 'bone';
+function palDe(ch, ja) { // roupa e cabelo de cada treinador do mundo
+  const cab = CABELOS[ch.nome];
+  let p;
+  if (ch.rival) p = { H: '#ece8f6', h: '#b0a8c8', L: '#ffffff', A: '#b01030', J: '#b01030', j: '#7a0a20', Y: '#ffd23f' };
+  else if (cab) p = { H: cab, h: tom(cab, -.3), L: tom(cab, .45), A: cab, J: ch.g ? tom(ch.cor, -.45) : ch.cor, j: ch.g ? tom(ch.cor, -.6) : tom(ch.cor, -.3), Y: '#f4efe6' };
+  else p = { H: ch.cor, h: '#4a2a18', L: tom(ch.cor, .35), A: tom(ch.cor, -.35), J: tom(ch.cor, -.45), j: tom(ch.cor, -.6), Y: ch.cor };
+  p = { ...PELE, ...p, id: (ch.g ? 'g' : 't') + ch.i + (ch.rival ? 'r' : '') + (ja ? 'x' : '') };
+  if (ja) for (const k in p) if (k !== 'id') p[k] = cinza(p[k]);
+  return p;
+}
+const cabDe = ch => ch.rival ? 'espetado' : CABELOS[ch.nome] ? 'longo' : 'bone';
 
 // --- Chão: cada tipo de quadradinho é feito uma vez e guardado ---
 const TILES = new Map();
@@ -984,9 +1014,9 @@ function desenha() {
     const ja = vencido(ch), dx = S.x - ch.x, dy = S.y - ch.y, perto = Math.hypot(dx, dy) < 4;
     const dir = !perto ? 'frente' : Math.abs(dx) > Math.abs(dy) ? 'lado' : dy < 0 ? 'costas' : 'frente';
     sombra(g, ch.x * TILE, ch.y * TILE, 10);
-    blit(g, spriteTreinador(palDe(ch, ja), cabDe(ch), dir, 0), ch.x * TILE - 8, ch.y * TILE - 19, dir === 'lado' && dx < 0);
+    blit(g, spriteTreinador(palDe(ch, ja), cabDe(ch), dir, 0), ch.x * TILE - 8, ch.y * TILE - 23, dir === 'lado' && dx < 0);
     const marca = ja ? (ch.g ? estrela(ch.cor) : null) : exclama(ch.g ? ch.cor : '#ff4a3a');
-    if (marca) blit(g, marca, ch.x * TILE - (marca.width >> 1), ch.y * TILE - 30 - Math.floor(t * 3) % 2);
+    if (marca) blit(g, marca, ch.x * TILE - (marca.width >> 1), ch.y * TILE - 34 - Math.floor(t * 3) % 2);
   } });
   if (titaSolto()) fila.push({ y: TITA.y, f: () => { const s = spriteFera('ferrugor', 9); if (!s) return;
     sombra(g, TITA.x * TILE, TITA.y * TILE, s.width * .7); blit(g, s, TITA.x * TILE - s.width / 2, TITA.y * TILE - s.height - Math.floor(t * 2) % 2, true); } });
@@ -996,7 +1026,7 @@ function desenha() {
   fila.push({ y: S.y, f: () => {
     const q = !J.andando ? 0 : J.dir === 'lado' ? Math.floor(J.passo / 1.6) % 2 : [0, 1, 0, 2][Math.floor(J.passo / 1.6) % 4];
     sombra(g, S.x * TILE, S.y * TILE, 10);
-    blit(g, spriteTreinador(PAL_HEROI, 'espetado', J.dir, q), S.x * TILE - 8, S.y * TILE - 19, J.dir === 'lado' && J.lado < 0); } });
+    blit(g, spriteTreinador(PAL_HEROI, 'espetado', J.dir, q), S.x * TILE - 8, S.y * TILE - 23, J.dir === 'lado' && J.lado < 0); } });
   fila.sort((a, b) => a.y - b.y);
   for (const o of fila) o.f();
   for (const p of parts) { g.fillStyle = p.cor; const z = p.r > .07 ? 2 : 1; g.fillRect(Math.round(p.x * TILE), Math.round(p.y * TILE), z, z); }
@@ -1018,7 +1048,7 @@ function desenha() {
   // textos em resolução cheia (ficam nítidos)
   c.font = `${ESC * 5 + 4}px "Jersey 10", monospace`; c.textAlign = 'center'; c.lineWidth = 3; c.lineJoin = 'round'; c.strokeStyle = TRACO;
   const rotulo = (txt, x, y, cor) => { c.strokeText(txt, (x - camx) * ESC, (y - camy) * ESC); c.fillStyle = cor; c.fillText(txt, (x - camx) * ESC, (y - camy) * ESC); };
-  rotulo(S.nome, S.x * TILE, S.y * TILE - 22, '#f4efe6');
+  rotulo(S.nome, S.x * TILE, S.y * TILE - 26, '#f4efe6');
   rotulo('LOJA', LOJA.x * TILE, LOJA.y * TILE - 30, '#ffd23f');
   if (joy && Math.hypot(joy.x - joy.x0, joy.y - joy.y0) > 10) {
     c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 3; ell(c, joy.x0, joy.y0, 42, 42); c.stroke();
@@ -1113,20 +1143,23 @@ function golpeIA() {
   if (Math.random() < .3) return l[Math.floor(rnd(l.length))];
   return l.reduce((a, b) => (b.pot * efeito(b.tipo, alvo) * (b.tipo === F[B.ini.id].tipo ? 1.5 : 1) > a.pot * efeito(a.tipo, alvo) * (a.tipo === F[B.ini.id].tipo ? 1.5 : 1) ? b : a));
 }
+const FISICO = new Set(['garra', 'mordida', 'investida', 'rapido', 'hiper']); // golpes em que a fera avança no inimigo
+const DUR = { bola: .6, gotas: .7, folhas: .75, cacos: .65, bolhas: .9, feixe: 1, raio: .75, chuva: 1.05, pilar: .95, onda: .9, redemoinho: 1, terremoto: 1.05, garra: .6, mordida: .6, investida: .32, rapido: .4, hiper: .62 };
 async function ataca(quem, a, d, gp) {
   const nome = quem === 'eu' ? F[a.id].nome : (B.tipo === 'selv' ? 'O ' : '') + nomeIni(), alvo = quem === 'eu' ? 'ini' : 'eu';
   B.anim[quem] = { tipo: 'ataque', t0: tempoReal };
-  await diz(`${nome} usou ${gp.nome}!`, 500);
-  // 1) o golpe voa até o alvo
-  const fx = B.fx = { tipo: gp.tipo, de: quem, para: alvo, t0: tempoReal, dur: gp.tipo === 'normal' ? .18 : .6, forte: gp.pot >= 100 };
+  await diz(`${nome} usou ${gp.nome}!`, 450);
+  // 1) a animação do golpe até chegar no alvo
+  const fx = B.fx = { tipo: gp.tipo, anim: gp.anim, pot: gp.pot, de: quem, para: alvo, t0: tempoReal, dur: DUR[gp.anim], forte: gp.pot >= 100, feitos: {} };
+  if (FISICO.has(gp.anim)) B.anim[quem] = { tipo: 'avanca', t0: tempoReal, dur: fx.dur / .6, rastro: gp.anim === 'rapido' || gp.anim === 'hiper' };
   somTipo(gp.tipo);
   await dorme(fx.dur * 1000);
   if (Math.random() > gp.prec) { B.fx = null; await diz('Mas errou!'); return; }
-  // 2) acerta: explosão, tremor, piscada e dano
+  // 2) acerta: explosão, tremor, clarão, piscada e dano
   const r = dano(a, d, gp);
   fx.hit = true; impacto(fx); B.anim[alvo] = { tipo: 'dano', t0: tempoReal }; somGolpe();
   d.hp = Math.max(0, d.hp - r.v); pintaPlacas();
-  await dorme(520); B.fx = null;
+  await dorme(560); B.fx = null;
   if (r.crit) await diz('Golpe crítico!', 750);
   if (r.ef > 1) await diz('É super eficaz!', 800); else if (r.ef < 1) await diz('Não foi muito eficaz…', 800);
 }
@@ -1138,10 +1171,12 @@ function ganhaXp(m, q) { // devolve as mensagens do que aconteceu
   const msgs = [];
   m.xp += q;
   while (m.nv < 60 && m.xp >= xpProx(m.nv)) {
+    const velhos = golpes(m).map(x => x.nome);
     m.xp -= xpProx(m.nv); const antes = stat(m).hp; m.nv++; m.hp += stat(m).hp - antes;
     msgs.push(`${F[m.id].nome} subiu para o nível ${m.nv}!`);
     const f = F[m.id];
     if (f.evo && m.nv >= f.evo[1]) { const a2 = stat(m).hp; m.id = f.evo[0]; m.hp += stat(m).hp - a2; S.dex[m.id] = 2; msgs.push(`★ ${f.nome} evoluiu para ${F[m.id].nome}! ★`); }
+    for (const x of golpes(m)) if (!velhos.includes(x.nome)) msgs.push(`${F[m.id].nome} aprendeu ${x.nome}!`);
   }
   return msgs;
 }
@@ -1262,47 +1297,216 @@ function fundoBatalha(tr) {
   elipsePx(g, POS.ini.x, POS.ini.y, 46, 9, plat[0], plat[1]);
   elipsePx(g, POS.eu.x, POS.eu.y, 58, 11, plat[0], plat[1]);
 }
-// cores dos efeitos de cada tipo de golpe
-const COR_FX = { normal: ['#ffffff', '#ffd23f', '#f4efe6'], fogo: ['#ff5a1a', '#ffd23f', '#ff9a2a'], agua: ['#3fa0ff', '#9fe8ff', '#ffffff'], planta: ['#57c84d', '#c8ff6a', '#2f7a3c'],
-  trovao: ['#ffd21f', '#fff79a', '#ffffff'], rocha: ['#b08a6a', '#6a5040', '#d8b890'], sombra: ['#9a5cf0', '#2a1040', '#d9a8ff'], gelo: ['#7fe0ff', '#ffffff', '#3fb8e8'] };
+// cores dos efeitos de cada tipo: [borda, meio, miolo]
+const COR_FX = { normal: ['#c8c0d0', '#ffffff', '#ffd23f'], fogo: ['#e8401a', '#ff9a2a', '#ffe27a'], agua: ['#2f7fd6', '#6fc0ff', '#e0f6ff'], planta: ['#2f8a3c', '#57c84d', '#c8ff6a'],
+  trovao: ['#e0a800', '#ffd21f', '#ffffff'], rocha: ['#6a5040', '#b08a6a', '#d8b890'], sombra: ['#2a1040', '#7a4ac8', '#d9a8ff'], gelo: ['#3fb8e8', '#7fe0ff', '#ffffff'] };
 const centroDe = quem => B.centro[quem] || { x: POS[quem].x, y: POS[quem].y - 20 };
-function desenhaGolpe(g, tr) { // o golpe voando até o alvo
-  const fx = B.fx; if (!fx || fx.hit) return;
-  const k = clamp((tr - fx.t0) / fx.dur, 0, 1), A = centroDe(fx.de), Z = centroDe(fx.para), cor = COR_FX[fx.tipo], f = fx.forte ? 1 : 0;
-  const pos = (kk, arco) => ({ x: lerp(A.x, Z.x, kk), y: lerp(A.y, Z.y, kk) - Math.sin(kk * Math.PI) * arco });
-  if (fx.tipo === 'fogo') { // bola de fogo com rastro
-    const p = pos(k, 14); disco(g, p.x, p.y, 3 + f * 2, cor[0]); disco(g, p.x, p.y, 1 + f, cor[1]);
-    B.parts.push({ x: p.x + rnd(-2, 2), y: p.y + rnd(-2, 2), vx: rnd(-12, 12), vy: rnd(-20, -4), vida: .3, cor: cor[Math.random() < .5 ? 0 : 2], t: 1 });
-  } else if (fx.tipo === 'agua') { // jato de gotas
-    for (let i = 0; i < 7 + f * 3; i++) { const kk = k * 1.45 - i * .075; if (kk < 0 || kk > 1) continue; const p = pos(kk, 10), x = Math.round(p.x), y = Math.round(p.y);
-      g.fillStyle = cor[0]; g.fillRect(x - 1, y - 1, 3 + f, 3 + f); g.fillStyle = cor[2]; g.fillRect(x, y - 1, 1, 1); }
-  } else if (fx.tipo === 'planta') { // folhas girando
-    for (let i = 0; i < 4 + f * 2; i++) { const kk = k * 1.3 - i * .1; if (kk < 0 || kk > 1) continue; const p = pos(kk, 0), x = Math.round(p.x), y = Math.round(p.y + Math.sin(kk * 14 + i * 2) * 7);
-      g.fillStyle = TRACO; g.fillRect(x - 3, y - 2, 7, 5); g.fillStyle = cor[0]; g.fillRect(x - 2, y - 1, 5, 3); g.fillStyle = cor[1]; g.fillRect(x - 2, y - 1, 2, 1); g.fillStyle = cor[2]; g.fillRect(x, y + 1, 3, 1); }
-  } else if (fx.tipo === 'trovao') { // raio caindo do céu
-    if (k > .3 && Math.floor(tr * 30) % 3) { let x = Z.x, y = 0; const n = 8;
-      for (let i = 0; i < n; i++) { const ny = Z.y * (i + 1) / n, nx = i === n - 1 ? Z.x : Z.x + Math.round(h2(i, Math.floor(tr * 20), 3) * 14 - 7);
-        linhaPx(g, x, y, nx, ny, 3 + f, cor[0], cor[2]); x = nx; y = ny; } }
-  } else if (fx.tipo === 'rocha') { // pedras caindo
-    for (let i = 0; i < 3 + f * 2; i++) { const kk = clamp(k * 1.4 - i * .12, 0, 1); if (kk <= 0) continue; const x = Math.round(Z.x + (i - 1 - f) * 9), y = Math.round(lerp(-8, Z.y, kk * kk));
-      g.fillStyle = TRACO; g.fillRect(x - 3, y - 2, 7, 6); g.fillStyle = cor[0]; g.fillRect(x - 2, y - 1, 5, 4); g.fillStyle = cor[2]; g.fillRect(x - 2, y - 1, 2, 1); }
-  } else if (fx.tipo === 'sombra') { // esfera sombria pulsando
-    const p = pos(k, 6), r = 3 + f * 2 + Math.floor(tr * 16) % 2; disco(g, p.x, p.y, r + 1, cor[0]); disco(g, p.x, p.y, r - 1, cor[1]);
-    g.fillStyle = cor[2]; g.fillRect(Math.round(p.x) - 1, Math.round(p.y) - 1, 1, 1);
-  } else if (fx.tipo === 'gelo') { // cacos de gelo
-    const dx = Z.x > A.x ? 1 : -1;
-    for (let i = 0; i < 3 + f * 2; i++) { const kk = k * 1.3 - i * .08; if (kk < 0 || kk > 1) continue; const p = pos(kk, 0), x = Math.round(p.x), y = Math.round(p.y + (i - 1) * 5);
-      for (let s = 0; s < 5; s++) { g.fillStyle = s === 0 ? cor[1] : cor[0]; g.fillRect(x - dx * s, y, 1, 1); }
-      g.fillStyle = cor[2]; g.fillRect(x - dx, y - 1, 2, 1); g.fillRect(x - dx, y + 1, 2, 1); }
+function brilho(g, x, y, r, cor, a = .35) { g.globalAlpha = a; disco(g, x, y, Math.max(1, Math.round(r)), cor); g.globalAlpha = 1; }
+function faiscas(x, y, cor, n, v = 60, grav = 0, t = 1) {
+  for (let i = 0; i < n; i++) { const a = rnd(TAU), s = rnd(v * .3, v); B.parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - (grav ? 40 : 0), vida: rnd(.2, .5), cor: cor[i % cor.length], t, grav }); }
+}
+function linhaGrossa(g, x0, y0, x1, y1, w, cor) {
+  const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1); g.fillStyle = cor;
+  for (let i = 0; i <= n; i++) g.fillRect(Math.round(lerp(x0, x1, i / n) - w / 2), Math.round(lerp(y0, y1, i / n) - w / 2), w, w);
+}
+function pedra(g, x, y, w, h, c1, c2) {
+  x = Math.round(x - w / 2); y = Math.round(y - h / 2); g.fillStyle = TRACO; g.fillRect(x - 1, y, w + 2, h); g.fillRect(x, y - 1, w, h + 2);
+  g.fillStyle = c1; g.fillRect(x, y, w, h); g.fillStyle = c2; g.fillRect(x, y, Math.max(1, w >> 1), 1); g.fillRect(x, y, 1, Math.max(1, h >> 1));
+}
+function espinho(g, x, base, w, h, c1, c2) { // espinho/cristal saindo do chão
+  x = Math.round(x); base = Math.round(base);
+  for (let j = 0; j < h; j++) { const m = Math.round(w / 2 * (1 - j / h)); g.fillStyle = TRACO; g.fillRect(x - m - 1, base - j, 2 * m + 3, 1); }
+  for (let j = 0; j < h - 1; j++) { const m = Math.max(0, Math.round(w / 2 * (1 - j / h)) - 1); g.fillStyle = j < h * .45 ? c1 : c2; g.fillRect(x - m, base - j, 2 * m + 1, 1); g.fillStyle = c2; g.fillRect(x - m, base - j, 1, 1); }
+}
+function dentes(g, cx, y, w, s) { // fileira de dentes (s = 1 de cima, -1 de baixo)
+  g.fillStyle = TRACO; g.fillRect(Math.round(cx - w / 2) - 1, s > 0 ? y - 6 : y + 1, w + 2, 6);
+  g.fillStyle = '#b03050'; g.fillRect(Math.round(cx - w / 2), s > 0 ? y - 5 : y + 2, w, 4);
+  for (let i = 0; i < 6; i++) { const tx = Math.round(cx - w / 2 + (i + .5) * w / 6);
+    for (let j = 0; j < 7; j++) { const m = Math.round(3 * (1 - j / 7)); g.fillStyle = TRACO; g.fillRect(tx - m - 1, y + s * j, 2 * m + 3, 1); g.fillStyle = '#ffffff'; if (m > 0) g.fillRect(tx - m, y + s * j, 2 * m + 1, 1); } }
+}
+function desenhaGolpe(g, tr) { // a animação de cada golpe, conforme o estilo dele
+  const fx = B.fx; if (!fx) return;
+  const k = (tr - fx.t0) / fx.dur, A = centroDe(fx.de), Z = centroDe(fx.para), cor = COR_FX[fx.tipo], f = fx.forte ? 1 : 0, chao = POS[fx.para].y;
+  const dir = Z.x > A.x ? 1 : -1, pos = (kk, arco) => ({ x: lerp(A.x, Z.x, kk), y: lerp(A.y, Z.y, kk) - Math.sin(kk * Math.PI) * arco });
+  const uma = (id, fn) => { if (!fx.feitos[id]) { fx.feitos[id] = 1; fn(); } }; // acontece uma vez só
+  switch (fx.anim) {
+    case 'bola': { // projétil grande com rastro
+      if (k > 1) break;
+      const p = pos(k, 16), r = 5 + f * 3;
+      if (fx.tipo === 'rocha') { brilho(g, p.x, p.y, r + 4, cor[2], .25); pedra(g, p.x, p.y, r * 2 + 1, r * 2 - 1, cor[1], cor[2]); }
+      else { brilho(g, p.x, p.y, r + 5, cor[1], .3); disco(g, p.x, p.y, r, cor[0]); disco(g, p.x, p.y, r - 2, cor[1]); disco(g, p.x, p.y, Math.max(0, r - 4), cor[2]); }
+      for (let i = 0; i < 3; i++) B.parts.push({ x: p.x + rnd(-r, r), y: p.y + rnd(-r, r), vx: -dir * rnd(10, 50), vy: rnd(-25, 10), vida: rnd(.2, .45), cor: cor[i % 3], t: Math.random() < .4 ? 2 : 1 });
+      for (let i = 0; i < 5; i++) { const a = tr * 18 + i * TAU / 5; g.fillStyle = cor[2]; g.fillRect(Math.round(p.x + Math.cos(a) * (r + 3)), Math.round(p.y + Math.sin(a) * (r + 3)), 1, 1); }
+      break;
+    }
+    case 'gotas': case 'folhas': case 'cacos': { // rajada de muitos projéteis
+      if (k > 1) break;
+      for (let i = 0; i < 10 + f * 6; i++) {
+        const kk = k * 1.6 - i * .06; if (kk < 0 || kk > 1) continue;
+        const p = pos(kk, fx.anim === 'gotas' ? 12 : 0), x = Math.round(p.x), y = Math.round(p.y + Math.sin(i * 1.7) * 8 + (fx.anim === 'folhas' ? Math.sin(kk * 14 + i) * 6 : 0));
+        if (fx.anim === 'gotas') { g.fillStyle = cor[0]; g.fillRect(x - 2, y - 1, 4 + f, 3 + f); g.fillStyle = cor[1]; g.fillRect(x - 1, y - 1, 2, 2); g.fillStyle = cor[2]; g.fillRect(x - 1, y - 1, 1, 1); }
+        else if (fx.anim === 'folhas') { g.fillStyle = TRACO; g.fillRect(x - 3, y - 2, 7, 5); g.fillStyle = cor[1]; g.fillRect(x - 2, y - 1, 5, 3); g.fillStyle = cor[2]; g.fillRect(x - 2, y - 1, 2, 1); g.fillStyle = cor[0]; g.fillRect(x, y + 1, 3, 1); }
+        else { for (let q = 0; q < 7; q++) { g.fillStyle = q < 2 ? cor[2] : cor[1]; g.fillRect(x - dir * q, y, 1, 1); } g.fillStyle = cor[0]; g.fillRect(x - dir * 5 - (dir < 0 ? 0 : 2), y - 1, 3, 1); g.fillRect(x - dir * 5 - (dir < 0 ? 0 : 2), y + 1, 3, 1); }
+      }
+      break;
+    }
+    case 'bolhas': {
+      if (k > 1) break;
+      for (let i = 0; i < 9 + f * 5; i++) {
+        const kk = k * 1.5 - i * .06; if (kk < 0 || kk > 1) continue;
+        const p = pos(kk, 6), r = 2 + Math.floor(h2(i, 3, 9) * 4), x = p.x + Math.sin(kk * 9 + i) * 8, y = p.y + Math.cos(kk * 7 + i * 2) * 8;
+        brilho(g, x, y, r, cor[1], .45); anel(g, x, y, r, cor[2]); g.fillStyle = '#ffffff'; g.fillRect(Math.round(x - r / 2), Math.round(y - r / 2), 1, 1);
+      }
+      break;
+    }
+    case 'feixe': { // carrega energia e solta um raio grosso
+      const bx = A.x + dir * 10, by = A.y - 4;
+      if (k < .35) {
+        const c = k / .35; brilho(g, bx, by, 3 + c * 9, cor[1], .35); disco(g, bx, by, Math.round(1 + c * 4), cor[2]);
+        for (let i = 0; i < 3; i++) { const a = rnd(TAU), d = rnd(14, 28); B.parts.push({ x: bx + Math.cos(a) * d, y: by + Math.sin(a) * d, vx: -Math.cos(a) * d * 4, vy: -Math.sin(a) * d * 4, vida: .22, cor: cor[i % 3], t: 1 }); }
+      } else if (k < 1.3) {
+        const fade = k > 1 ? 1 - (k - 1) / .3 : 1, w = Math.max(2, Math.round((7 + f * 5) * fade + Math.sin(tr * 50) * 1.5));
+        const e = clamp((k - .35) / .15, 0, 1), ex = lerp(bx, Z.x, e), ey = lerp(by, Z.y, e);
+        g.globalAlpha = .3; linhaGrossa(g, bx, by, ex, ey, w + 8, cor[1]); g.globalAlpha = 1;
+        linhaGrossa(g, bx, by, ex, ey, w, cor[0]); linhaGrossa(g, bx, by, ex, ey, Math.max(1, w - 3), cor[1]); linhaGrossa(g, bx, by, ex, ey, Math.max(1, w - 6), cor[2]);
+        disco(g, bx, by, Math.round(w * .8), cor[2]);
+        if (e >= 1) { brilho(g, Z.x, Z.y, w + 6, cor[1], .5); disco(g, Z.x, Z.y, Math.round(w * .7), cor[2]); for (let i = 0; i < 4; i++) B.parts.push({ x: Z.x, y: Z.y, vx: rnd(-100, 100), vy: rnd(-100, 100), vida: .3, cor: cor[i % 3], t: Math.random() < .5 ? 2 : 1 }); }
+        if (Math.random() < .6) { const q = rnd(); B.parts.push({ x: lerp(bx, ex, q), y: lerp(by, ey, q), vx: rnd(-30, 30), vy: rnd(-30, 30), vida: .25, cor: cor[2], t: 1 }); }
+        uma('clarao', () => { B.flash = { t0: tempoReal, cor: cor[1], a: .3 }; });
+      }
+      break;
+    }
+    case 'raio': { // raios caindo do céu
+      if (k > 1.15 || k < .15 || !(Math.floor(tr * 24) % 3)) break;
+      const nb = 1 + (fx.pot >= 80 ? 1 : 0) + f;
+      for (let b = 0; b < nb; b++) {
+        const tx = Z.x + (b - (nb - 1) / 2) * 14, n = 9; let x = tx + rnd(-10, 10), y = -4;
+        for (let i = 0; i < n; i++) {
+          const ny = Z.y * (i + 1) / n, nx = i === n - 1 ? tx : tx + Math.round(h2(i, Math.floor(tr * 20) + b * 7, 3) * 18 - 9);
+          g.globalAlpha = .3; linhaPx(g, x, y, nx, ny, 8 + f * 2, cor[1], cor[1]); g.globalAlpha = 1;
+          linhaPx(g, x, y, nx, ny, 3 + f, cor[1], cor[2]);
+          if (i === 4) linhaPx(g, nx, ny, nx + Math.round(h2(b, i, 5) * 28 - 14), ny + 12, 1, cor[1], cor[2]);
+          x = nx; y = ny;
+        }
+      }
+      if (Math.random() < .3) B.flash = { t0: tempoReal, cor: '#ffffff', a: .35 };
+      break;
+    }
+    case 'chuva': { // muitos projéteis caindo em cima do alvo
+      const n = 10 + f * 8;
+      for (let i = 0; i < n; i++) {
+        const kk = (k - i / n * .6) / .4; if (kk < 0) continue;
+        const tx = Z.x + (h2(i, 1, 7) - .5) * 64, ty = chao - 6 - h2(i, 3, 7) * 18;
+        if (kk >= 1) { uma('c' + i, () => { faiscas(tx, ty, cor, 6 + f * 4, 70, fx.tipo === 'rocha' ? 160 : 0, 2); if (fx.tipo === 'rocha' || fx.tipo === 'fogo') B.tremor = { t0: tempoReal, f: 1 + f }; }); continue; }
+        const sx = tx - (fx.tipo === 'fogo' || fx.tipo === 'rocha' ? 40 : 0), sy = -12 - h2(i, 2, 7) * 20, e = fx.tipo === 'planta' || fx.tipo === 'gelo' ? kk : kk * kk;
+        const x = lerp(sx, tx, e) + (fx.tipo === 'planta' || fx.tipo === 'gelo' ? Math.sin(kk * 12 + i) * 5 : 0), y = lerp(sy, ty, e);
+        if (fx.tipo === 'fogo') { brilho(g, x, y, 6 + f, cor[1], .3); disco(g, x, y, 3 + f, cor[0]); disco(g, x, y, 1 + f, cor[2]); B.parts.push({ x, y, vx: rnd(-10, 10), vy: rnd(-20, 0), vida: .25, cor: cor[1], t: 1 }); }
+        else if (fx.tipo === 'rocha') pedra(g, x, y, 7 + f * 3, 6 + f * 2, cor[1], cor[2]);
+        else if (fx.tipo === 'planta') { g.fillStyle = i % 2 ? '#ff8fb3' : cor[2]; g.fillRect(Math.round(x) - 1, Math.round(y) - 1, 3, 2); g.fillStyle = '#ffffff'; g.fillRect(Math.round(x), Math.round(y) - 2, 1, 1); }
+        else if (fx.tipo === 'gelo') { const X = Math.round(x), Y = Math.round(y); g.fillStyle = cor[2]; g.fillRect(X - 2, Y, 5, 1); g.fillRect(X, Y - 2, 1, 5); g.fillStyle = cor[1]; g.fillRect(X - 1, Y - 1, 3, 3); g.fillStyle = cor[2]; g.fillRect(X, Y, 1, 1); }
+        else if (fx.tipo === 'trovao') { if (kk > .55 && Math.floor(tr * 24 + i) % 2) { let x0 = tx, y0 = -4; for (let q = 0; q < 6; q++) { const ny = lerp(-4, ty, (q + 1) / 6), nx = q === 5 ? tx : tx + Math.round(h2(q, i, Math.floor(tr * 20)) * 12 - 6); linhaPx(g, x0, y0, nx, ny, 3, cor[1], cor[2]); x0 = nx; y0 = ny; } } }
+        else disco(g, x, y, 3, cor[1]);
+      }
+      break;
+    }
+    case 'pilar': { // algo enorme sai do chão debaixo do alvo
+      const base = chao - 2;
+      if (k < .3) {
+        const c = k / .3; g.globalAlpha = .5 * c; elipsePx(g, Math.round(Z.x), base, Math.round(10 + c * 16), Math.max(2, Math.round(2 + c * 3)), cor[1], cor[0]); g.globalAlpha = 1;
+        if (Math.random() < .6) B.parts.push({ x: Z.x + rnd(-20, 20), y: base, vx: 0, vy: -rnd(20, 70), vida: .3, cor: cor[1], t: 1 });
+      } else if (k < 1.3) {
+        const c = clamp((k - .3) / .2, 0, 1), fade = k > 1 ? 1 - (k - 1) / .3 : 1;
+        if (fx.tipo === 'sombra') { // eclipse: um buraco negro
+          const r = Math.round(((10 + f * 6) * fade + 6) * c);
+          brilho(g, Z.x, Z.y, r + 8, cor[1], .4); disco(g, Z.x, Z.y, r + 2, cor[1]); disco(g, Z.x, Z.y, r, '#000000'); anel(g, Z.x, Z.y, r + 3, cor[2]);
+          for (let i = 0; i < 14; i++) { const a = tr * 6 + i * TAU / 14, d = r + 7 + Math.sin(tr * 10 + i) * 3; g.fillStyle = cor[2]; g.fillRect(Math.round(Z.x + Math.cos(a) * d), Math.round(Z.y + Math.sin(a) * d * .6), 2, 1); }
+        } else if (fx.tipo === 'fogo') { // coluna de fogo
+          const h = Math.round(95 * c), w = Math.round((22 + f * 8) * fade) + Math.floor(tr * 30) % 2;
+          for (let y = 0; y < h; y++) { const ww = Math.max(2, Math.round(w * (1 - y / h * .45) + Math.sin(y * .3 + tr * 30) * 2)), yy = base - y, X = Math.round(Z.x);
+            g.fillStyle = cor[0]; g.fillRect(X - (ww >> 1), yy, ww, 1); g.fillStyle = cor[1]; g.fillRect(X - (ww >> 2), yy, Math.max(1, ww >> 1), 1); g.fillStyle = cor[2]; g.fillRect(X - (ww >> 3), yy, Math.max(1, ww >> 2), 1); }
+          for (let i = 0; i < 2; i++) B.parts.push({ x: Z.x + rnd(-w / 2, w / 2), y: base - rnd(0, h), vx: rnd(-30, 30), vy: -rnd(40, 90), vida: .35, cor: cor[1 + (Math.random() < .5 ? 1 : 0)], t: 2 });
+        } else { // espinhos de pedra, cristais de gelo ou espinhos de planta
+          const n = 5 + f * 2;
+          for (let i = 0; i < n; i++) { const cc = clamp(c * 1.6 - i * .1, 0, 1), h = Math.round((18 + (i % 2) * 12 + f * 8) * cc * fade);
+            if (h > 2) espinho(g, Z.x + (i - (n - 1) / 2) * 9, base + 2 - Math.abs(i - (n - 1) / 2), 8 + f * 2, h, cor[1], cor[2]); }
+          uma('pedrinhas', () => faiscas(Z.x, base, cor, 16, 90, 140, 2));
+        }
+        uma('tremor', () => { B.tremor = { t0: tempoReal, f: 2 + f }; });
+      }
+      break;
+    }
+    case 'onda': { // ondas de energia saindo do atacante
+      if (k > 1.15) break;
+      const Dd = Math.hypot(Z.x - A.x, Z.y - A.y);
+      if (fx.tipo === 'agua') { // um paredão de água atravessa a tela
+        const cx = dir > 0 ? lerp(-20, BW + 50, k) : lerp(BW + 20, -50, k);
+        g.globalAlpha = .9;
+        for (let dx = 0; dx < 56; dx++) { const x = Math.round(cx - dir * dx), h = Math.round((60 + f * 20) * Math.pow(Math.sin(dx / 56 * Math.PI), .7));
+          g.fillStyle = cor[0]; g.fillRect(x, BH - h, 1, h); g.fillStyle = cor[1]; g.fillRect(x, BH - h, 1, Math.min(h, 7)); g.fillStyle = cor[2]; g.fillRect(x, BH - h, 1, 2); }
+        g.globalAlpha = 1;
+        for (let i = 0; i < 3; i++) B.parts.push({ x: cx + rnd(-4, 4), y: BH - rnd(40, 70), vx: dir * rnd(20, 60), vy: -rnd(20, 60), vida: .4, cor: cor[1 + (i % 2)], t: 2, grav: 160 });
+      }
+      for (let i = 0; i < 4 + f * 2; i++) { const r = (k * 1.35 - i * .12) * (Dd + 30); if (r < 2) continue;
+        g.globalAlpha = clamp(1 - r / (Dd + 70), .2, 1); anel(g, A.x, A.y, r, cor[0]); anel(g, A.x, A.y, r - 1, cor[1]); anel(g, A.x, A.y, r - 2, cor[2]); g.globalAlpha = 1; }
+      if (fx.tipo === 'gelo') for (let i = 0; i < 8; i++) { const kk = (k * 1.6 + i * .13) % 1, x = lerp(A.x, Z.x, kk), y = lerp(A.y, Z.y, kk) + (i - 3.5) * 6; linhaPx(g, x - dir * 12, y, x, y, 1, cor[1], cor[2]); }
+      break;
+    }
+    case 'redemoinho': { // redemoinho em volta do alvo
+      if (k > 1.25) break;
+      const c = clamp(k / .3, 0, 1), fade = k > 1 ? 1 - (k - 1) / .25 : 1;
+      for (let i = 0; i < 40 + f * 14; i++) { const a = tr * (8 + i % 3) + i * .9, d = (32 - (i % 12) * 2) * c * fade * (1 - Math.min(k, 1) * .35) + 2;
+        g.fillStyle = cor[i % 3]; g.fillRect(Math.round(Z.x + Math.cos(a) * d), Math.round(Z.y + Math.sin(a) * d * .55 + (i % 5) - 2), 2, 2); }
+      brilho(g, Z.x, Z.y, 6 + 6 * c * fade, cor[1], .4); disco(g, Z.x, Z.y, Math.round(2 + 3 * c * fade), cor[2]);
+      break;
+    }
+    case 'terremoto': { // o chão racha do atacante até o alvo
+      if (k > 1.15) break;
+      B.tremor = { t0: tempoReal, f: 2 + f };
+      const pts = fx.racha || (fx.racha = Array.from({ length: 14 }, (_, i) => ({ x: lerp(POS[fx.de].x, POS[fx.para].x, i / 13) + rnd(-7, 7), y: lerp(POS[fx.de].y, POS[fx.para].y, i / 13) + rnd(-4, 4) })));
+      const m = Math.floor(clamp(k * 1.2, 0, 1) * 13);
+      for (let i = 0; i < m; i++) linhaPx(g, pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y, 3, TRACO, '#ff7a3a');
+      if (Math.random() < .7) { const q = pts[Math.floor(rnd(m + 1))]; B.parts.push({ x: q.x, y: q.y, vx: rnd(-30, 30), vy: -rnd(60, 130), vida: .55, cor: cor[Math.floor(rnd(3))], t: 2, grav: 280 }); }
+      for (let i = 0; i < 2; i++) B.parts.push({ x: rnd(0, BW), y: rnd(70, BH), vx: rnd(-10, 10), vy: -rnd(5, 20), vida: .4, cor: '#d8c8a8', t: 1 });
+      break;
+    }
+    case 'garra': { // três arranhões no alvo
+      if (k > 1.4) break;
+      for (let i = 0; i < 3; i++) {
+        const t0 = .55 + i * .12, kk = (k - t0) / .18; if (kk < 0) continue;
+        const vida = 1 - (k - t0 - .18) / .4; if (vida <= 0) continue;
+        const x0 = Z.x - 18 + i * 9, y0 = Z.y - 18, e = clamp(kk, 0, 1), xe = lerp(x0, x0 + 20, e), ye = lerp(y0, y0 + 34, e);
+        g.globalAlpha = clamp(vida, 0, 1);
+        linhaPx(g, x0, y0, xe, ye, 5 + f * 2, cor[0], cor[2]); linhaPx(g, x0, y0, xe, ye, 2, cor[1], cor[2]);
+        g.globalAlpha = 1;
+        uma('g' + i, () => faiscas(Z.x + i * 6 - 6, Z.y, cor, 10, 80, 0, 1));
+      }
+      break;
+    }
+    case 'mordida': { // dentes fechando no alvo
+      if (k > 1.35) break;
+      const c = clamp((k - .3) / .6, 0, 1), aberto = Math.round(26 * (1 - c * c)) + 2, w = 40 + f * 8;
+      g.globalAlpha = k > 1 ? clamp(1 - (k - 1) / .35, 0, 1) : clamp(k / .3, 0, 1);
+      dentes(g, Z.x, Math.round(Z.y - aberto), w, 1); dentes(g, Z.x, Math.round(Z.y + aberto), w, -1);
+      g.globalAlpha = 1;
+      break;
+    }
+    default: { // investida, ataque rápido e hiper golpe: linhas de velocidade
+      if (k > 1) break;
+      const P = centroDe(fx.de);
+      for (let i = 0; i < 5 + f * 4; i++) { const y = P.y + (h2(i, 5, 1) - .5) * 34, x = P.x - dir * (8 + ((k * 260 + i * 23) % 44)); g.fillStyle = i % 2 ? '#ffffff' : cor[2]; g.fillRect(Math.round(x), Math.round(y), 9 + f * 5, 1); }
+      if (fx.anim === 'rapido' && fx.tipo === 'trovao') for (let i = 0; i < 3; i++) B.parts.push({ x: P.x + rnd(-12, 12), y: P.y + rnd(-12, 12), vx: rnd(-60, 60), vy: rnd(-60, 60), vida: .2, cor: COR_FX.trovao[i % 3], t: 1 });
+      if (fx.anim === 'hiper' && k > .6) brilho(g, Z.x, Z.y, 6 + (k - .6) * 40, '#ffffff', .45);
+    }
   }
 }
-function impacto(fx) { // explosão no alvo
-  const Z = centroDe(fx.para), cor = COR_FX[fx.tipo], n = fx.forte ? 30 : 16, grav = fx.tipo === 'agua' || fx.tipo === 'rocha' ? 160 : 0;
-  for (let i = 0; i < n; i++) { const a = rnd(TAU), v = rnd(30, 100);
-    B.parts.push({ x: Z.x, y: Z.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - (grav ? 50 : 0), vida: rnd(.25, .55), cor: cor[i % cor.length], t: Math.random() < .3 ? 2 : 1, grav }); }
-  if (fx.forte || fx.tipo === 'rocha' || fx.tipo === 'trovao') B.tremor = { t0: tempoReal, f: fx.forte ? 3 : 2 };
-  B.flash = { t0: tempoReal, cor: fx.tipo === 'trovao' ? '#ffffff' : cor[0], a: fx.tipo === 'trovao' ? .7 : fx.forte ? .35 : 0 };
-  B.ring = { t0: tempoReal, x: Z.x, y: Z.y, cor: cor[0] };
+function impacto(fx) { // explosão grande no alvo
+  const Z = centroDe(fx.para), cor = COR_FX[fx.tipo], f = fx.forte ? 1 : 0, n = 26 + f * 26, grav = fx.tipo === 'agua' || fx.tipo === 'rocha' ? 160 : 0;
+  for (let i = 0; i < n; i++) { const a = rnd(TAU), v = rnd(40, 130 + f * 50);
+    B.parts.push({ x: Z.x, y: Z.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - (grav ? 60 : 0), vida: rnd(.3, .65), cor: cor[i % 3], t: Math.random() < .4 ? 2 : 1, grav }); }
+  B.tremor = { t0: tempoReal, f: 1 + f * 2 + (fx.tipo === 'rocha' || fx.tipo === 'trovao' || fx.anim === 'hiper' ? 1 : 0) };
+  B.flash = { t0: tempoReal, cor: fx.tipo === 'trovao' ? '#ffffff' : cor[1], a: fx.tipo === 'trovao' ? .6 : .22 + f * .2 };
+  B.ring = { t0: tempoReal, x: Z.x, y: Z.y, cor: cor[1], cor2: cor[2], grande: 1 + f };
+  B.estrela = { t0: tempoReal, x: Z.x, y: Z.y, cor: cor[2] };
 }
 function desenhaBatalha(tr) {
   const g = cB, dtq = Math.min(.05, tr - (B.tq || tr)); B.tq = tr;
@@ -1314,6 +1518,11 @@ function desenhaBatalha(tr) {
     const a = B.anim[quem] || {}, dt = tr - (a.t0 || 0), dir = quem === 'eu' ? 1 : -1, P = POS[quem];
     let ox = 0, oy = Math.floor(tr * 2.2 + (quem === 'eu' ? 0 : 1)) % 2, vis = true;
     if (a.tipo === 'ataque' && dt < .3) { const k = Math.sin(dt / .3 * Math.PI); ox = dir * k * 14; oy -= dir * k * 5; }
+    if (a.tipo === 'avanca' && dt < a.dur) { // corre até o inimigo e volta
+      const kk = dt / a.dur, q = kk < .6 ? Math.sin(kk / .6 * Math.PI / 2) : Math.cos((kk - .6) / .4 * Math.PI / 2);
+      ox = dir * q * 78; oy -= dir * q * 42;
+      if (a.rastro && kk < .65) { g.globalAlpha = .3; for (const z of [.35, .65]) blit(g, spr, P.x - spr.width / 2 + ox * z, P.y - spr.height + 2 + oy * z, quem === 'ini'); g.globalAlpha = 1; }
+    }
     if (a.tipo === 'dano' && dt < .5) { ox = Math.round(Math.sin(dt * 60) * 2); vis = Math.floor(dt * 16) % 2 === 0; }
     if (a.tipo === 'entra' && dt < .4) ox = -dir * (1 - dt / .4) * 140; // entra deslizando
     if (a.tipo === 'cai') { if (dt > .45) return; oy = dt * 90; }     // afunda na plataforma
@@ -1336,7 +1545,10 @@ function desenhaBatalha(tr) {
   desenhaGolpe(g, tr);
   for (const p of B.parts) { p.vida -= dtq; p.x += p.vx * dtq; p.y += p.vy * dtq; p.vy += (p.grav || 0) * dtq; g.fillStyle = p.cor; g.fillRect(Math.round(p.x), Math.round(p.y), p.t, p.t); }
   B.parts = B.parts.filter(p => p.vida > 0);
-  if (B.ring) { const k = (tr - B.ring.t0) / .3; if (k > 1) B.ring = null; else { anel(g, B.ring.x, B.ring.y, 4 + k * 18, B.ring.cor); anel(g, B.ring.x, B.ring.y, 2 + k * 12, '#ffffff'); } }
+  if (B.ring) { const k = (tr - B.ring.t0) / .35; if (k > 1) B.ring = null; else { const R = B.ring.grande;
+    anel(g, B.ring.x, B.ring.y, 4 + k * 24 * R, B.ring.cor); anel(g, B.ring.x, B.ring.y, 5 + k * 24 * R, B.ring.cor); anel(g, B.ring.x, B.ring.y, 2 + k * 15 * R, B.ring.cor2); } }
+  if (B.estrela) { const k = (tr - B.estrela.t0) / .22; if (k > 1) B.estrela = null; else for (let i = 0; i < 8; i++) { const a = i * TAU / 8 + .2, l = 6 + k * 22;
+    linhaPx(g, B.estrela.x + Math.cos(a) * 4, B.estrela.y + Math.sin(a) * 4, B.estrela.x + Math.cos(a) * l, B.estrela.y + Math.sin(a) * l, i % 2 ? 1 : 3, B.estrela.cor, '#ffffff'); } }
   g.setTransform(1, 0, 0, 1, 0, 0);
   if (B.flash && B.flash.a) { const k = (tr - B.flash.t0) / .25; if (k > 1) B.flash = null; else { g.globalAlpha = B.flash.a * (1 - k); g.fillStyle = B.flash.cor; g.fillRect(0, 0, BW, BH); g.globalAlpha = 1; } }
 }
