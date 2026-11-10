@@ -132,7 +132,7 @@ h3{margin:16px 0 0;font-size:15px;color:#ff7a1a;text-align:left;text-transform:u
       <li>Ande com as setas, WASD ou arrastando o dedo.</li>
       <li>Ande pelo mato alto para achar feras selvagens. Enfraqueça e lance um núcleo para capturar.</li>
       <li>Treinadores rivais te desafiam nas rotas. Vencer dá dinheiro para a loja do acampamento.</li>
-      <li>Treine, evolua, vença os 3 Guardiões e desperte o titã Ferrugor.</li>
+      <li>Você é um jovem domador com um sonho: vencer os 3 Guardiões, derrotar seu rival Rex e virar Campeão da Liga.</li>
     </ul>
     <button class="grande tit" id="bJogar">Jogar</button>
     <div class="rodape">Nexvora · salva sozinho no navegador</div>
@@ -143,7 +143,8 @@ h3{margin:16px 0 0;font-size:15px;color:#ff7a1a;text-align:left;text-transform:u
 <div class="tela" id="escolha">
   <div class="cartao">
     <h2 class="tit">Escolha sua primeira fera</h2>
-    <div class="sub">Ela vai lutar ao seu lado desde o começo.</div>
+    <div class="sub">Mestra Forja: "Toda lenda começa com uma fera. Como você se chama, jovem domador?"</div>
+    <input id="iNome" maxlength="10" value="Kai" autocomplete="off" spellcheck="false" style="font:inherit;font-size:20px;text-align:center;width:200px;padding:8px;border-radius:10px;border:2px solid #ff7a1a;background:#1b1424;color:#f4efe6;margin-bottom:12px;user-select:text;-webkit-user-select:text">
     <div id="trio"></div>
   </div>
 </div>
@@ -519,7 +520,15 @@ const TREINS = [ // treinadores rivais espalhados pelas rotas
   { nome: 'Ferreira Nara', cor: '#ff6a2a', ...achaLivre(CX + 13, CY + 2), time: [['cinzal', 17], ['cascalho', 18], ['fornalho', 18]], fala: 'Forjei meu time no calor do vulcão!' },
   { nome: 'Vulto Kael', cor: '#4b2f7a', ...achaLivre(CX + 14, CY - 10), time: [['umbrakar', 20], ['voltarok', 21]], fala: 'Poucos me enxergam antes de perder.' }
 ];
-TREINS.forEach((tr, i) => { tr.i = i; tr.premio = tr.time[tr.time.length - 1][1] * 30; });
+const CONTRA = { brasito: 'marulho', marulho: 'espinhel', espinhel: 'brasito' }; // o rival pega a fera que vence a sua
+const feraRival = fase => { let id = CONTRA[S.inicial] || 'marulho'; for (let i = 1; i < fase; i++) id = F[id].evo[0]; return id; };
+TREINS.push(
+  { nome: 'Rival Rex', rival: 1, cor: '#b01030', premio: 200, ...achaLivre(CX + 6, CY + 5), time: () => [[feraRival(1), 5]], fala: 'Então você também ganhou uma fera? A minha é mais forte!' },
+  { nome: 'Rival Rex', rival: 1, cor: '#b01030', premio: 600, ...achaLivre(CX - 3, CY + 17), time: () => [['faiscao', 12], ['vultinho', 13], [feraRival(2), 15]], fala: 'Eu treinei sem parar. Dessa vez você não passa!' },
+  { nome: 'Campeão Rex', rival: 1, liga: 1, req: 3, cor: '#b01030', premio: 3000, ...achaLivre(CX, CY - 18), time: () => [['voltarok', 26], ['umbrakar', 26], ['krakenor', 27], ['monolitan', 27], [feraRival(3), 29]], fala: 'Cheguei primeiro e virei Campeão. Venha tomar o título, se conseguir!' }
+);
+const LIGA = TREINS[TREINS.length - 1];
+TREINS.forEach((tr, i) => { tr.i = i; tr.premio = tr.premio || tr.time[tr.time.length - 1][1] * 30; });
 const FIXOS = [...CHEFES, ...TREINS];
 const vencido = o => o.g ? S.chefes[o.i] : S.trein[o.i];
 const LOJA = { x: CX + 3.1, y: CY + .2 };
@@ -534,7 +543,7 @@ const TAB = { // quem aparece em cada lugar: [fera, peso, só à noite?]
 // ---------- Estado e salvamento ----------
 const CHAVE = 'feras-ferrugem-v1';
 let S = novoJogo();
-function novoJogo() { return { feras: [], dex: {}, nuc: 6, poc: 3, chefes: [0, 0, 0], trein: [], din: 300, x: CX + .5, y: CY + 1.6, hora: .1, som: true, fim: 0 }; }
+function novoJogo() { return { feras: [], dex: {}, nuc: 6, poc: 3, chefes: [0, 0, 0], trein: [], din: 300, nome: 'Kai', inicial: 'brasito', campeao: 0, x: CX + .5, y: CY + 1.6, hora: .1, som: true, fim: 0 }; }
 function carrega() {
   try { const d = JSON.parse(localStorage.getItem(CHAVE)); if (d && Array.isArray(d.feras)) S = Object.assign(novoJogo(), d); } catch (e) {}
   S.feras = S.feras.filter(m => F[m.id]);
@@ -569,7 +578,7 @@ let W = 0, H = 0, T = 48, dpr = 1;
 function ajusta() { dpr = Math.min(window.devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; T = clamp(Math.min(W, H) / 10, 38, 60); }
 addEventListener('resize', ajusta); ajusta();
 const teclas = {};
-addEventListener('keydown', e => { teclas[e.key.toLowerCase()] = true; if (e.key.startsWith('Arrow') || e.key === ' ') e.preventDefault(); });
+addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; teclas[e.key.toLowerCase()] = true; if (e.key.startsWith('Arrow') || e.key === ' ') e.preventDefault(); });
 addEventListener('keyup', e => { teclas[e.key.toLowerCase()] = false; });
 addEventListener('blur', () => { for (const k in teclas) teclas[k] = false; joy = null; });
 let joy = null;
@@ -588,7 +597,7 @@ const escuro = () => { const h = S.hora, a = clamp((h - .55) / .08, 0, 1), d = c
 const eNoite = () => escuro() > .5;
 function faisca(x, y, cor, n = 8) { for (let i = 0; i < n; i++) { const a = rnd(TAU), v = rnd(.5, 2); parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 1, vida: rnd(.4, .9), cor, r: rnd(.04, .09) }); } }
 
-function nivelSelvagem(x, y) { return clamp(Math.round(1 + Math.hypot(x - CX, y - CY) / 3 + emblemas() * 4 + rnd(-1, 1)), 2, 40); }
+function nivelSelvagem(x, y) { return clamp(Math.round(Math.hypot(x - CX, y - CY) / 2.8 + emblemas() * 4 + rnd(-1, 1)), 2, 40); }
 function sorteiaSelvagem(x, y) { // qual fera sai do mato aqui
   const noite = eNoite(), op = TAB[bioma[y | 0][x | 0]].filter(o => !o[2] || noite);
   let soma = 0; for (const o of op) soma += o[1];
@@ -643,11 +652,12 @@ function atualiza(dt) {
   if (fixoPerto && Math.hypot(fixoPerto.x - S.x, fixoPerto.y - S.y) > 1.8) fixoPerto = null;
   if (!fixoPerto) {
     for (const o of FIXOS) {
+      if (o.req && emblemas() < o.req) continue;
       const d2 = Math.hypot(o.x - S.x, o.y - S.y), ja = vencido(o);
       if (pausado || d2 > (o.g || ja ? .95 : 2.3)) continue;
       fixoPerto = o;
-      if (ja) avisa(`${o.nome}: "${o.g ? 'Você já provou seu valor.' : 'Boa luta! Ainda vou te alcançar.'}"`);
-      else { const fila = o.time.map(([id, nv]) => novaFera(id, nv)); iniciaBatalha({ tipo: 'dono', dono: o, ini: fila.shift(), fila }); }
+      if (ja) avisa(`${o.nome}: "${o.g ? 'Você já provou seu valor.' : o.liga ? 'Você mereceu o título, Campeão.' : 'Boa luta! Ainda vou te alcançar.'}"`);
+      else { const fila = (typeof o.time === 'function' ? o.time() : o.time).map(([id, nv]) => novaFera(id, nv)); iniciaBatalha({ tipo: 'dono', dono: o, ini: fila.shift(), fila }); }
       break;
     }
     if (!pausado && titaSolto() && Math.hypot(TITA.x - S.x, TITA.y - S.y) < 1.3) { fixoPerto = TITA; iniciaBatalha({ tipo: 'lenda', ini: novaFera('ferrugor', TITA.nv) }); }
@@ -658,7 +668,7 @@ function atualiza(dt) {
   for (const p of parts) { p.vida -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 2.6 * dt; }
   parts = parts.filter(p => p.vida > 0);
 }
-const titaSolto = () => emblemas() === 3 && !S.feras.some(m => m.id === 'ferrugor');
+const titaSolto = () => S.campeao && !S.feras.some(m => m.id === 'ferrugor');
 
 // ---------- Desenho do mundo ----------
 function treinador(c, x, y, s, t, o) {
@@ -675,10 +685,20 @@ function treinador(c, x, y, s, t, o) {
   ell(c, 0, -s * .94, s * .38, s * .35); pinta(c, o.pele || '#e8b48a');
   c.fillStyle = TRACO; ell(c, s * .0, -s * .93, s * .05, s * .07); c.fill(); ell(c, s * .24, -s * .93, s * .05, s * .07); c.fill();
   c.beginPath(); c.moveTo(-s * .08, -s * 1.03); c.lineTo(s * .08, -s * .99); c.moveTo(s * .32, -s * 1.03); c.lineTo(s * .18, -s * .99); c.stroke();
-  // boné
-  c.beginPath(); c.moveTo(-s * .4, -s * 1.05); c.quadraticCurveTo(-s * .38, -s * 1.5, 0, -s * 1.5); c.quadraticCurveTo(s * .38, -s * 1.5, s * .4, -s * 1.05); c.closePath(); pinta(c, o.bone);
-  c.beginPath(); c.roundRect(s * .1, -s * 1.13, s * .52, s * .12, s * .06); pinta(c, o.faixa);
+  if (o.cabelo) { // cabelo espetado com faixa na testa
+    const h = [-.42, -.98, -.54, -1.3, -.32, -1.2, -.28, -1.56, -.08, -1.3, .05, -1.64, .18, -1.3, .42, -1.52, .38, -1.18, .58, -1.22, .42, -.98, .3, -1.12, -.3, -1.12];
+    poli(c, h.map(v => v * s)); pinta(c, o.cabelo);
+    c.beginPath(); c.roundRect(-s * .4, -s * 1.17, s * .8, s * .11, s * .05); pinta(c, o.faixa);
+  } else { // boné
+    c.beginPath(); c.moveTo(-s * .4, -s * 1.05); c.quadraticCurveTo(-s * .38, -s * 1.5, 0, -s * 1.5); c.quadraticCurveTo(s * .38, -s * 1.5, s * .4, -s * 1.05); c.closePath(); pinta(c, o.bone);
+    c.beginPath(); c.roundRect(s * .1, -s * 1.13, s * .52, s * .12, s * .06); pinta(c, o.faixa);
+  }
   c.restore();
+}
+const HEROI = { jaqueta: '#2a2233', faixa: '#ff7a1a', cabelo: '#3a2418', capa: '#ff7a1a' };
+function visual(ch, ja) { // roupa de cada treinador do mundo
+  return { jaqueta: ja ? '#5a5060' : ch.g ? '#2a2233' : ch.cor, faixa: ja ? '#8a8090' : ch.g ? ch.cor : '#f4efe6', bone: ja ? '#5a5060' : ch.g ? ch.cor : '#2a2233',
+    capa: ch.g || ch.rival ? (ja ? '#5a5060' : ch.g ? ch.cor : '#ffd23f') : null, cabelo: ch.rival ? '#e4e0f0' : null };
 }
 function pinheiro(c, x, y, s, v, t) {
   const bal = Math.sin(t * 1.2 + v * 20) * s * .02;
@@ -758,9 +778,9 @@ function desenha() {
     poli(c, [fx - T * 1.9, fy - T * .1, fx - T * 1.3, fy - T * 1.1, fx - T * .7, fy - T * .1]); pinta(c, '#c94f2a'); poli(c, [fx - T * 1.42, fy - T * .1, fx - T * 1.3, fy - T * .6, fx - T * 1.18, fy - T * .1]); pinta(c, '#2a1c24');
     for (const k of [-1, 1]) { c.save(); c.translate(fx, fy); c.rotate(k * .5); c.beginPath(); c.roundRect(-T * .3, -T * .06, T * .6, T * .12, T * .05); pinta(c, '#6a4428'); c.restore(); }
     chama(c, fx, fy - T * .04, T * .2, T * .6, t, '#ff6a2a', '#ffd23f'); } });
-  for (const ch of FIXOS) fila.push({ y: ch.y, f: () => {
+  for (const ch of FIXOS) if (!ch.req || emblemas() >= ch.req) fila.push({ y: ch.y, f: () => {
     const ja = vencido(ch);
-    treinador(c, ch.x * T, ch.y * T, T * (ch.g ? .68 : .62), t, { jaqueta: ja ? '#5a5060' : ch.g ? '#2a2233' : ch.cor, faixa: ja ? '#8a8090' : ch.g ? ch.cor : '#f4efe6', bone: ja ? '#5a5060' : ch.g ? ch.cor : '#2a2233', capa: ch.g ? (ja ? '#5a5060' : ch.cor) : null, lado: S.x < ch.x ? -1 : 1 });
+    treinador(c, ch.x * T, ch.y * T, T * (ch.g ? .68 : .62), t, { ...visual(ch, ja), lado: S.x < ch.x ? -1 : 1 });
     const tx = ja ? (ch.g ? '★' : '') : '!';
     if (!tx) return;
     c.font = `900 ${T * .5}px system-ui`; c.textAlign = 'center'; c.lineWidth = 4; c.strokeStyle = TRACO;
@@ -777,7 +797,8 @@ function desenha() {
     c.font = `900 ${T * .26}px system-ui`; c.textAlign = 'center'; c.lineWidth = 3; c.strokeText('LOJA', lx, ly - T * 1.4); c.fillStyle = '#f4efe6'; c.fillText('LOJA', lx, ly - T * 1.4); } });
   if (titaSolto()) fila.push({ y: TITA.y, f: () => desenhaFera(c, F.ferrugor, TITA.x * T, TITA.y * T, T * .62, t, {}) });
   if (S.feras[0]) fila.push({ y: seg.y, f: () => desenhaFera(c, F[S.feras[0].id], seg.x * T, seg.y * T, T * .36, t, { flip: seg.lado < 0 }) });
-  fila.push({ y: S.y, f: () => treinador(c, S.x * T, S.y * T, T * .64, t, { jaqueta: '#2a2233', faixa: '#ff7a1a', bone: '#d8321e', anda: J.andando, passo: J.passo, lado: J.lado }) });
+  fila.push({ y: S.y, f: () => { treinador(c, S.x * T, S.y * T, T * .64, t, { ...HEROI, anda: J.andando, passo: J.passo, lado: J.lado });
+    c.font = `900 ${T * .22}px system-ui`; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = TRACO; c.strokeText(S.nome, S.x * T, S.y * T - T * 1.3); c.fillStyle = '#f4efe6'; c.fillText(S.nome, S.x * T, S.y * T - T * 1.3); } });
   fila.sort((a, b) => a.y - b.y);
   for (const o of fila) o.f();
   for (const p of parts) { c.globalAlpha = clamp(p.vida * 2, 0, 1); c.fillStyle = p.cor; ell(c, p.x * T, p.y * T, p.r * T, p.r * T); c.fill(); }
@@ -815,8 +836,9 @@ function pintaObjetivo() {
   let alvo = null, txt = '';
   const i = S.chefes.indexOf(0);
   if (i >= 0) { alvo = CHEFES[i]; txt = `Desafie ${CHEFES[i].nome}, ${CHEFES[i].dica}`; }
+  else if (!S.campeao) { alvo = LIGA; txt = 'Enfrente o Campeão Rex na Arena da Liga, ao norte'; }
   else if (titaSolto()) { alvo = TITA; txt = 'O titã Ferrugor despertou ao nordeste!'; }
-  else txt = 'Você domou Ferrugor. Complete a Feradex!';
+  else txt = `${S.nome}, Campeão e domador de Ferrugor. Complete a Feradex!`;
   $('#objTxt').textContent = txt;
   $('#seta').style.visibility = alvo ? 'visible' : 'hidden';
   if (alvo) $('#seta').style.transform = `rotate(${Math.atan2(alvo.y - S.y, alvo.x - S.x)}rad)`;
@@ -845,7 +867,7 @@ async function iniciaBatalha(cfg) {
   if (B.dono) { const ch = B.dono; await diz(`${ch.nome} quer batalhar!`); await diz(`"${ch.fala}"`, 1500); await diz(`${ch.nome} mandou ${F[B.ini.id].nome}!`); }
   else if (B.tipo === 'lenda') { await diz('O chão treme…', 1300); await diz('FERRUGOR, o titã de ferrugem, despertou!', 1600); }
   else await diz(`Um ${nomeIni()} pulou do mato!`);
-  await diz(`Vai, ${F[meu().id].nome}!`, 800);
+  await diz(`${S.nome}: "Vai, ${F[meu().id].nome}!"`, 800);
   B.ocup = false; menu('raiz');
 }
 function pintaPlacas() {
@@ -937,7 +959,7 @@ async function checaQueda() {
 }
 async function entraForcado(i) {
   B.meu = i; B.anim.eu = { tipo: 'entra', t0: tempoReal }; pintaPlacas(); menu(null);
-  await diz(`Vai, ${F[meu().id].nome}!`, 800); menu('raiz');
+  await diz(`${S.nome}: "Vai, ${F[meu().id].nome}!"`, 800); menu('raiz');
 }
 async function turno(ac) {
   if (!B || B.ocup) return;
@@ -948,7 +970,7 @@ async function turno(ac) {
   else {
     if (ac.t === 'fuga') { await diz('Você escapou em segurança!', 800); await fimBatalha('fuga'); return; }
     if (ac.t === 'pocao') { S.poc--; const m = meu(), st = stat(m); m.hp = Math.min(st.hp, m.hp + Math.ceil(st.hp * .6)); pintaPlacas(); pintaHud(); nota(523, 0, .1); nota(784, .1, .2); await diz(`${F[m.id].nome} recuperou a vida!`); }
-    if (ac.t === 'troca') { await diz(`Volte, ${F[meu().id].nome}!`, 600); B.meu = ac.i; B.anim.eu = { tipo: 'entra', t0: tempoReal }; pintaPlacas(); await diz(`Vai, ${F[meu().id].nome}!`, 700); }
+    if (ac.t === 'troca') { await diz(`Volte, ${F[meu().id].nome}!`, 600); B.meu = ac.i; B.anim.eu = { tipo: 'entra', t0: tempoReal }; pintaPlacas(); await diz(`${S.nome}: "Vai, ${F[meu().id].nome}!"`, 700); }
     if (ac.t === 'nucleo' && await tentaCaptura()) return;
     ordem = [['ini', gi]];
   }
@@ -988,8 +1010,9 @@ async function fimBatalha(res) {
     if (ch.g) {
       S.chefes[ch.i] = 1; S.nuc += 4; S.poc += 3;
       await diz(`Ganhou um emblema, 4 núcleos, 3 poções e $${ch.premio}!`, 1700);
-      if (emblemas() === 3) await diz('Um rugido de metal ecoa ao nordeste…', 1800);
-    } else { S.trein[ch.i] = 1; await diz(`Você ganhou $${ch.premio} pela vitória!`, 1300); }
+      if (emblemas() === 3) await diz('A Arena da Liga abriu ao norte. Rex te espera lá!', 1900);
+    } else { S.trein[ch.i] = 1; await diz(`${S.nome} ganhou $${ch.premio} pela vitória!`, 1300); }
+    if (ch.liga) { S.campeao = 1; await diz(`★ ${S.nome} é o novo Campeão da Liga de Ferrugem! ★`, 2600); await diz('Mas um rugido de metal ecoa ao nordeste…', 1900); }
   } else if (b.tipo === 'lenda' && (res === 'vitoria' || res === 'captura') && !S.fim) {
     S.fim = 1; await diz(res === 'captura' ? 'FERRUGOR agora luta ao seu lado. Você é uma lenda!' : 'Você derrotou o titã! Mas ele voltará… tente capturá-lo.', 2400);
   }
@@ -1022,6 +1045,8 @@ function desenhaBatalha(tr) {
     if (quem === 'ini' && B.cap) return;
     if (vis) desenhaFera(cB, F[m.id], x + ox, y + oy, s * esc, tr, { flip: quem === 'ini', ph: quem === 'eu' ? 1 : 3 });
   };
+  treinador(cB, 52, 404, 92, tr, HEROI);
+  if (B.dono) treinador(cB, 706, 240, 62, tr, { ...visual(B.dono, false), lado: -1 });
   desenha1('ini', B.ini, 555, 232, 58);
   desenha1('eu', meu(), 200, 392, 78);
   if (B.cap) { // núcleo de captura
@@ -1126,9 +1151,11 @@ function abreEscolha() {
     const n = document.createElement('div'); n.innerHTML = `${f.nome}<br>${etqTipo(f.tipo)}`;
     b.append(cv2, n); el.appendChild(b); trio.push({ cv2, f });
     b.onclick = () => {
+      S.nome = $('#iNome').value.trim().slice(0, 10) || 'Kai'; S.inicial = id;
       S.feras = [novaFera(id, 5)]; S.dex[id] = 2; salva(); pintaHud();
       $('#escolha').classList.remove('on'); pausado = false; somVitoria();
-      avisa(`${f.nome} entrou para o seu time!`);
+      avisa(`${f.nome} agora é a parceira de ${S.nome}!`);
+      setTimeout(() => avisa('Seu rival Rex está te esperando perto do acampamento!'), 3200);
     };
   }
   $('#escolha').classList.add('on');
