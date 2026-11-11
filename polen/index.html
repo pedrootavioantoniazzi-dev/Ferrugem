@@ -805,7 +805,7 @@ function sombra(g, x, y, w) {
 
 // --- Feras em pixel art: a fera é desenhada bem grande e depois reduzida bloco por bloco ---
 // K = tamanho do pixel (quanto maior, mais detalhada e maior a fera fica).
-const SPR = new Map();
+const SPR = new Map(), RASCUNHO = document.createElement('canvas');
 function pixeliza(src, B, prio = -1) { // cada bloco B×B vira um pixel da cor mais comum dele (prio = cor dos olhos, que ganha prioridade)
   const w = src.width, h = src.height, d = src.getContext('2d').getImageData(0, 0, w, h).data;
   const N = Math.floor(w / B), M = Math.floor(h / B), cel = new Int32Array(N * M).fill(-1), conta = new Map();
@@ -851,10 +851,16 @@ function spriteFera(id, K) {
     out = novaTela(f.im.naturalWidth * z, f.im.naturalHeight * z);
     const x = out.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(f.im, 0, 0, out.width, out.height);
   } else {
-    const s = 8 * K, Z = Math.ceil(s * 7 * f.tam / 8) * 8, big = novaTela(Z, Z);
-    desenhaFera(big.getContext('2d'), f, Z / 2, Math.round(Z * .88), s, 1.3, { semSombra: true });
+    // Usa sempre a mesma tela de rascunho e a esvazia no fim: o iPhone trava se o jogo
+    // criar muitas telas grandes, porque ele demora a liberar a memória delas.
+    const s = 8 * K, Z = Math.ceil(s * 7 * f.tam / 8) * 8;
+    RASCUNHO.width = Z; RASCUNHO.height = Z;
+    const x = RASCUNHO.getContext('2d');
+    if (!x) return null; // sem memória agora: tenta de novo depois
+    desenhaFera(x, f, Z / 2, Math.round(Z * .88), s, 1.3, { semSombra: true });
     const luz = parseInt(((f.look && f.look.luz) || TIPO[f.tipo].luz || '#ffffff').slice(1), 16);
-    out = pixeliza(big, 8, ((luz >> 16) >> 3) << 10 | ((luz >> 8 & 255) >> 3) << 5 | ((luz & 255) >> 3));
+    out = pixeliza(RASCUNHO, 8, ((luz >> 16) >> 3) << 10 | ((luz >> 8 & 255) >> 3) << 5 | ((luz & 255) >> 3));
+    RASCUNHO.width = RASCUNHO.height = 1; // devolve a memória
   }
   SPR.set(chave, out); return out;
 }
@@ -1130,6 +1136,7 @@ const nomeIni = () => (B.tipo === 'selv' ? F[B.ini.id].nome + ' selvagem' : F[B.
 async function iniciaBatalha(cfg) {
   if (B) return;
   pausado = true; paraTudo();
+  if (!time().some(m => m.hp > 0)) curaTudo();
   B = Object.assign({ meu: S.feras.findIndex((m, i) => i < 4 && m.hp > 0), ocup: true, anim: {}, fx: null, cap: null, parts: [], centro: {}, t0: tempoReal, bio: bioma[S.y | 0][S.x | 0], noite: eNoite() }, cfg);
   S.dex[B.ini.id] = S.dex[B.ini.id] || 1;
   menu(null); pintaPlacas(); $('#batalha').classList.add('on'); document.body.classList.add('lutando'); somBatalha();
@@ -1689,6 +1696,10 @@ if (S.feras.length) $('#bJogar').textContent = 'Continuar';
 // ---------- Laço principal ----------
 let antes = performance.now(), tempoReal = 0, salvaEm = 0, quadros = 0;
 function quadro(agora) {
+  requestAnimationFrame(quadro); // pede o próximo quadro antes: se algo der erro, o jogo não congela
+  try { passo(agora); } catch (e) { console.error(e); }
+}
+function passo(agora) {
   const dt = Math.min(.05, (agora - antes) / 1000); antes = agora; tempoReal += dt;
   if (!pausado) { atualiza(dt); pintaObjetivo(); if (tempoReal > salvaEm) { salvaEm = tempoReal + 5; salva(); } }
   if (!B) desenha();
@@ -1697,7 +1708,6 @@ function quadro(agora) {
   if ($('#inicio').classList.contains('on')) desenhaInicio(tempoReal);
   if ($('#escolha').classList.contains('on')) for (const m of trio) { const x = m.cv2.getContext('2d'), s = spriteFera(m.f.id, 16); x.clearRect(0, 0, 64, 60); if (s) blit(x, s, 32 - s.width / 2, 58 - s.height - Math.floor(tempoReal * 2.2 + m.f.base[0]) % 2); }
   if (preparar.length && !B && ++quadros % 4 === 0) spriteFera(...preparar.shift()); // prepara um sprite de vez em quando, sem travar
-  requestAnimationFrame(quadro);
 }
 addEventListener('pagehide', salva);
 document.addEventListener('visibilitychange', () => { if (document.hidden) salva(); });
