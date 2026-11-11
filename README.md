@@ -12,7 +12,7 @@ O jogador extrai minérios, transforma em produtos cada vez mais complexos e lig
 
 ## Outros jogos
 
-- **Feras de Ferrugem** ([`polen/`](polen/index.html)): jogo 2D de capturar, treinar e batalhar com 28 feras originais, 3 Guardiões e o titã Ferrugor. Jogar: https://pedrootavioantoniazzi-dev.github.io/Ferrugem/polen/
+- **Feras de Ferrugem** ([`polen/`](polen/index.html)): jogo 2D em pixel art, no estilo dos portáteis antigos, de capturar, treinar e batalhar com 28 feras originais, 3 Guardiões e o titã Ferrugor. Jogar: https://pedrootavioantoniazzi-dev.github.io/Ferrugem/polen/
 
 ## Em resumo
 

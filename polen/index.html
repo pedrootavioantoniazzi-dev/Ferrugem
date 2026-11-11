@@ -6,103 +6,108 @@
 <title>Feras de Ferrugem</title>
 <meta name="description" content="Capture, treine e evolua feras para derrotar os Guardiões e enfrentar o titã Ferrugor.">
 <meta name="theme-color" content="#1b1424">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;overflow:hidden;background:#1b1424;
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:700;
+  font-family:"Jersey 10",ui-monospace,Consolas,monospace;font-weight:400;
   color:#f4efe6;user-select:none;-webkit-user-select:none;touch-action:none}
+canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 #jogo{position:fixed;inset:0;width:100%;height:100%;display:block}
 button{font:inherit;color:inherit;cursor:pointer;border:0}
-.tit{font-family:Impact,"Arial Black","Franklin Gothic Heavy",system-ui,sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase}
+.tit{font-weight:400;letter-spacing:2px;text-transform:uppercase}
 
-/* ---------- HUD ---------- */
+/* ---------- HUD: caixas com borda grossa, cantos retos e sombra dura ---------- */
 #hud{position:fixed;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:flex-start;
   gap:8px;padding:calc(10px + env(safe-area-inset-top)) 10px 0;pointer-events:none}
 .grupo{display:flex;flex-wrap:wrap;gap:6px;pointer-events:auto}
-.chip,.btn{background:rgba(27,20,36,.9);border:2px solid #3b2d4a;border-radius:10px;padding:6px 11px;font-size:15px;
-  display:flex;align-items:center;gap:6px;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.chip,.btn{background:#1b1424;border:3px solid #f4efe6;padding:3px 10px;font-size:21px;
+  display:flex;align-items:center;gap:6px;box-shadow:3px 3px 0 #000}
 .btn{border-color:#ff7a1a}
-.btn:active{transform:translateY(2px)}
-.chip.pulo{animation:pulo .35s}
-@keyframes pulo{40%{transform:scale(1.2);border-color:#ff7a1a}}
-.ic{width:16px;height:16px;flex:none}
-.ic.nuc{background:#ff7a1a;clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%);box-shadow:inset 0 0 0 4px #ffd23f}
-.ic.poc{background:#4be07a;border-radius:4px 4px 8px 8px;border-top:4px solid #f4efe6}
-#objetivo{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%);
-  background:rgba(27,20,36,.9);border:2px solid #3b2d4a;border-radius:10px;padding:7px 14px;font-size:14px;
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
+.chip.pulo{animation:pulo .35s steps(3)}
+@keyframes pulo{40%{transform:translateY(-4px);border-color:#ff7a1a}}
+.ic{width:14px;height:14px;flex:none}
+.ic.nuc{background:#ff7a1a;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);box-shadow:inset 0 0 0 4px #ffd23f}
+.ic.poc{background:#4be07a;border-top:4px solid #f4efe6}
+#objetivo{position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);
+  background:#1b1424;border:3px solid #f4efe6;padding:5px 12px;font-size:20px;box-shadow:3px 3px 0 #000;
   pointer-events:none;display:flex;align-items:center;gap:10px;max-width:94vw;text-align:center}
-#seta{display:inline-block;color:#ff7a1a;font-size:18px;transition:transform .2s}
+#seta{display:inline-block;color:#ff7a1a;font-size:23px}
 #avisos{position:fixed;left:50%;top:calc(62px + env(safe-area-inset-top));transform:translateX(-50%);
   display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;z-index:30}
-.aviso{background:#ff7a1a;color:#1b1424;border-radius:10px;padding:8px 16px;font-size:15px;font-weight:900;
-  box-shadow:0 4px 0 rgba(0,0,0,.4);animation:aviso 3s forwards;max-width:92vw;text-align:center}
-@keyframes aviso{0%{opacity:0;transform:translateY(-10px) scale(.9)}8%,82%{opacity:1;transform:none}100%{opacity:0}}
+.aviso{background:#f8f4e0;color:#1b1424;border:3px solid #1b1424;box-shadow:inset 0 0 0 2px #ff7a1a,3px 3px 0 #000;
+  padding:7px 14px;font-size:21px;font-weight:400;animation:aviso 3s forwards;max-width:92vw;text-align:center}
+@keyframes aviso{0%{opacity:0;transform:translateY(-8px)}8%,85%{opacity:1;transform:none}100%{opacity:0}}
 
 /* ---------- Janelas ---------- */
-.tela{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:12px;z-index:10;background:rgba(10,6,16,.72)}
+.tela{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:12px;z-index:10;background:rgba(10,6,16,.78)}
 .tela.on{display:flex}
-.cartao{background:#241a30;border:3px solid #ff7a1a;border-radius:18px;padding:18px;width:min(520px,100%);max-height:100%;overflow:auto;
-  box-shadow:0 10px 0 rgba(0,0,0,.45);text-align:center;animation:entra .25s;touch-action:pan-y}
+.cartao{background:#241a30;border:4px solid #f4efe6;box-shadow:inset 0 0 0 3px #ff7a1a,6px 6px 0 #000;padding:18px;
+  width:min(520px,100%);max-height:100%;overflow:auto;text-align:center;animation:entra .2s steps(4);touch-action:pan-y}
 @keyframes entra{from{transform:scale(.9);opacity:0}}
-.cartao h1{margin:0;font-size:52px;line-height:.95;color:#ff7a1a;text-shadow:3px 3px 0 #000}
-.cartao h1 small{display:block;font-size:24px;color:#f4efe6;letter-spacing:6px}
-.cartao h2{margin:0 0 6px;font-size:28px;color:#ff7a1a}
-.sub{color:#b9a8c9;margin:6px 0 10px;font-size:14px}
+.cartao h1{margin:0;font-size:65px;line-height:1;color:#ff7a1a;text-shadow:4px 4px 0 #000}
+.cartao h1 small{display:block;font-size:29px;color:#f4efe6;letter-spacing:6px}
+.cartao h2{margin:0 0 6px;font-size:34px;color:#ff7a1a;text-shadow:3px 3px 0 #000}
+.sub{color:#b9a8c9;margin:6px 0 10px;font-size:20px}
 .cartao canvas{display:block;margin:0 auto;max-width:100%}
-.grande{background:#ff7a1a;color:#1b1424;border-radius:12px;padding:13px 30px;font-size:22px;box-shadow:0 5px 0 #b34d05;margin-top:12px}
-.grande:active{transform:translateY(4px);box-shadow:0 1px 0 #b34d05}
-.leve{background:#3b2d4a;border-radius:10px;padding:8px 14px;font-size:13px}
+.grande{background:#ff7a1a;color:#1b1424;border:3px solid #1b1424;padding:10px 28px;font-size:29px;font-weight:400;box-shadow:4px 4px 0 #000;margin-top:12px}
+.grande:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #000}
+.leve{background:#3b2d4a;border:2px solid #1b1424;padding:6px 12px;font-size:18px;box-shadow:2px 2px 0 #000}
 .leve:disabled{opacity:.4}
-.passos{list-style:none;padding:0;margin:10px 0 0;text-align:left;font-size:14px;display:grid;gap:6px}
-.passos li{background:#1b1424;border-left:4px solid #ff7a1a;border-radius:8px;padding:8px 12px}
-.rodape{font-size:12px;color:#7d6c8c;margin-top:12px}
+.passos{list-style:none;padding:0;margin:10px 0 0;text-align:left;font-size:20px;display:grid;gap:6px}
+.passos li{background:#1b1424;border-left:4px solid #ff7a1a;padding:7px 12px}
+.rodape{font-size:17px;color:#7d6c8c;margin-top:12px}
 
 /* Escolha inicial */
 #trio{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.inicial{background:#1b1424;border:2px solid #3b2d4a;border-radius:14px;padding:8px 4px 10px;font-size:15px}
+.inicial{background:#1b1424;border:3px solid #3b2d4a;padding:6px 4px 8px;font-size:21px;box-shadow:3px 3px 0 #000}
 .inicial:hover,.inicial:active{border-color:#ff7a1a}
 .inicial canvas{width:100%;height:auto}
-.tp{display:inline-block;border-radius:6px;padding:1px 8px;font-size:11px;color:#1b1424;text-transform:uppercase;letter-spacing:.5px;font-weight:900}
+.tp{display:inline-block;padding:0 6px;font-size:16px;color:#1b1424;text-transform:uppercase;letter-spacing:.5px;font-weight:400;border:2px solid #1b1424}
 
-/* Batalha */
+/* Batalha: tela de 240×160 ampliada, com caixas de texto de videogame antigo */
 #batalha{padding:0;background:#0d0814}
-.arena{width:min(760px,100%);max-height:100%;display:flex;flex-direction:column;position:relative}
-#palco{position:relative;border-bottom:4px solid #ff7a1a}
+.arena{width:min(760px,100%,calc((100vh - 240px) * 1.5));min-width:min(320px,100%);max-height:100%;display:flex;flex-direction:column;position:relative}
+#palco{position:relative;border:4px solid #1b1424;border-bottom:0}
 #cvB{width:100%;height:auto;display:block}
 #batalha.on .arena{animation:clarao .55s steps(1)}
 @keyframes clarao{0%,50%{filter:brightness(9)}25%,75%{filter:brightness(0)}100%{filter:none}}
-.placa{position:absolute;background:rgba(27,20,36,.92);border:2px solid #f4efe6;border-radius:10px;padding:6px 10px;width:46%;max-width:290px;text-align:left;font-size:14px}
-.placa.ini{left:2%;top:4%}.placa.eu{right:2%;bottom:4%}
+.placa{position:absolute;background:#f8f4e0;color:#1b1424;border:3px solid #1b1424;box-shadow:inset 0 0 0 2px #c8b890,3px 3px 0 rgba(0,0,0,.5);
+  padding:3px 8px 5px;width:46%;max-width:280px;text-align:left;font-size:18px}
+.placa.ini{left:3%;top:5%}.placa.eu{right:3%;bottom:6%}
 .placa .l1{display:flex;justify-content:space-between;gap:6px;align-items:center;white-space:nowrap}
-.placa .l1 b{overflow:hidden;text-overflow:ellipsis;font-size:16px}
-@media(max-width:520px){.placa .tp{display:none}.placa{font-size:13px}.placa .l1 b{font-size:15px}}
-.hp{height:10px;background:#0d0814;border-radius:6px;overflow:hidden;margin-top:5px}
-.hp i{display:block;height:100%;background:#4be07a;transition:width .45s,background .3s}
-.xp{height:4px;background:#0d0814;border-radius:4px;overflow:hidden;margin-top:4px}
-.xp i{display:block;height:100%;background:#59c2ff;transition:width .4s}
-.hpn{font-size:12px;color:#b9a8c9;text-align:right;margin-top:2px}
-#bMsg{min-height:56px;padding:10px 14px;font-size:17px;background:#241a30;display:flex;align-items:center;text-align:left}
+.placa .l1 b{overflow:hidden;text-overflow:ellipsis;font-size:21px}
+@media(max-width:520px){.placa .tp{display:none}.placa{font-size:17px}.placa .l1 b{font-size:18px}}
+.hp{height:9px;background:#3a3440;border:2px solid #1b1424;margin-top:4px}
+.hp i{display:block;height:100%;background:#4be07a;transition:width .45s steps(10),background .3s}
+.xp{height:4px;background:#3a3440;margin-top:3px}
+.xp i{display:block;height:100%;background:#59c2ff;transition:width .4s steps(8)}
+.hpn{font-size:17px;color:#4a3a5c;text-align:right;margin-top:1px}
+#bMsg{min-height:60px;padding:8px 16px;font-size:23px;background:#f8f4e0;color:#1b1424;border:4px solid #1b1424;box-shadow:inset 0 0 0 3px #ff7a1a;display:flex;align-items:center;text-align:left}
 #bMenu{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px;background:#1b1424;min-height:118px;align-content:start}
-.op{background:#3b2d4a;border-radius:10px;padding:12px 8px;font-size:16px;border-bottom:4px solid rgba(0,0,0,.35);text-align:center}
-.op:active{transform:translateY(2px)}
+.op{background:#f8f4e0;color:#1b1424;border:3px solid #1b1424;box-shadow:3px 3px 0 #000;padding:8px;font-size:22px;font-weight:400;text-align:center}
+.op:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
 .op:disabled{opacity:.35}
-.op.luta{background:#ff7a1a;color:#1b1424}
-.op small{display:block;font-size:11px;opacity:.85;font-weight:800}
+.op.luta{background:#ff7a1a}
+.op small{display:block;font-size:16px;font-weight:400;opacity:.85}
 .op.larga{grid-column:1/-1}
 
 /* Equipe e Feradex */
 #equipe .cartao{width:min(640px,100%)}
-.linha{display:flex;align-items:center;gap:8px;background:#1b1424;border-radius:12px;padding:6px 8px;margin-top:6px;text-align:left;border:2px solid transparent}
+.linha{display:flex;align-items:center;gap:8px;background:#1b1424;padding:6px 8px;margin-top:6px;text-align:left;border:3px solid transparent}
 .linha.tim{border-color:#3b2d4a}
-.linha canvas{width:64px;height:56px;flex:none;margin:0}
-.linha .meio{flex:1;min-width:0;font-size:14px}
-.linha .meio b{font-size:16px}
+.linha canvas{width:96px;height:84px;flex:none;margin:0}
+.linha .meio{flex:1;min-width:0;font-size:20px}
+.linha .meio b{font-size:22px}
 .linha .lado{display:flex;flex-direction:column;gap:4px}
 #dex{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:8px}
 @media(max-width:480px){#dex{grid-template-columns:repeat(4,1fr)}}
-.dx{background:#1b1424;border-radius:10px;padding:3px 2px 5px;font-size:10px;color:#b9a8c9;overflow:hidden}
+.dx{background:#1b1424;border:2px solid #3b2d4a;padding:3px 2px 5px;font-size:16px;color:#b9a8c9;overflow:hidden}
 .dx canvas{width:100%;height:auto}
-h3{margin:16px 0 0;font-size:15px;color:#ff7a1a;text-align:left;text-transform:uppercase;letter-spacing:1px}
+h3{margin:16px 0 0;font-size:21px;color:#ff7a1a;text-align:left;text-transform:uppercase;letter-spacing:1px}
 </style>
 </head>
 <body>
@@ -127,7 +132,7 @@ h3{margin:16px 0 0;font-size:15px;color:#ff7a1a;text-align:left;text-transform:u
 <div class="tela on" id="inicio">
   <div class="cartao">
     <h1 class="tit">Feras<small>de Ferrugem</small></h1>
-    <canvas id="cvInicio" width="760" height="330" style="width:380px"></canvas>
+    <canvas id="cvInicio" width="192" height="84" style="width:384px"></canvas>
     <ul class="passos">
       <li>Ande com as setas, WASD ou arrastando o dedo.</li>
       <li>Ande pelo mato alto para achar feras selvagens. Enfraqueça e lance um núcleo para capturar.</li>
@@ -144,7 +149,7 @@ h3{margin:16px 0 0;font-size:15px;color:#ff7a1a;text-align:left;text-transform:u
   <div class="cartao">
     <h2 class="tit">Escolha sua primeira fera</h2>
     <div class="sub">Mestra Forja: "Toda lenda começa com uma fera. Como você se chama, jovem domador?"</div>
-    <input id="iNome" maxlength="10" value="Kai" autocomplete="off" spellcheck="false" style="font:inherit;font-size:20px;text-align:center;width:200px;padding:8px;border-radius:10px;border:2px solid #ff7a1a;background:#1b1424;color:#f4efe6;margin-bottom:12px;user-select:text;-webkit-user-select:text">
+    <input id="iNome" maxlength="10" value="Kai" autocomplete="off" spellcheck="false" style="font:inherit;font-size:26px;text-align:center;width:200px;padding:8px;border:3px solid #ff7a1a;box-shadow:3px 3px 0 #000;background:#1b1424;color:#f4efe6;margin-bottom:12px;user-select:text;-webkit-user-select:text">
     <div id="trio"></div>
   </div>
 </div>
@@ -153,7 +158,7 @@ h3{margin:16px 0 0;font-size:15px;color:#ff7a1a;text-align:left;text-transform:u
 <div class="tela" id="batalha">
   <div class="arena">
     <div id="palco">
-      <canvas id="cvB" width="760" height="420"></canvas>
+      <canvas id="cvB" width="240" height="160"></canvas>
       <div class="placa ini" id="pIni"><div class="l1"><b></b><span></span></div><div class="hp"><i></i></div></div>
       <div class="placa eu" id="pEu"><div class="l1"><b></b><span></span></div><div class="hp"><i></i></div><div class="hpn"></div><div class="xp"><i></i></div></div>
     </div>
@@ -190,7 +195,7 @@ h3{margin:16px 0 0;font-size:15px;color:#ff7a1a;text-align:left;text-transform:u
 /* =====================================================================
    FERAS DE FERRUGEM
    Jogo 2D de capturar, treinar e batalhar com feras originais.
-   Arquivo único, sem bibliotecas. Tudo é desenhado no canvas.
+   Arquivo único, sem bibliotecas. Tudo é desenhado em pixel art no canvas.
    ===================================================================== */
 
 // ---------- Utilidades ----------
@@ -229,16 +234,18 @@ const TIPO = {
 // FORTE: contra quem cada tipo dá dano dobrado. FRACO: contra quem dá só metade.
 const FORTE = { fogo: ['planta', 'gelo'], agua: ['fogo', 'rocha'], planta: ['agua', 'rocha'], trovao: ['agua', 'sombra'], rocha: ['fogo', 'trovao', 'gelo'], sombra: ['planta', 'sombra'], gelo: ['planta', 'sombra'] };
 const FRACO = { fogo: ['agua', 'rocha', 'fogo'], agua: ['planta', 'agua'], planta: ['fogo', 'planta'], trovao: ['rocha', 'trovao', 'planta'], rocha: ['agua', 'planta', 'rocha'], sombra: ['rocha', 'fogo'], gelo: ['fogo', 'agua', 'gelo'] };
-const g = (nome, tipo, pot, prec = 1) => ({ nome, tipo, pot, prec });
-const GN = [g('Investida', 'normal', 40), g('Mordida', 'normal', 60)];
+// Cada golpe: nome, tipo, força, estilo da animação e precisão (1 = nunca erra).
+const g = (nome, tipo, pot, anim, prec = 1) => ({ nome, tipo, pot, anim, prec });
+// Normais: aprendidos nos níveis 1, 5, 12 e 28. Do tipo da fera: 1, 8, 16, 24 e 32. Do segundo tipo: 10, 22 e 34.
+const GN = [g('Investida', 'normal', 40, 'investida'), g('Mordida', 'normal', 60, 'mordida'), g('Ataque Rápido', 'normal', 50, 'rapido'), g('Hiper Golpe', 'normal', 95, 'hiper', .9)];
 const GT = {
-  fogo:   [g('Brasa', 'fogo', 45), g('Lança-Chamas', 'fogo', 75), g('Inferno', 'fogo', 105, .85)],
-  agua:   [g('Jato', 'agua', 45), g('Maremoto', 'agua', 75), g('Abismo', 'agua', 105, .85)],
-  planta: [g('Chicote', 'planta', 45), g('Lâmina-Folha', 'planta', 75), g('Fúria Verde', 'planta', 105, .85)],
-  trovao: [g('Choque', 'trovao', 45), g('Raio', 'trovao', 75), g('Tempestade', 'trovao', 105, .85)],
-  rocha:  [g('Pedrada', 'rocha', 45), g('Avalanche', 'rocha', 75), g('Terremoto', 'rocha', 105, .85)],
-  sombra: [g('Garra Sombria', 'sombra', 45), g('Pulso Negro', 'sombra', 75), g('Eclipse', 'sombra', 105, .85)],
-  gelo:   [g('Caco de Gelo', 'gelo', 45), g('Nevasca', 'gelo', 75), g('Era do Gelo', 'gelo', 105, .85)]
+  fogo:   [g('Brasa', 'fogo', 45, 'bola'), g('Garra de Fogo', 'fogo', 60, 'garra'), g('Lança-Chamas', 'fogo', 80, 'feixe'), g('Inferno', 'fogo', 105, 'pilar', .85), g('Meteoro', 'fogo', 120, 'chuva', .8)],
+  agua:   [g('Jato', 'agua', 45, 'gotas'), g('Bolhas', 'agua', 55, 'bolhas'), g('Hidro-Canhão', 'agua', 80, 'feixe'), g('Maremoto', 'agua', 100, 'onda', .9), g('Abismo', 'agua', 115, 'redemoinho', .8)],
+  planta: [g('Folha Navalha', 'planta', 45, 'folhas'), g('Chicote de Cipó', 'planta', 60, 'garra'), g('Chuva de Pétalas', 'planta', 80, 'chuva'), g('Raio Solar', 'planta', 105, 'feixe', .9), g('Fúria Verde', 'planta', 115, 'pilar', .8)],
+  trovao: [g('Choque', 'trovao', 45, 'raio'), g('Faísca', 'trovao', 60, 'rapido'), g('Raio', 'trovao', 80, 'raio'), g('Canhão Elétrico', 'trovao', 100, 'feixe', .9), g('Tempestade', 'trovao', 115, 'chuva', .8)],
+  rocha:  [g('Pedrada', 'rocha', 45, 'bola'), g('Lâmina de Pedra', 'rocha', 65, 'pilar'), g('Avalanche', 'rocha', 80, 'chuva'), g('Desabamento', 'rocha', 100, 'chuva', .9), g('Terremoto', 'rocha', 115, 'terremoto', .8)],
+  sombra: [g('Garra Sombria', 'sombra', 45, 'garra'), g('Bola Sombria', 'sombra', 60, 'bola'), g('Pulso Negro', 'sombra', 80, 'onda'), g('Pesadelo', 'sombra', 100, 'redemoinho', .9), g('Eclipse', 'sombra', 115, 'pilar', .8)],
+  gelo:   [g('Caco de Gelo', 'gelo', 45, 'cacos'), g('Vento Gelado', 'gelo', 60, 'onda'), g('Raio de Gelo', 'gelo', 80, 'feixe'), g('Nevasca', 'gelo', 100, 'chuva', .9), g('Era do Gelo', 'gelo', 115, 'pilar', .8)]
 };
 
 // ---------- As feras (criaturas originais) ----------
@@ -329,11 +336,18 @@ const FERAS = [
   { id: 'espinhorn', nome: 'Espinhorn', tipo: 'planta', extra: 'rocha', base: [90, 96, 108, 46], tam: 1.2,
     look: { cor: '#3a8a4a', cor2: '#e8c870', det: '#24582e', bw: .88, bh: .74, hw: .6, hh: .46, chifre: 'coroa', crista: 7, cauda: 'clava', braco: 2, presas: 2, marca: 'listras', aura: 1 } },
 
+  // ===== FERAS DESENHADAS À MÃO =====
+  // Desenhe no Piskel (ou outro site), salve em PNG com fundo transparente,
+  // com o bicho virado para a direita, e coloque o arquivo na pasta polen/feras/.
+  // Depois escreva img: 'feras/nome-do-arquivo.png' no lugar do look. Exemplo:
+  // { id: 'meubicho', nome: 'Meu Bicho', tipo: 'agua', extra: 'rocha', base: [52, 48, 62, 42], tam: .85, img: 'feras/meubicho.png' },
+
   { id: 'ferrugor', nome: 'Ferrugor', tipo: 'rocha', extra: 'fogo', base: [110, 118, 115, 80], tam: 1.42, taxa: .22, lenda: 1,
     look: { cor: '#a8431f', cor2: '#e0a05a', det: '#3a2620', bw: .92, bh: .76, hw: .62, hh: .48, chifre: 'coroa', crista: 6, asa: 'morcego', cauda: 'clava', braco: 2, presas: 2, marca: 'rachas', aura: 1, luz: '#ffd23f' } }
 ];
 const F = Object.fromEntries(FERAS.map(f => [f.id, f]));
 for (const f of FERAS) { f.fase = 1; }
+for (const f of FERAS) if (f.img) { f.im = new Image(); f.im.src = f.img; } // carrega os desenhos feitos à mão
 for (const f of FERAS) if (f.evo) F[f.evo[0]].fase = f.fase + 1;
 for (const f of FERAS) if (f.taxa === undefined) f.taxa = [0, .85, .5, .3][f.fase];
 
@@ -344,13 +358,13 @@ function stat(m) {
   return { hp: Math.floor(b[0] * 2 * n / 100) + n + 10, atk: Math.floor(b[1] * 2 * n / 100) + 5, def: Math.floor(b[2] * 2 * n / 100) + 5, vel: Math.floor(b[3] * 2 * n / 100) + 5 };
 }
 const xpProx = n => 6 * n * n + 10;
-function golpes(m) {
-  const f = F[m.id], n = m.nv, l = [GN[0], GT[f.tipo][0]];
-  if (n >= 7) l.push(GN[1]);
-  if (n >= 10) l.push(GT[f.extra][n >= 22 ? 1 : 0]);
-  if (n >= 15) l.push(GT[f.tipo][1]);
-  if (n >= 27) l.push(GT[f.tipo][2]);
-  return l.slice(-4);
+const NV_TIPO = [1, 8, 16, 24, 32], NV_EXTRA = [10, 22, 34], NV_NORMAL = [1, 5, 12, 28];
+function golpes(m) { // os 4 golpes que a fera usa: os 2 mais fortes do tipo dela, 1 do segundo tipo e 1 normal
+  const f = F[m.id], n = m.nv, forte = l => [...l].sort((a, b) => b.pot - a.pot);
+  const meus = forte(GT[f.tipo].filter((x, i) => n >= NV_TIPO[i])), extra = forte(GT[f.extra].filter((x, i) => i < 3 && n >= NV_EXTRA[i])), norm = forte(GN.filter((x, i) => n >= NV_NORMAL[i]));
+  const l = [...meus.slice(0, 2), ...extra.slice(0, 1), ...norm.slice(0, 1)];
+  for (const x of [...meus, ...norm, ...extra]) if (l.length < 4 && !l.includes(x)) l.push(x);
+  return l;
 }
 function efeito(tipoGolpe, tipoAlvo) { return tipoGolpe === 'normal' ? 1 : FORTE[tipoGolpe].includes(tipoAlvo) ? 2 : FRACO[tipoGolpe].includes(tipoAlvo) ? .5 : 1; }
 function dano(a, d, gp) {
@@ -376,11 +390,19 @@ function raio(c, x1, y1, x2, y2, seed, cor, lw) {
 // (x, y) são os pés; s é a escala; o: {flip, ph, semSombra}
 function desenhaFera(c, f, x, y, s, t, o) {
   o = o || {};
-  const L = f.look, ph = o.ph || 0, b = Math.sin(t * 2.6 + ph), T2 = TIPO[f.tipo], luz = L.luz || T2.luz;
+  const L = f.look || { bw: .8 }, ph = o.ph || 0, b = Math.sin(t * 2.6 + ph), T2 = TIPO[f.tipo], luz = L.luz || T2.luz;
   s *= f.tam;
   c.save(); c.translate(x, y);
   if (!o.semSombra) { c.fillStyle = 'rgba(0,0,0,.32)'; ell(c, 0, 0, s * L.bw * 1.15, s * .2); c.fill(); }
   if (o.flip) c.scale(-1, 1);
+  if (f.img) { // fera desenhada à mão: usa a imagem PNG
+    if (f.im.naturalWidth) {
+      const w = s * 2.2, h = w * f.im.naturalHeight / f.im.naturalWidth;
+      c.imageSmoothingEnabled = false; // deixa os pixels nítidos
+      c.drawImage(f.im, -w / 2, -h - s * .05 + b * s * .04, w, h);
+    }
+    c.restore(); return;
+  }
   const lw = Math.max(1.5, s * .075);
   c.lineWidth = lw; c.lineJoin = c.lineCap = 'round'; c.strokeStyle = TRACO;
   const bw = L.bw * s, bh = L.bh * s, hw = L.hw * s, hh = L.hh * s;
@@ -622,8 +644,14 @@ const somBatalha = () => [220, 277, 330, 440, 330, 440].forEach((f, i) => nota(f
 
 // ---------- Canvas e controles ----------
 const cv = $('#jogo'), c = cv.getContext('2d');
-let W = 0, H = 0, T = 48, dpr = 1;
-function ajusta() { dpr = Math.min(window.devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; T = clamp(Math.min(W, H) / 10, 38, 60); }
+// O mapa é desenhado numa tela pequena (em pixels de verdade) e depois ampliado sem suavizar.
+const TILE = 16; // cada quadradinho do mapa tem 16×16 pixels
+const tela = document.createElement('canvas'), tc = tela.getContext('2d');
+let W = 0, H = 0, dpr = 1, ESC = 3, LW = 0, LH = 0; // ESC = quantas vezes a tela pequena é ampliada
+function ajusta() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr;
+  ESC = Math.max(2, Math.round(Math.min(W, H) / 170)); LW = Math.ceil(W / ESC); LH = Math.ceil(H / ESC); tela.width = LW; tela.height = LH;
+}
 addEventListener('resize', ajusta); ajusta();
 const teclas = {};
 addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; teclas[e.key.toLowerCase()] = true; if (e.key.startsWith('Arrow') || e.key === ' ') e.preventDefault(); });
@@ -637,7 +665,7 @@ cv.addEventListener('pointerup', solta); cv.addEventListener('pointercancel', so
 function paraTudo() { joy = null; for (const k in teclas) teclas[k] = false; }
 
 // ---------- Entidades do mundo ----------
-const J = { lado: 1, passo: 0, andando: false };
+const J = { lado: 1, passo: 0, andando: false, dir: 'frente' }; // dir: frente, costas ou lado
 const seg = { x: S.x - 1, y: S.y, lado: 1, anda: false }; // a líder segue você
 let parts = [], matoAnda = 0, semEncontro = 0, lojaPerto = false, tempo = 0, pausado = true, fixoPerto = null, curouEm = 0;
 const vaga = Array.from({ length: 24 }, () => ({ x: rnd(), y: rnd(), ph: rnd(TAU), v: rnd(.4, 1) }));
@@ -669,6 +697,7 @@ function atualiza(dt) {
     if (cabe(nx, S.y, .26)) S.x = nx;
     if (cabe(S.x, ny, .26)) S.y = ny;
     if (Math.abs(dx) > .1) J.lado = dx > 0 ? 1 : -1;
+    J.dir = Math.abs(dx) > Math.abs(dy) ? 'lado' : dy < 0 ? 'costas' : 'frente';
     J.passo += dt * 11;
   }
   // a líder segue atrás
@@ -718,150 +747,309 @@ function atualiza(dt) {
 }
 const titaSolto = () => S.campeao && !S.feras.some(m => m.id === 'ferrugor');
 
-// ---------- Desenho do mundo ----------
-function treinador(c, x, y, s, t, o) {
-  const p = o.anda ? Math.sin(o.passo) : 0, sobe = o.anda ? Math.abs(Math.cos(o.passo)) * s * .06 : Math.sin(t * 2.5) * s * .015;
-  c.save(); c.translate(x, y);
-  c.fillStyle = 'rgba(0,0,0,.3)'; ell(c, 0, 0, s * .5, s * .15); c.fill();
-  c.scale(o.lado || 1, 1); c.lineWidth = Math.max(1.5, s * .06); c.lineJoin = c.lineCap = 'round'; c.strokeStyle = TRACO;
-  for (const k of [-1, 1]) { ell(c, k * s * .17 + p * k * s * .1, -s * .06 - (k * p > 0 ? s * .06 : 0), s * .15, s * .1); pinta(c, '#2a2233'); }
-  c.translate(0, -sobe);
-  if (o.capa) { poli(c, [-s * .36, -s * .6, -s * .58, -s * .02, s * .1, -s * .1, s * .3, -s * .6]); pinta(c, o.capa); }
-  c.beginPath(); c.roundRect(-s * .34, -s * .64, s * .68, s * .58, s * .16); pinta(c, o.jaqueta);
-  c.fillStyle = o.faixa; c.fillRect(-s * .08, -s * .62, s * .16, s * .54);
-  for (const k of [-1, 1]) { ell(c, k * s * .39, -s * .36 + p * k * s * .06, s * .11, s * .16, k * .3); pinta(c, o.jaqueta); }
-  ell(c, 0, -s * .94, s * .38, s * .35); pinta(c, o.pele || '#e8b48a');
-  c.fillStyle = TRACO; ell(c, s * .0, -s * .93, s * .05, s * .07); c.fill(); ell(c, s * .24, -s * .93, s * .05, s * .07); c.fill();
-  c.beginPath(); c.moveTo(-s * .08, -s * 1.03); c.lineTo(s * .08, -s * .99); c.moveTo(s * .32, -s * 1.03); c.lineTo(s * .18, -s * .99); c.stroke();
-  if (o.cabelo) { // cabelo espetado com faixa na testa
-    const h = [-.42, -.98, -.54, -1.3, -.32, -1.2, -.28, -1.56, -.08, -1.3, .05, -1.64, .18, -1.3, .42, -1.52, .38, -1.18, .58, -1.22, .42, -.98, .3, -1.12, -.3, -1.12];
-    poli(c, h.map(v => v * s)); pinta(c, o.cabelo);
-    c.beginPath(); c.roundRect(-s * .4, -s * 1.17, s * .8, s * .11, s * .05); pinta(c, o.faixa);
-  } else { // boné
-    c.beginPath(); c.moveTo(-s * .4, -s * 1.05); c.quadraticCurveTo(-s * .38, -s * 1.5, 0, -s * 1.5); c.quadraticCurveTo(s * .38, -s * 1.5, s * .4, -s * 1.05); c.closePath(); pinta(c, o.bone);
-    c.beginPath(); c.roundRect(s * .1, -s * 1.13, s * .52, s * .12, s * .06); pinta(c, o.faixa);
-  }
-  c.restore();
+// ---------- Pixel art ----------
+function novaTela(w, h) { const k = document.createElement('canvas'); k.width = w; k.height = h; return k; }
+function px(x, i, j, cor) { x.fillStyle = cor; x.fillRect(i, j, 1, 1); }
+// Pixel art escrita como texto: cada letra vira uma cor da paleta ('.' = transparente)
+function deMapa(linhas, pal) {
+  const k = novaTela(linhas[0].length, linhas.length), x = k.getContext('2d');
+  linhas.forEach((l, j) => { for (let i = 0; i < l.length; i++) if (pal[l[i]]) px(x, i, j, pal[l[i]]); });
+  return k;
 }
-const HEROI = { jaqueta: '#2a2233', faixa: '#ff7a1a', cabelo: '#3a2418', capa: '#ff7a1a' };
-function visual(ch, ja) { // roupa de cada treinador do mundo
-  return { jaqueta: ja ? '#5a5060' : ch.g ? '#2a2233' : ch.cor, faixa: ja ? '#8a8090' : ch.g ? ch.cor : '#f4efe6', bone: ja ? '#5a5060' : ch.g ? ch.cor : '#2a2233',
-    capa: ch.g || ch.rival ? (ja ? '#5a5060' : ch.g ? ch.cor : '#ffd23f') : null, cabelo: ch.rival ? '#e4e0f0' : null };
+const inverte = s => [...s].reverse().join('');
+const espelha = s => s + inverte(s); // metade esquerda → linha inteira, simétrica
+function blit(g, img, x, y, vira) { // desenha uma imagem; vira = true espelha para a esquerda
+  if (!img) return;
+  x = Math.round(x); y = Math.round(y);
+  if (!vira) { g.drawImage(img, x, y); return; }
+  g.save(); g.translate(x + img.width, y); g.scale(-1, 1); g.drawImage(img, 0, 0); g.restore();
 }
-function pinheiro(c, x, y, s, v, t) {
-  const bal = Math.sin(t * 1.2 + v * 20) * s * .02;
-  c.fillStyle = 'rgba(0,0,0,.25)'; ell(c, x, y, s * .5, s * .15); c.fill();
-  c.fillStyle = '#5a3a24'; c.fillRect(x - s * .09, y - s * .4, s * .18, s * .42);
-  const verde = v < .5 ? '#1f6a48' : '#27784a';
-  for (let i = 0; i < 3; i++) { const w = s * (.62 - i * .13), yy = y - s * (.3 + i * .36);
-    poli(c, [x - w, yy, x + bal * (i + 1), yy - s * .62, x + w, yy]); c.fillStyle = i === 2 ? tom(verde, .12) : verde; c.fill();
-    poli(c, [x, yy, x + bal * (i + 1), yy - s * .62, x + w, yy]); c.fillStyle = 'rgba(0,0,0,.14)'; c.fill(); }
-}
-function pedrona(c, x, y, s, v) {
-  c.fillStyle = 'rgba(0,0,0,.3)'; ell(c, x, y, s * .55, s * .16); c.fill();
-  poli(c, [x - s * .5, y, x - s * .42, y - s * .5, x - s * .1, y - s * (.8 + v * .2), x + s * .35, y - s * .6, x + s * .5, y]); c.fillStyle = '#5c4a4a'; c.fill();
-  poli(c, [x - s * .1, y - s * (.8 + v * .2), x + s * .35, y - s * .6, x + s * .5, y, x + s * .05, y]); c.fillStyle = '#463838'; c.fill();
-}
-function itemChao(c, it, x, y, s, t) {
-  const fl = Math.sin(t * 3 + it.ph) * s * .05; y -= s * .22 + fl;
-  c.fillStyle = 'rgba(0,0,0,.25)'; ell(c, x, y + s * .22 + fl, s * .2, s * .07); c.fill();
-  c.lineWidth = s * .05; c.strokeStyle = TRACO; c.lineJoin = 'round';
-  if (it.tipo === 'nucleo') nucleo(c, x, y, s * .2, t);
-  else { c.beginPath(); c.roundRect(x - s * .13, y - s * .08, s * .26, s * .26, s * .08); pinta(c, '#4be07a'); c.beginPath(); c.rect(x - s * .07, y - s * .2, s * .14, s * .12); pinta(c, '#f4efe6');
-    c.fillStyle = '#fff'; c.fillRect(x - s * .02, y - s * .02, s * .04, s * .14); c.fillRect(x - s * .07, y + s * .03, s * .14, s * .04); }
-}
-function nucleo(c, x, y, r, t) { // o núcleo de captura: um hexágono de ferro com miolo aceso
-  const p = []; for (let i = 0; i < 6; i++) { const a = i / 6 * TAU + Math.PI / 6; p.push(x + Math.cos(a) * r, y + Math.sin(a) * r); }
-  poli(c, p); pinta(c, '#ff7a1a');
-  c.save(); c.shadowColor = '#ffd23f'; c.shadowBlur = r * (1 + Math.sin(t * 5) * .4); ell(c, x, y, r * .42, r * .42); c.fillStyle = '#ffe89a'; c.fill(); c.restore();
-  ell(c, x, y, r * .42, r * .42); c.stroke();
-}
-function mancha(x0, x1, y0, y1, qual, borda, fundo) { // lagos e lava com cantos arredondados
-  for (const [cor, fol] of [[borda, 3], [fundo, 0]])
-    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
-      if (mapa[y][x] !== qual) continue;
-      const u = tile(x, y - 1) !== qual, d = tile(x, y + 1) !== qual, l = tile(x - 1, y) !== qual, r = tile(x + 1, y) !== qual, R = T * .42;
-      c.fillStyle = cor; c.beginPath(); c.roundRect(x * T - fol, y * T - fol, T + 1 + fol * 2, T + 1 + fol * 2, [u && l ? R : 0, u && r ? R : 0, d && r ? R : 0, d && l ? R : 0]); c.fill();
-    }
+function sombra(g, x, y, w) {
+  x = Math.round(x); y = Math.round(y); w = Math.max(4, Math.round(w)); g.fillStyle = 'rgba(0,0,0,.28)';
+  g.fillRect(x - (w >> 1) + 1, y - 1, w - 2, 1); g.fillRect(x - (w >> 1), y, w, 1); g.fillRect(x - (w >> 1) + 1, y + 1, w - 2, 1);
 }
 
+// --- Feras em pixel art: a fera é desenhada bem grande e depois reduzida bloco por bloco ---
+// K = tamanho do pixel (quanto maior, mais detalhada e maior a fera fica).
+const SPR = new Map();
+function pixeliza(src, B, prio = -1) { // cada bloco B×B vira um pixel da cor mais comum dele (prio = cor dos olhos, que ganha prioridade)
+  const w = src.width, h = src.height, d = src.getContext('2d').getImageData(0, 0, w, h).data;
+  const N = Math.floor(w / B), M = Math.floor(h / B), cel = new Int32Array(N * M).fill(-1), conta = new Map();
+  for (let j = 0; j < M; j++) for (let i = 0; i < N; i++) {
+    conta.clear(); let transp = 0, traco = 0, melhor = -1, mx = 0;
+    for (let y = j * B; y < j * B + B; y++) for (let x = i * B; x < i * B + B; x++) {
+      const k = (y * w + x) * 4;
+      if (d[k + 3] < 140) { transp++; continue; }
+      const r = d[k], g = d[k + 1], b = d[k + 2];
+      if (Math.abs(r - 27) < 14 && Math.abs(g - 20) < 14 && Math.abs(b - 36) < 14) { traco++; continue; }
+      const q = (r >> 3) << 10 | (g >> 3) << 5 | (b >> 3), n = (conta.get(q) || 0) + 1;
+      conta.set(q, n); if (n > mx) { mx = n; melhor = q; }
+    }
+    if (transp > B * B * .55) continue;
+    cel[j * N + i] = prio >= 0 && (conta.get(prio) || 0) >= B * B * .14 ? prio : traco > B * B * .3 || melhor < 0 ? -2 : melhor; // -2 = contorno
+  }
+  const cheio = (i, j) => i >= 0 && j >= 0 && i < N && j < M && cel[j * N + i] !== -1;
+  let x0 = N, y0 = M, x1 = -1, y1 = -1; const borda = [];
+  for (let j = 0; j < M; j++) for (let i = 0; i < N; i++) if (cheio(i, j)) {
+    x0 = Math.min(x0, i); x1 = Math.max(x1, i); y0 = Math.min(y0, j); y1 = Math.max(y1, j);
+    if (!cheio(i + 1, j) || !cheio(i - 1, j) || !cheio(i, j + 1) || !cheio(i, j - 1)) borda.push(j * N + i);
+  }
+  for (const k of borda) cel[k] = -2; // contorno escuro em volta de tudo
+  if (x1 < 0) return novaTela(1, 1);
+  const out = novaTela(x1 - x0 + 1, y1 - y0 + 1), oc = out.getContext('2d'), im = oc.createImageData(out.width, out.height);
+  for (let j = y0; j <= y1; j++) for (let i = x0; i <= x1; i++) {
+    const v = cel[j * N + i]; if (v === -1) continue;
+    const k = ((j - y0) * out.width + (i - x0)) * 4;
+    if (v === -2) { im.data[k] = 27; im.data[k + 1] = 20; im.data[k + 2] = 36; }
+    else { im.data[k] = (v >> 10 & 31) << 3 | 4; im.data[k + 1] = (v >> 5 & 31) << 3 | 4; im.data[k + 2] = (v & 31) << 3 | 4; }
+    im.data[k + 3] = 255;
+  }
+  oc.putImageData(im, 0, 0);
+  return out;
+}
+function spriteFera(id, K) {
+  const chave = id + ':' + K;
+  if (SPR.has(chave)) return SPR.get(chave);
+  const f = F[id]; let out;
+  if (f.img) { // fera desenhada à mão: só amplia a imagem por um número inteiro
+    if (!f.im.naturalWidth) return null;
+    const z = Math.max(1, Math.round(K * 2.4 * f.tam / f.im.naturalHeight));
+    out = novaTela(f.im.naturalWidth * z, f.im.naturalHeight * z);
+    const x = out.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(f.im, 0, 0, out.width, out.height);
+  } else {
+    const s = 8 * K, Z = Math.ceil(s * 7 * f.tam / 8) * 8, big = novaTela(Z, Z);
+    desenhaFera(big.getContext('2d'), f, Z / 2, Math.round(Z * .88), s, 1.3, { semSombra: true });
+    const luz = parseInt(((f.look && f.look.luz) || TIPO[f.tipo].luz || '#ffffff').slice(1), 16);
+    out = pixeliza(big, 8, ((luz >> 16) >> 3) << 10 | ((luz >> 8 & 255) >> 3) << 5 | ((luz & 255) >> 3));
+  }
+  SPR.set(chave, out); return out;
+}
+const preparar = FERAS.flatMap(f => [[f.id, 6], [f.id, 8]]); // vai preparando os sprites aos poucos
+
+// --- Treinadores: pixel art feita à mão, 16×24 pixels ---
+// Letras: K contorno, H cabelo/boné, h cabelo na sombra, L brilho do cabelo, A faixa/aba,
+// S pele, s pele na sombra, R bochecha, E olho, T camiseta, J jaqueta, j jaqueta na sombra,
+// Y detalhe da roupa, P calça, p calça na sombra, B bota.
+// Frente e costas são escritas só pela metade esquerda: o jogo espelha para fazer a direita.
+const CABECA = {
+  espetado: {
+    frente: ['......K.', '....KKHK', '...KHLHH', '...KHLHH', '..KHHHHH', '..KAAAAA', '..KhHSHS', '..KhSSSS', '..KhSESS', '..KsSESS', '...KRSSK', '....KKSS'],
+    costas: ['......K.', '....KKHK', '...KHLHH', '...KHLHH', '..KHHHHH', '..KAAAAA', '..KhHHHA', '..KhHLHA', '..KhHHHH', '..KhhHHH', '...KhhHH', '....KKhh'],
+    lado: ['.........K......', '.......KKHK.K...', '......KHLHHKHK..', '.....KHLHHHHHK..', '....KHHHHHHHHK..', '..AKAAAAAAAAAK..', '.A.KhHHHHSHSK...',
+      '....KhhHSSSSSK..', '....KhhSSSSESSK.', '....KhhSSSSESK..', '.....KhsSSRSK...', '......KKSSSK....']
+  },
+  bone: {
+    frente: ['........', '........', '....KKKK', '...KHHHH', '..KHHLHH', '..KAAAAA', '..KhSSSS', '..KhSSSS', '..KhSESS', '..KsSESS', '...KRSSK', '....KKSS'],
+    costas: ['........', '........', '....KKKK', '...KHHHH', '..KHHLHH', '..KHHHHH', '..Khhhhh', '..Khhhhh', '..Khhhhh', '..Khhhhh', '...Khhhh', '....KKhh'],
+    lado: ['................', '................', '.......KKKKK....', '......KHHHHHK...', '.....KHHLHHHHK..', '....KAAAAAAAAAAK', '....KhhSSSSSK...',
+      '....KhhSSSSSSK..', '....KhhSSSSESSK.', '....KhsSSSSESK..', '.....KhsSSRSK...', '......KKSSSK....']
+  },
+  longo: {
+    frente: ['........', '......KK', '....KKHH', '...KHLHH', '..KHLHHH', '..KHHHHH', '.KHHSHHS', '.KHhSSSS', '.KHhSESS', '.KHsSESS', '.KHKRSSK', '.KHHKKSS'],
+    costas: ['........', '......KK', '....KKHH', '...KHLHH', '..KHLHHH', '..KHHHHH', '.KHHHHHH', '.KHhHHHH', '.KHhHLHH', '.KHhHHHH', '.KHhhHHH', '.KHHhhhh'],
+    lado: ['................', '.......KKKKK....', '.....KKHHHHHK...', '....KHLHHHHHHK..', '...KHLHHHHHHHK..', '...KHHHHHHHHHK..', '..KHHhHHSHHSK...',
+      '..KHhhHSSSSSK...', '..KHhhSSSSESSK..', '..KHhhSSSSESK...', '..KHhhKsSRSK....', '..KHHhKKSSK.....']
+  }
+};
+const CORPO = {
+  frente: ['....KJTT', '...KJJYT', '..KJKJYJ', '..KJKJYJ', '..KJKjjj', '..KSKPPP', '...KKPPP'],
+  costas: ['....KJJJ', '...KJJJJ', '..KJKJJJ', '..KJKJJJ', '..KJKjjj', '..KSKPPP', '...KKPPP'],
+  lado: ['......KJTTK.....', '.....KJJYJK.....', '.....KJKYJK.....', '.....KJKYJK.....', '.....KjKjjK.....', '.....KSKPPK.....']
+};
+const PES = {
+  frente: ['....KPpK', '....KPpK', '....KPpK', '....KBBK', '....KKKK'],
+  andaF: ['....KPpKKpPK....', '....KBBKKpPK....', '....KKKKKpPK....', '........KBBK....', '........KKKK....'],
+  lado: ['......KPPK......', '......KPpK......', '......KPpK......', '......KPpK......', '......KBBBK.....', '......KKKKK.....'],
+  andaL: ['......KPPK......', '.....KPKKPK.....', '....KPK..KPK....', '....KPK..KPK....', '...KBBK..KBBK...', '...KKK...KKKK...']
+};
+const TRN = new Map();
+function spriteTreinador(pal, cab, dir, q) { // dir: frente, costas ou lado; q = quadro do andar (0 parado)
+  const chave = pal.id + cab + dir + q;
+  if (TRN.has(chave)) return TRN.get(chave);
+  let L;
+  if (dir === 'lado') L = [...CABECA[cab].lado, ...CORPO.lado, ...(q ? PES.andaL : PES.lado)];
+  else {
+    L = [...CABECA[cab][dir], ...CORPO[dir], ...PES.frente].map(espelha);
+    if (q) L.splice(19, 5, ...(q === 1 ? PES.andaF : PES.andaF.map(inverte)));
+  }
+  const k = deMapa(L, pal); TRN.set(chave, k); return k;
+}
+const PELE = { K: TRACO, E: TRACO, S: '#f6c49a', s: '#d89a70', R: '#f08080', T: '#f4efe6', P: '#2a3a5a', p: '#1e2a44', B: '#6a3a22' };
+const PAL_HEROI = { ...PELE, id: 'heroi', H: '#6a3a1e', h: '#4a2412', L: '#a8683a', A: '#ff7a1a', J: '#3b2d4a', j: '#2a2233', Y: '#ff7a1a' };
+const CABELOS = { 'Guardiã Tormenta': '#ffd21f', 'Caçadora Lia': '#4a2a5a', 'Ferreira Nara': '#c84a1e', 'Alpinista Neve': '#eef6ff' }; // treinadoras de cabelo comprido
+function cinza(cor) { // deixa a cor acinzentada (treinador já vencido)
+  let r, g, b;
+  if (cor[0] === '#') { const n = parseInt(cor.slice(1), 16); r = n >> 16; g = n >> 8 & 255; b = n & 255; } else [r, g, b] = cor.match(/\d+/g).map(Number);
+  const y = r * .3 + g * .59 + b * .11, m = v => Math.round(v * .25 + y * .75);
+  return `rgb(${m(r)},${m(g)},${m(b)})`;
+}
+function palDe(ch, ja) { // roupa e cabelo de cada treinador do mundo
+  const cab = CABELOS[ch.nome];
+  let p;
+  if (ch.rival) p = { H: '#ece8f6', h: '#b0a8c8', L: '#ffffff', A: '#b01030', J: '#b01030', j: '#7a0a20', Y: '#ffd23f' };
+  else if (cab) p = { H: cab, h: tom(cab, -.3), L: tom(cab, .45), A: cab, J: ch.g ? tom(ch.cor, -.45) : ch.cor, j: ch.g ? tom(ch.cor, -.6) : tom(ch.cor, -.3), Y: '#f4efe6' };
+  else p = { H: ch.cor, h: '#4a2a18', L: tom(ch.cor, .35), A: tom(ch.cor, -.35), J: tom(ch.cor, -.45), j: tom(ch.cor, -.6), Y: ch.cor };
+  p = { ...PELE, ...p, id: (ch.g ? 'g' : 't') + ch.i + (ch.rival ? 'r' : '') + (ja ? 'x' : '') };
+  if (ja) for (const k in p) if (k !== 'id') p[k] = cinza(p[k]);
+  return p;
+}
+const cabDe = ch => ch.rival ? 'espetado' : CABELOS[ch.nome] ? 'longo' : 'bone';
+
+// --- Chão: cada tipo de quadradinho é feito uma vez e guardado ---
+const TILES = new Map();
+function ladrilho(chave, faz) { let k = TILES.get(chave); if (!k) { k = novaTela(TILE, TILE); faz(k.getContext('2d')); TILES.set(chave, k); } return k; }
+const tGrama = v => ladrilho('g' + v, x => {
+  x.fillStyle = '#5aab4c'; x.fillRect(0, 0, 16, 16);
+  for (let n = 0; n < 4; n++) { const i = 1 + Math.floor(h2(n, v, 31) * 12), j = 2 + Math.floor(h2(v, n, 32) * 12);
+    px(x, i, j, '#479640'); px(x, i + 2, j, '#479640'); px(x, i + 1, j + 1, '#479640'); }
+  for (let n = 0; n < 4; n++) px(x, Math.floor(h2(n, v, 33) * 16), Math.floor(h2(v, n, 34) * 16), '#79c463');
+  if (v === 3) { // florzinhas
+    for (const [i, j] of [[5, 6], [7, 6], [6, 5], [6, 7]]) px(x, i, j, '#fff'); px(x, 6, 6, '#ffd23f');
+    for (const [i, j] of [[11, 11], [13, 11], [12, 10], [12, 12]]) px(x, i, j, '#ff8fb3'); px(x, 12, 11, '#fff');
+  }
+});
+const tPedra = v => ladrilho('p' + v, x => {
+  x.fillStyle = '#6b5a5a'; x.fillRect(0, 0, 16, 16);
+  for (let n = 0; n < 9; n++) px(x, Math.floor(h2(n, v, 35) * 16), Math.floor(h2(v, n, 36) * 16), n % 3 ? '#5e4e4e' : '#806e6a');
+  if (v === 3) for (const [i, j] of [[3, 4], [4, 5], [5, 5], [6, 6], [7, 6], [8, 7], [8, 8], [9, 9], [10, 9]]) px(x, i, j, '#463838');
+});
+const tMato = (f, vul) => ladrilho('m' + f + vul, x => { // mato alto que balança (f = quadro)
+  const [base, cont, meio, ponta] = vul ? ['#4a3a3a', '#2a1c1c', '#6a5048', '#9a7a66'] : ['#3c8a3e', '#235a2a', '#4fa34a', '#8ad070'];
+  x.fillStyle = base; x.fillRect(0, 0, 16, 16);
+  for (let r = 0; r < 3; r++) for (let b = 0; b < 4; b++) {
+    const bx = b * 4 + (r % 2) * 2, by = r * 5 + 5;
+    px(x, bx, by, cont); px(x, bx + 1, by, cont); px(x, bx + 2, by, cont);
+    px(x, bx, by - 1, meio); px(x, bx + 1, by - 1, cont); px(x, bx + 2, by - 1, meio);
+    px(x, bx + f, by - 2, meio); px(x, bx + 2 + f, by - 2, meio);
+    px(x, bx + f, by - 3, ponta); px(x, bx + 2 + f, by - 3, ponta);
+  }
+});
+const tAgua = (f, v) => ladrilho('a' + f + v, x => {
+  x.fillStyle = '#3d8ee6'; x.fillRect(0, 0, 16, 16);
+  for (let j = 0; j < 16; j++) for (let i = 0; i < 16; i++) if ((i * 3 + j * 5 + v) % 17 === 0) px(x, i, j, '#3482da');
+  for (let n = 0; n < 2; n++) { const wx = Math.floor(h2(n, v, 41) * 11 + f * 2) % 12, wy = 3 + Math.floor(h2(v, n, 42) * 10);
+    for (const [i, j] of [[0, 0], [1, -1], [2, -1], [3, 0]]) px(x, wx + i, wy + j, '#a8dcff'); }
+});
+const tLava = (f, v) => ladrilho('l' + f + v, x => {
+  x.fillStyle = '#ee4a14'; x.fillRect(0, 0, 16, 16);
+  for (let n = 0; n < 5; n++) { x.fillStyle = '#ff7a26'; x.fillRect(Math.floor(h2(n, v, 43) * 14), Math.floor(h2(v, n, 44) * 14), 3, 2); }
+  for (let n = 0; n < 2; n++) { const i = Math.floor(h2(n, v, 45) * 13), j = (Math.floor(h2(v, n, 46) * 13) + 13 - f * 3) % 14;
+    x.fillStyle = '#ffd23f'; x.fillRect(i, j, 2, 2); px(x, i, j, '#fff6b0'); }
+});
+// --- Objetos do mapa ---
+const ARV = [0, 1].map(v => { // árvore redonda, 16×24
+  const k = novaTela(16, 24), x = k.getContext('2d');
+  const [base, claro, escuro] = v ? ['#2f8a52', '#58b070', '#1f6038'] : ['#3f9a48', '#6cc060', '#2a6a34'];
+  for (let j = 15; j < 23; j++) for (let i = 6; i < 10; i++) px(x, i, j, i === 6 || i === 9 || j === 22 ? TRACO : i === 7 ? '#9a6a40' : '#6a4428');
+  for (let j = 0; j < 17; j++) for (let i = 0; i < 16; i++) {
+    const d = Math.hypot(i - 7.5, j - 8); if (d > 7.6) continue;
+    const lado = (i - 7.5) + (j - 8);
+    px(x, i, j, d > 6.7 ? TRACO : lado < -5 ? claro : lado > 4 ? escuro : h2(i, j, v + 50) < .14 ? escuro : base);
+  }
+  return k;
+});
+const PEDRAO = (() => { const k = novaTela(16, 16), x = k.getContext('2d');
+  for (let j = 2; j < 16; j++) for (let i = 0; i < 16; i++) {
+    const d = Math.hypot((i - 7.5) / 7.6, (j - 9.5) / 6.6); if (d > 1) continue;
+    const lado = (i - 7.5) + (j - 9.5);
+    px(x, i, j, d > .86 || j === 15 ? TRACO : lado < -4 ? '#9a8a84' : lado > 3 ? '#4e4040' : '#6e5e5a');
+  } return k; })();
+const NUC = deMapa(['..KKKK..', '.KOOOOK.', 'KOOYYOOK', 'KOYWYYOK', 'KOYYYYOK', 'KOOYYOOK', '.KOOOOK.', '..KKKK..'], { K: TRACO, O: '#ff7a1a', Y: '#ffd23f', W: '#fff6c8' });
+const POC = deMapa(['..KKKK..', '..KWWK..', '...KK...', '.KKGGKK.', 'KGGGGGGK', 'KGWGGGGK', 'KGGGGGGK', 'KgGGGGgK', '.KKKKKK.'], { K: TRACO, G: '#4be07a', g: '#2fae58', W: '#ffffff' });
+const MARCA = new Map();
+const exclama = cor => MARCA.get('!' + cor) || MARCA.set('!' + cor, deMapa(['KKK', 'KRK', 'KRK', 'KRK', 'KRK', 'KKK', 'KRK', 'KKK'], { K: TRACO, R: cor })).get('!' + cor);
+const estrela = cor => MARCA.get('*' + cor) || MARCA.set('*' + cor, deMapa(['...K...', '..KYK..', 'KKKYKKK', 'KYYYYYK', '.KYYYK.', '.KYKYK.', '.KK.KK.'], { K: TRACO, Y: cor })).get('*' + cor);
+const FOGO = [0, 1].map(f => { const k = novaTela(16, 16), x = k.getContext('2d');
+  for (let j = 2; j < 13; j++) { const m = Math.max(1, Math.round((j - 2) * .42)), o = j < 8 && j % 3 === 0 ? (f ? 1 : -1) : 0;
+    for (let i = 8 - m; i < 8 + m; i++) px(x, i + o, j, Math.abs(i + .5 - 8) < m - 1.5 && j > 5 ? '#ffd23f' : '#ff5a1a'); }
+  x.fillStyle = TRACO; x.fillRect(2, 12, 12, 4); x.fillStyle = '#6a4428'; x.fillRect(3, 13, 10, 2); x.fillStyle = '#8a5a34'; x.fillRect(3, 13, 10, 1);
+  return k; });
+const TENDA = (() => { const k = novaTela(24, 18), x = k.getContext('2d');
+  for (let j = 0; j < 18; j++) { const meia = 1 + j * .62;
+    for (let i = 0; i < 24; i++) { const dx = i + .5 - 12; if (Math.abs(dx) > meia) continue;
+      px(x, i, j, Math.abs(dx) > meia - 1 || j === 17 ? TRACO : j > 8 && Math.abs(dx) < (j - 8) * .45 ? '#2a1c24' : dx > 0 ? '#a33c1e' : '#d4582c'); } }
+  return k; })();
+const LOJA_SPR = (() => { const k = novaTela(32, 28), x = k.getContext('2d');
+  const r = (i, j, w, h, cor) => { x.fillStyle = cor; x.fillRect(i, j, w, h); };
+  r(3, 8, 3, 20, TRACO); r(4, 8, 1, 20, '#8a5a34'); r(26, 8, 3, 20, TRACO); r(27, 8, 1, 20, '#8a5a34');
+  r(1, 17, 30, 11, TRACO); r(2, 18, 28, 9, '#8a5a34'); r(2, 18, 28, 2, '#a8723f');
+  r(0, 1, 32, 10, TRACO); for (let i = 0; i < 30; i++) r(1 + i, 2, 1, 8, Math.floor(i / 5) % 2 ? '#f4efe6' : '#ff7a1a');
+  for (let i = 0; i < 6; i++) { r(1 + i * 5, 10, 5, 1, Math.floor(i) % 2 ? '#f4efe6' : '#ff7a1a'); r(1 + i * 5, 11, 5, 1, TRACO); }
+  x.drawImage(NUC, 7, 10); x.drawImage(POC, 18, 9);
+  return k; })();
+
+// ---------- Desenho do mundo ----------
 function desenha() {
-  c.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const t = tempo, esc = escuro();
-  const camx = clamp(S.x * T - W / 2, 0, Math.max(0, MW * T - W)), camy = clamp(S.y * T - H / 2, 0, Math.max(0, MH * T - H));
-  const x0 = Math.max(0, Math.floor(camx / T)), x1 = Math.min(MW - 1, Math.ceil((camx + W) / T));
-  const y0 = Math.max(0, Math.floor(camy / T)), y1 = Math.min(MH - 1, Math.ceil((camy + H) / T) + 1);
-  c.fillStyle = '#1f6a48'; c.fillRect(0, 0, W, H);
-  c.save(); c.translate(-Math.round(camx), -Math.round(camy));
-  const verdes = ['#58a84e', '#52a049', '#5fb054'], pedras = ['#6b5a5a', '#645353', '#725f5c'];
+  const t = tempo, esc = escuro(), fq = Math.floor(t * 2.5) % 2, fa = Math.floor(t * 3) % 3, g = tc;
+  const camx = Math.round(clamp(S.x * TILE - LW / 2, 0, Math.max(0, MW * TILE - LW)));
+  const camy = Math.round(clamp(S.y * TILE - LH / 2, 0, Math.max(0, MH * TILE - LH)));
+  const x0 = Math.max(0, Math.floor(camx / TILE)), x1 = Math.min(MW - 1, Math.floor((camx + LW) / TILE));
+  const y0 = Math.max(0, Math.floor(camy / TILE)), y1 = Math.min(MH - 1, Math.floor((camy + LH) / TILE));
+  g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false;
+  g.fillStyle = '#2a6a34'; g.fillRect(0, 0, LW, LH);
+  g.save(); g.translate(-camx, -camy);
+  // chão
   for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
-    const k = h2(x, y, 7), tp = mapa[y][x], vul = bioma[y][x] === 'vulcao';
-    c.fillStyle = (vul ? pedras : verdes)[(k * 3) | 0]; c.fillRect(x * T, y * T, T + 1, T + 1);
-    if (tp === MATO) {
-      c.fillStyle = vul ? 'rgba(20,8,8,.42)' : 'rgba(20,80,40,.35)'; c.beginPath(); c.roundRect(x * T + 2, y * T + 2, T - 4, T - 4, T * .25); c.fill();
-      c.strokeStyle = vul ? '#3a2626' : '#2f7a3c'; c.lineWidth = T * .06; c.lineCap = 'round';
-      for (let i = 0; i < 4; i++) { const gx = x * T + T * (.2 + h2(x + i, y, 21) * .6), gy = y * T + T * (.45 + h2(x, y + i, 22) * .5), bb = Math.sin(t * 2 + x + y + i) * T * .05;
-        c.beginPath(); c.moveTo(gx - T * .07, gy); c.lineTo(gx - T * .1 + bb, gy - T * .24); c.moveTo(gx, gy); c.lineTo(gx + bb, gy - T * .32); c.moveTo(gx + T * .07, gy); c.lineTo(gx + T * .1 + bb, gy - T * .22); c.stroke(); }
-    } else if (vul && k > .7) { c.strokeStyle = 'rgba(30,20,20,.45)'; c.lineWidth = T * .04; c.beginPath(); c.moveTo(x * T + T * .2, y * T + T * k * .7); c.lineTo(x * T + T * .5, y * T + T * .5); c.lineTo(x * T + T * .75, y * T + T * k * .9); c.stroke(); }
-    else if (!vul && k > .86) { c.fillStyle = k > .93 ? '#ffd23f' : '#f4efe6'; ell(c, x * T + T * .3, y * T + T * .55, T * .04, T * .04); c.fill(); ell(c, x * T + T * .7, y * T + T * .3, T * .035, T * .035); c.fill(); }
+    const tp = mapa[y][x], vul = bioma[y][x] === 'vulcao', v = Math.floor(h2(x, y, 7) * 4), X = x * TILE, Y = y * TILE;
+    g.drawImage(tp === MATO ? tMato(fq, vul) : tp === AGUA ? tAgua(fa, v) : tp === LAVA ? tLava(fa, v) : vul ? tPedra(v) : tGrama(v), X, Y);
+    if (tp === AGUA || tp === LAVA) { // margem: contorno escuro e uma linha de espuma (água) ou brasa (lava)
+      const [c1, c2] = tp === AGUA ? ['#1f4a60', '#bfe8ff'] : ['#2a1a1a', '#ffd23f'];
+      for (const [nx, ny, rx, ry, w, h, ox, oy] of [[x, y - 1, X, Y, 16, 1, 0, 1], [x, y + 1, X, Y + 15, 16, 1, 0, -1], [x - 1, y, X, Y, 1, 16, 1, 0], [x + 1, y, X + 15, Y, 1, 16, -1, 0]])
+        if (tile(nx, ny) !== tp) { g.fillStyle = c1; g.fillRect(rx, ry, w, h); g.fillStyle = c2; g.fillRect(rx + ox, ry + oy, w, h); }
+    }
   }
-  mancha(x0, x1, y0, y1, AGUA, '#2a5f52', '#2f7fd6');
-  mancha(x0, x1, y0, y1, LAVA, '#2a1a1a', '#ff5a1a');
-  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
-    const tp = mapa[y][x], k = h2(x, y, 13);
-    if (tp === AGUA) { c.strokeStyle = 'rgba(190,235,255,.55)'; c.lineWidth = T * .045; c.lineCap = 'round'; const ox = Math.sin(t * .8 + k * 9) * T * .1;
-      c.beginPath(); c.moveTo(x * T + T * .25 + ox, y * T + T * (.3 + k * .4)); c.lineTo(x * T + T * .5 + ox, y * T + T * (.3 + k * .4)); c.stroke(); }
-    if (tp === LAVA) { const pu = .5 + Math.sin(t * 2 + k * 20) * .5; c.fillStyle = `rgba(255,220,90,${.35 + pu * .4})`; ell(c, x * T + T * (.3 + k * .4), y * T + T * (.4 + k * .3), T * (.1 + pu * .08), T * (.07 + pu * .05)); c.fill(); }
-  }
-  // fila ordenada por profundidade
-  const fila = [];
+  // tudo que tem altura, de trás para a frente
+  const fila = [], vis = (x, y) => x > x0 - 2 && x < x1 + 3 && y > y0 - 1 && y < y1 + 3;
   for (let y = y0; y <= Math.min(MH - 1, y1 + 1); y++) for (let x = Math.max(0, x0 - 1); x <= Math.min(MW - 1, x1 + 1); x++) {
-    if (mapa[y][x] === ARVORE) fila.push({ y: y + .85, f: () => pinheiro(c, (x + .5) * T, (y + .85) * T, T, h2(x, y, 17), t) });
-    if (mapa[y][x] === ROCHA) fila.push({ y: y + .85, f: () => pedrona(c, (x + .5) * T, (y + .85) * T, T, h2(x, y, 17)) });
+    if (mapa[y][x] === ARVORE) fila.push({ y: y + .95, f: () => g.drawImage(ARV[h2(x, y, 17) > .5 ? 1 : 0], x * TILE, y * TILE - 8) });
+    if (mapa[y][x] === ROCHA) fila.push({ y: y + .95, f: () => g.drawImage(PEDRAO, x * TILE, y * TILE) });
   }
-  for (const it of itens) if (it.pronto && it.x > x0 - 1 && it.x < x1 + 2 && it.y > y0 - 1 && it.y < y1 + 2) fila.push({ y: it.y, f: () => itemChao(c, it, it.x * T, it.y * T, T, t) });
-  // acampamento
-  fila.push({ y: CY + .5, f: () => { const fx = (CX + .5) * T, fy = (CY + .5) * T;
-    c.lineWidth = T * .05; c.strokeStyle = TRACO; c.lineJoin = 'round';
-    poli(c, [fx - T * 1.9, fy - T * .1, fx - T * 1.3, fy - T * 1.1, fx - T * .7, fy - T * .1]); pinta(c, '#c94f2a'); poli(c, [fx - T * 1.42, fy - T * .1, fx - T * 1.3, fy - T * .6, fx - T * 1.18, fy - T * .1]); pinta(c, '#2a1c24');
-    for (const k of [-1, 1]) { c.save(); c.translate(fx, fy); c.rotate(k * .5); c.beginPath(); c.roundRect(-T * .3, -T * .06, T * .6, T * .12, T * .05); pinta(c, '#6a4428'); c.restore(); }
-    chama(c, fx, fy - T * .04, T * .2, T * .6, t, '#ff6a2a', '#ffd23f'); } });
-  for (const ch of FIXOS) if (!ch.req || emblemas() >= ch.req) fila.push({ y: ch.y, f: () => {
-    const ja = vencido(ch);
-    treinador(c, ch.x * T, ch.y * T, T * (ch.g ? .68 : .62), t, { ...visual(ch, ja), lado: S.x < ch.x ? -1 : 1 });
-    const tx = ja ? (ch.g ? '★' : '') : '!';
-    if (!tx) return;
-    c.font = `900 ${T * .5}px system-ui`; c.textAlign = 'center'; c.lineWidth = 4; c.strokeStyle = TRACO;
-    const yy = ch.y * T - T * 1.35 + Math.sin(t * 4) * 3;
-    c.strokeText(tx, ch.x * T, yy); c.fillStyle = ch.cor; c.fillText(tx, ch.x * T, yy); } });
-  fila.push({ y: LOJA.y, f: () => { const lx = LOJA.x * T, ly = LOJA.y * T; // barraca da loja
-    c.lineWidth = T * .05; c.strokeStyle = TRACO; c.lineJoin = 'round';
-    c.fillStyle = '#6a4428'; c.fillRect(lx - T * .62, ly - T * .95, T * .1, T * .95); c.fillRect(lx + T * .52, ly - T * .95, T * .1, T * .95);
-    c.beginPath(); c.roundRect(lx - T * .7, ly - T * .5, T * 1.4, T * .5, T * .06); pinta(c, '#8a5a34');
-    poli(c, [lx - T * .85, ly - T * .9, lx - T * .6, ly - T * 1.3, lx + T * .6, ly - T * 1.3, lx + T * .85, ly - T * .9]); pinta(c, '#ff7a1a');
-    for (let i = -1; i <= 1; i++) { poli(c, [lx + i * T * .5 - T * .12, ly - T * .9, lx + i * T * .42 - T * .1, ly - T * 1.3, lx + i * T * .42 + T * .1, ly - T * 1.3, lx + i * T * .5 + T * .12, ly - T * .9]); pinta(c, '#f4efe6', false); }
-    nucleo(c, lx - T * .3, ly - T * .62, T * .13, t);
-    c.beginPath(); c.roundRect(lx + T * .18, ly - T * .72, T * .22, T * .22, T * .06); pinta(c, '#4be07a');
-    c.font = `900 ${T * .26}px system-ui`; c.textAlign = 'center'; c.lineWidth = 3; c.strokeText('LOJA', lx, ly - T * 1.4); c.fillStyle = '#f4efe6'; c.fillText('LOJA', lx, ly - T * 1.4); } });
-  if (titaSolto()) fila.push({ y: TITA.y, f: () => desenhaFera(c, F.ferrugor, TITA.x * T, TITA.y * T, T * .62, t, {}) });
-  if (S.feras[0]) fila.push({ y: seg.y, f: () => desenhaFera(c, F[S.feras[0].id], seg.x * T, seg.y * T, T * .36, t, { flip: seg.lado < 0 }) });
-  fila.push({ y: S.y, f: () => { treinador(c, S.x * T, S.y * T, T * .64, t, { ...HEROI, anda: J.andando, passo: J.passo, lado: J.lado });
-    c.font = `900 ${T * .22}px system-ui`; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = TRACO; c.strokeText(S.nome, S.x * T, S.y * T - T * 1.3); c.fillStyle = '#f4efe6'; c.fillText(S.nome, S.x * T, S.y * T - T * 1.3); } });
+  for (const it of itens) if (it.pronto && vis(it.x, it.y)) fila.push({ y: it.y, f: () => {
+    sombra(g, it.x * TILE, it.y * TILE, 6); blit(g, it.tipo === 'nucleo' ? NUC : POC, it.x * TILE - 4, it.y * TILE - 11 - Math.floor(t * 3 + it.ph) % 2); } });
+  const fx = (CX + .5) * TILE, fy = (CY + .5) * TILE;
+  fila.push({ y: CY + .4, f: () => g.drawImage(TENDA, Math.round(fx - 1.3 * TILE - 12), Math.round(fy - 18)) });
+  fila.push({ y: CY + .5, f: () => g.drawImage(FOGO[fq], Math.round(fx - 8), Math.round(fy - 13)) });
+  fila.push({ y: LOJA.y, f: () => g.drawImage(LOJA_SPR, Math.round(LOJA.x * TILE - 16), Math.round(LOJA.y * TILE - 28)) });
+  for (const ch of FIXOS) if ((!ch.req || emblemas() >= ch.req) && vis(ch.x, ch.y)) fila.push({ y: ch.y, f: () => {
+    const ja = vencido(ch), dx = S.x - ch.x, dy = S.y - ch.y, perto = Math.hypot(dx, dy) < 4;
+    const dir = !perto ? 'frente' : Math.abs(dx) > Math.abs(dy) ? 'lado' : dy < 0 ? 'costas' : 'frente';
+    sombra(g, ch.x * TILE, ch.y * TILE, 10);
+    blit(g, spriteTreinador(palDe(ch, ja), cabDe(ch), dir, 0), ch.x * TILE - 8, ch.y * TILE - 23, dir === 'lado' && dx < 0);
+    const marca = ja ? (ch.g ? estrela(ch.cor) : null) : exclama(ch.g ? ch.cor : '#ff4a3a');
+    if (marca) blit(g, marca, ch.x * TILE - (marca.width >> 1), ch.y * TILE - 34 - Math.floor(t * 3) % 2);
+  } });
+  if (titaSolto()) fila.push({ y: TITA.y, f: () => { const s = spriteFera('ferrugor', 9); if (!s) return;
+    sombra(g, TITA.x * TILE, TITA.y * TILE, s.width * .7); blit(g, s, TITA.x * TILE - s.width / 2, TITA.y * TILE - s.height - Math.floor(t * 2) % 2, true); } });
+  if (S.feras[0]) fila.push({ y: seg.y, f: () => { const s = spriteFera(S.feras[0].id, 6); if (!s) return;
+    sombra(g, seg.x * TILE, seg.y * TILE, s.width * .7);
+    blit(g, s, seg.x * TILE - s.width / 2, seg.y * TILE - s.height - (seg.anda ? Math.floor(t * 8) : Math.floor(t * 2)) % 2, seg.lado < 0); } });
+  fila.push({ y: S.y, f: () => {
+    const q = !J.andando ? 0 : J.dir === 'lado' ? Math.floor(J.passo / 1.6) % 2 : [0, 1, 0, 2][Math.floor(J.passo / 1.6) % 4];
+    sombra(g, S.x * TILE, S.y * TILE, 10);
+    blit(g, spriteTreinador(PAL_HEROI, 'espetado', J.dir, q), S.x * TILE - 8, S.y * TILE - 23, J.dir === 'lado' && J.lado < 0); } });
   fila.sort((a, b) => a.y - b.y);
   for (const o of fila) o.f();
-  for (const p of parts) { c.globalAlpha = clamp(p.vida * 2, 0, 1); c.fillStyle = p.cor; ell(c, p.x * T, p.y * T, p.r * T, p.r * T); c.fill(); }
-  c.globalAlpha = 1; c.restore();
-  // noite
+  for (const p of parts) { g.fillStyle = p.cor; const z = p.r > .07 ? 2 : 1; g.fillRect(Math.round(p.x * TILE), Math.round(p.y * TILE), z, z); }
+  g.restore();
+  // noite: escurece em volta do jogador e acende vaga-lumes
   if (esc > .01) {
-    const px = S.x * T - camx, py = S.y * T - camy - T * .5;
-    const gr = c.createRadialGradient(px, py, T, px, py, Math.max(W, H) * .7);
+    const qx = S.x * TILE - camx, qy = S.y * TILE - camy - 8;
+    const gr = g.createRadialGradient(qx, qy, 14, qx, qy, Math.max(LW, LH) * .7);
     gr.addColorStop(0, `rgba(14,10,40,${.15 * esc})`); gr.addColorStop(.4, `rgba(14,10,40,${.55 * esc})`); gr.addColorStop(1, `rgba(8,6,28,${.72 * esc})`);
-    c.fillStyle = gr; c.fillRect(0, 0, W, H);
-    c.globalCompositeOperation = 'lighter';
-    for (const v of vaga) { const x = (v.x * W + Math.sin(t * v.v + v.ph) * 60 + W) % W, y = (v.y * H + Math.cos(t * v.v * .8 + v.ph) * 50 + H) % H, a = (.5 + Math.sin(t * 3 * v.v + v.ph) * .5) * esc;
-      const gg = c.createRadialGradient(x, y, 0, x, y, 10); gg.addColorStop(0, `rgba(255,170,80,${a})`); gg.addColorStop(1, 'rgba(255,170,80,0)'); c.fillStyle = gg; ell(c, x, y, 10, 10); c.fill(); }
-    c.globalCompositeOperation = 'source-over';
+    g.fillStyle = gr; g.fillRect(0, 0, LW, LH);
+    for (const v of vaga) {
+      const x = Math.round((v.x * LW + Math.sin(t * v.v + v.ph) * 20 + LW) % LW), y = Math.round((v.y * LH + Math.cos(t * v.v * .8 + v.ph) * 16 + LH) % LH), a = (.5 + Math.sin(t * 3 * v.v + v.ph) * .5) * esc;
+      g.fillStyle = `rgba(255,170,80,${a * .35})`; g.fillRect(x - 1, y - 1, 3, 3); g.fillStyle = `rgba(255,232,150,${a})`; g.fillRect(x, y, 1, 1);
+    }
   }
+  // amplia a tela pequena para a tela de verdade
+  c.setTransform(dpr, 0, 0, dpr, 0, 0); c.imageSmoothingEnabled = false;
+  c.drawImage(tela, 0, 0, LW * ESC, LH * ESC);
+  // textos em resolução cheia (ficam nítidos)
+  c.font = `${ESC * 5 + 4}px "Jersey 10", monospace`; c.textAlign = 'center'; c.lineWidth = 3; c.lineJoin = 'round'; c.strokeStyle = TRACO;
+  const rotulo = (txt, x, y, cor) => { c.strokeText(txt, (x - camx) * ESC, (y - camy) * ESC); c.fillStyle = cor; c.fillText(txt, (x - camx) * ESC, (y - camy) * ESC); };
+  rotulo(S.nome, S.x * TILE, S.y * TILE - 26, '#f4efe6');
+  rotulo('LOJA', LOJA.x * TILE, LOJA.y * TILE - 30, '#ffd23f');
   if (joy && Math.hypot(joy.x - joy.x0, joy.y - joy.y0) > 10) {
     c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 3; ell(c, joy.x0, joy.y0, 42, 42); c.stroke();
     const jx = joy.x - joy.x0, jy = joy.y - joy.y0, m = Math.hypot(jx, jy), f = Math.min(m, 42) / m;
@@ -908,7 +1096,7 @@ const nomeIni = () => (B.tipo === 'selv' ? F[B.ini.id].nome + ' selvagem' : F[B.
 async function iniciaBatalha(cfg) {
   if (B) return;
   pausado = true; paraTudo();
-  B = Object.assign({ meu: S.feras.findIndex((m, i) => i < 4 && m.hp > 0), ocup: true, anim: {}, fx: null, cap: null, t0: tempoReal, bio: bioma[S.y | 0][S.x | 0], noite: eNoite() }, cfg);
+  B = Object.assign({ meu: S.feras.findIndex((m, i) => i < 4 && m.hp > 0), ocup: true, anim: {}, fx: null, cap: null, parts: [], centro: {}, t0: tempoReal, bio: bioma[S.y | 0][S.x | 0], noite: eNoite() }, cfg);
   S.dex[B.ini.id] = S.dex[B.ini.id] || 1;
   menu(null); pintaPlacas(); $('#batalha').classList.add('on'); somBatalha();
   B.anim.ini = { tipo: 'entra', t0: tempoReal }; B.anim.eu = { tipo: 'entra', t0: tempoReal };
@@ -955,26 +1143,40 @@ function golpeIA() {
   if (Math.random() < .3) return l[Math.floor(rnd(l.length))];
   return l.reduce((a, b) => (b.pot * efeito(b.tipo, alvo) * (b.tipo === F[B.ini.id].tipo ? 1.5 : 1) > a.pot * efeito(a.tipo, alvo) * (a.tipo === F[B.ini.id].tipo ? 1.5 : 1) ? b : a));
 }
+const FISICO = new Set(['garra', 'mordida', 'investida', 'rapido', 'hiper']); // golpes em que a fera avança no inimigo
+const DUR = { bola: .6, gotas: .7, folhas: .75, cacos: .65, bolhas: .9, feixe: 1, raio: .75, chuva: 1.05, pilar: .95, onda: .9, redemoinho: 1, terremoto: 1.05, garra: .6, mordida: .6, investida: .32, rapido: .4, hiper: .62 };
 async function ataca(quem, a, d, gp) {
   const nome = quem === 'eu' ? F[a.id].nome : (B.tipo === 'selv' ? 'O ' : '') + nomeIni(), alvo = quem === 'eu' ? 'ini' : 'eu';
   B.anim[quem] = { tipo: 'ataque', t0: tempoReal };
-  await diz(`${nome} usou ${gp.nome}!`, 600);
-  if (Math.random() > gp.prec) { await diz('Mas errou!'); return; }
+  await diz(`${nome} usou ${gp.nome}!`, 450);
+  // 1) a animação do golpe até chegar no alvo
+  const fx = B.fx = { tipo: gp.tipo, anim: gp.anim, pot: gp.pot, de: quem, para: alvo, t0: tempoReal, dur: DUR[gp.anim], forte: gp.pot >= 100, feitos: {} };
+  if (FISICO.has(gp.anim)) B.anim[quem] = { tipo: 'avanca', t0: tempoReal, dur: fx.dur / .6, rastro: gp.anim === 'rapido' || gp.anim === 'hiper' };
+  somTipo(gp.tipo);
+  await dorme(fx.dur * 1000);
+  if (Math.random() > gp.prec) { B.fx = null; await diz('Mas errou!'); return; }
+  // 2) acerta: explosão, tremor, clarão, piscada e dano
   const r = dano(a, d, gp);
-  B.fx = { alvo, tipo: gp.tipo, t0: tempoReal }; B.anim[alvo] = { tipo: 'dano', t0: tempoReal }; somGolpe();
+  fx.hit = true; impacto(fx); B.anim[alvo] = { tipo: 'dano', t0: tempoReal }; somGolpe();
   d.hp = Math.max(0, d.hp - r.v); pintaPlacas();
-  await dorme(550);
+  await dorme(560); B.fx = null;
   if (r.crit) await diz('Golpe crítico!', 750);
   if (r.ef > 1) await diz('É super eficaz!', 800); else if (r.ef < 1) await diz('Não foi muito eficaz…', 800);
 }
+const SOM_TIPO = { normal: [[200, 'square']], fogo: [[330, 'sawtooth'], [250, 'sawtooth'], [180, 'sawtooth']], agua: [[700, 'sine'], [900, 'sine'], [650, 'sine']],
+  planta: [[1000, 'triangle'], [1300, 'triangle'], [1100, 'triangle']], trovao: [[1800, 'square'], [300, 'square'], [1500, 'square']], rocha: [[110, 'square'], [80, 'square'], [95, 'square']],
+  sombra: [[220, 'sine'], [160, 'sine'], [110, 'sine']], gelo: [[1900, 'triangle'], [2400, 'triangle'], [2900, 'triangle']] };
+function somTipo(tp) { SOM_TIPO[tp].forEach(([f, o], i) => nota(f, i * .08, .14, o, .05)); }
 function ganhaXp(m, q) { // devolve as mensagens do que aconteceu
   const msgs = [];
   m.xp += q;
   while (m.nv < 60 && m.xp >= xpProx(m.nv)) {
+    const velhos = golpes(m).map(x => x.nome);
     m.xp -= xpProx(m.nv); const antes = stat(m).hp; m.nv++; m.hp += stat(m).hp - antes;
     msgs.push(`${F[m.id].nome} subiu para o nível ${m.nv}!`);
     const f = F[m.id];
     if (f.evo && m.nv >= f.evo[1]) { const a2 = stat(m).hp; m.id = f.evo[0]; m.hp += stat(m).hp - a2; S.dex[m.id] = 2; msgs.push(`★ ${f.nome} evoluiu para ${F[m.id].nome}! ★`); }
+    for (const x of golpes(m)) if (!velhos.includes(x.nome)) msgs.push(`${F[m.id].nome} aprendeu ${x.nome}!`);
   }
   return msgs;
 }
@@ -1068,51 +1270,287 @@ async function fimBatalha(res) {
   $('#batalha').classList.remove('on'); B = null; pausado = false; paraTudo();
   pintaHud(); salva();
 }
+// ---------- Batalha em pixel art: tela de 240×160, como os portáteis antigos ----------
+const BW = 240, BH = 160, POS = { eu: { x: 62, y: 142 }, ini: { x: 176, y: 80 } }, KB = { eu: 17, ini: 13 };
+function elipsePx(g, cx, cy, rx, ry, cor, borda) {
+  for (let j = -ry; j <= ry; j++) { const w = Math.round(rx * Math.sqrt(1 - (j / ry) ** 2)); g.fillStyle = borda; g.fillRect(cx - w, cy + j, 2 * w + 1, 1); }
+  for (let j = 1 - ry; j <= ry - 1; j++) { const w = Math.round((rx - 2) * Math.sqrt(1 - (j / (ry - 1)) ** 2)); g.fillStyle = cor; g.fillRect(cx - w, cy + j, 2 * w + 1, 1); }
+}
+function disco(g, x, y, r, cor) { g.fillStyle = cor; x = Math.round(x); y = Math.round(y); for (let j = -r; j <= r; j++) { const w = Math.round(Math.sqrt(r * r - j * j)); g.fillRect(x - w, y + j, 2 * w + 1, 1); } }
+function anel(g, x, y, r, cor) { g.fillStyle = cor; const n = Math.max(8, Math.round(r * 6)); for (let i = 0; i < n; i++) { const a = i / n * TAU; g.fillRect(Math.round(x + Math.cos(a) * r), Math.round(y + Math.sin(a) * r), 1, 1); } }
+function linhaPx(g, x0, y0, x1, y1, w, cor, miolo) {
+  const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
+  for (let i = 0; i <= n; i++) { const x = Math.round(lerp(x0, x1, i / n)), y = Math.round(lerp(y0, y1, i / n));
+    g.fillStyle = cor; g.fillRect(x - (w >> 1), y, w, 1); g.fillStyle = miolo; g.fillRect(x, y, 1, 1); }
+}
 function fundoBatalha(tr) {
-  const w = 760, h = 420, n = B.noite, bi = B.bio;
-  const ceu = cB.createLinearGradient(0, 0, 0, h * .6);
-  const cores = n ? ['#0d0a26', '#2b2060'] : bi === 'vulcao' ? ['#3a1410', '#c8502a'] : bi === 'lago' ? ['#2a78c8', '#a8dcff'] : bi === 'bosque' ? ['#1c5a48', '#8fd0a0'] : ['#3f8fd6', '#cfeaff'];
-  ceu.addColorStop(0, cores[0]); ceu.addColorStop(1, cores[1]); cB.fillStyle = ceu; cB.fillRect(0, 0, w, h);
-  cB.fillStyle = bi === 'vulcao' ? '#2a1a1a' : n ? '#16304a' : '#2f6a4a';
-  cB.beginPath(); cB.moveTo(0, h * .56); for (let i = 0; i <= 10; i++) cB.lineTo(i * 76, h * .56 - (i % 2 ? 60 : 20) - h2(i, 3, 5) * 40); cB.lineTo(w, h * .6); cB.lineTo(0, h * .6); cB.fill();
-  const chao = cB.createLinearGradient(0, h * .55, 0, h);
-  const cc = bi === 'vulcao' ? ['#5c4a4a', '#3a2c2c'] : n ? ['#27583a', '#17392a'] : ['#5fb054', '#3f8a40'];
-  chao.addColorStop(0, cc[0]); chao.addColorStop(1, cc[1]); cB.fillStyle = chao; cB.fillRect(0, h * .56, w, h);
-  cB.fillStyle = 'rgba(0,0,0,.2)'; ell(cB, 555, 232, 150, 30); cB.fill(); ell(cB, 200, 392, 190, 36); cB.fill();
-  cB.fillStyle = bi === 'vulcao' ? '#7a6060' : n ? '#3a7a50' : '#7fca6a'; ell(cB, 555, 226, 150, 30); cB.fill(); ell(cB, 200, 386, 190, 36); cB.fill();
+  const g = cB, n = B.noite, bi = B.bio;
+  const ceu = n ? ['#0d0a26', '#1a1440', '#2b2060'] : bi === 'vulcao' ? ['#3a1410', '#7a2a18', '#c8502a'] : bi === 'lago' ? ['#2a78c8', '#5aa8e8', '#a8dcff'] : bi === 'bosque' ? ['#1c5a48', '#4a9a78', '#8fd0a0'] : ['#3f8fd6', '#7ab8ec', '#cfeaff'];
+  ceu.forEach((cor, i) => { g.fillStyle = cor; g.fillRect(0, i * 22, BW, 22); });
+  if (n) for (let i = 0; i < 18; i++) if ((Math.floor(tr * 2) + i) % 5) { g.fillStyle = '#fff'; g.fillRect(Math.floor(h2(i, 1, 9) * BW), Math.floor(h2(1, i, 9) * 50), 1, 1); }
+  const morro = bi === 'vulcao' ? '#2a1a1a' : n ? '#16304a' : '#2f6a4a';
+  for (let x = 0; x < BW; x++) { const hh = 12 + Math.round(Math.sin(x * .045) * 6 + Math.sin(x * .13 + 1) * 3);
+    g.fillStyle = morro; g.fillRect(x, 66 - hh, 1, hh); g.fillStyle = tom(morro, .22); g.fillRect(x, 66 - hh, 1, 1); }
+  const chao = bi === 'vulcao' ? ['#5c4a4a', '#4e3e3e'] : n ? ['#27583a', '#204a30'] : ['#6cc050', '#5aab4c'];
+  for (let y = 66; y < BH; y++) { g.fillStyle = chao[Math.floor((y - 66) / 6) % 2]; g.fillRect(0, y, BW, 1); }
+  const plat = bi === 'vulcao' ? ['#7a6060', '#4a3838'] : n ? ['#3a7a50', '#24503a'] : ['#8ad070', '#4f9a46'];
+  elipsePx(g, POS.ini.x, POS.ini.y, 46, 9, plat[0], plat[1]);
+  elipsePx(g, POS.eu.x, POS.eu.y, 58, 11, plat[0], plat[1]);
+}
+// cores dos efeitos de cada tipo: [borda, meio, miolo]
+const COR_FX = { normal: ['#c8c0d0', '#ffffff', '#ffd23f'], fogo: ['#e8401a', '#ff9a2a', '#ffe27a'], agua: ['#2f7fd6', '#6fc0ff', '#e0f6ff'], planta: ['#2f8a3c', '#57c84d', '#c8ff6a'],
+  trovao: ['#e0a800', '#ffd21f', '#ffffff'], rocha: ['#6a5040', '#b08a6a', '#d8b890'], sombra: ['#2a1040', '#7a4ac8', '#d9a8ff'], gelo: ['#3fb8e8', '#7fe0ff', '#ffffff'] };
+const centroDe = quem => B.centro[quem] || { x: POS[quem].x, y: POS[quem].y - 20 };
+function brilho(g, x, y, r, cor, a = .35) { g.globalAlpha = a; disco(g, x, y, Math.max(1, Math.round(r)), cor); g.globalAlpha = 1; }
+function faiscas(x, y, cor, n, v = 60, grav = 0, t = 1) {
+  for (let i = 0; i < n; i++) { const a = rnd(TAU), s = rnd(v * .3, v); B.parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - (grav ? 40 : 0), vida: rnd(.2, .5), cor: cor[i % cor.length], t, grav }); }
+}
+function linhaGrossa(g, x0, y0, x1, y1, w, cor) {
+  const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1); g.fillStyle = cor;
+  for (let i = 0; i <= n; i++) g.fillRect(Math.round(lerp(x0, x1, i / n) - w / 2), Math.round(lerp(y0, y1, i / n) - w / 2), w, w);
+}
+function pedra(g, x, y, w, h, c1, c2) {
+  x = Math.round(x - w / 2); y = Math.round(y - h / 2); g.fillStyle = TRACO; g.fillRect(x - 1, y, w + 2, h); g.fillRect(x, y - 1, w, h + 2);
+  g.fillStyle = c1; g.fillRect(x, y, w, h); g.fillStyle = c2; g.fillRect(x, y, Math.max(1, w >> 1), 1); g.fillRect(x, y, 1, Math.max(1, h >> 1));
+}
+function espinho(g, x, base, w, h, c1, c2) { // espinho/cristal saindo do chão
+  x = Math.round(x); base = Math.round(base);
+  for (let j = 0; j < h; j++) { const m = Math.round(w / 2 * (1 - j / h)); g.fillStyle = TRACO; g.fillRect(x - m - 1, base - j, 2 * m + 3, 1); }
+  for (let j = 0; j < h - 1; j++) { const m = Math.max(0, Math.round(w / 2 * (1 - j / h)) - 1); g.fillStyle = j < h * .45 ? c1 : c2; g.fillRect(x - m, base - j, 2 * m + 1, 1); g.fillStyle = c2; g.fillRect(x - m, base - j, 1, 1); }
+}
+function dentes(g, cx, y, w, s) { // fileira de dentes (s = 1 de cima, -1 de baixo)
+  g.fillStyle = TRACO; g.fillRect(Math.round(cx - w / 2) - 1, s > 0 ? y - 6 : y + 1, w + 2, 6);
+  g.fillStyle = '#b03050'; g.fillRect(Math.round(cx - w / 2), s > 0 ? y - 5 : y + 2, w, 4);
+  for (let i = 0; i < 6; i++) { const tx = Math.round(cx - w / 2 + (i + .5) * w / 6);
+    for (let j = 0; j < 7; j++) { const m = Math.round(3 * (1 - j / 7)); g.fillStyle = TRACO; g.fillRect(tx - m - 1, y + s * j, 2 * m + 3, 1); g.fillStyle = '#ffffff'; if (m > 0) g.fillRect(tx - m, y + s * j, 2 * m + 1, 1); } }
+}
+function desenhaGolpe(g, tr) { // a animação de cada golpe, conforme o estilo dele
+  const fx = B.fx; if (!fx) return;
+  const k = (tr - fx.t0) / fx.dur, A = centroDe(fx.de), Z = centroDe(fx.para), cor = COR_FX[fx.tipo], f = fx.forte ? 1 : 0, chao = POS[fx.para].y;
+  const dir = Z.x > A.x ? 1 : -1, pos = (kk, arco) => ({ x: lerp(A.x, Z.x, kk), y: lerp(A.y, Z.y, kk) - Math.sin(kk * Math.PI) * arco });
+  const uma = (id, fn) => { if (!fx.feitos[id]) { fx.feitos[id] = 1; fn(); } }; // acontece uma vez só
+  switch (fx.anim) {
+    case 'bola': { // projétil grande com rastro
+      if (k > 1) break;
+      const p = pos(k, 16), r = 5 + f * 3;
+      if (fx.tipo === 'rocha') { brilho(g, p.x, p.y, r + 4, cor[2], .25); pedra(g, p.x, p.y, r * 2 + 1, r * 2 - 1, cor[1], cor[2]); }
+      else { brilho(g, p.x, p.y, r + 5, cor[1], .3); disco(g, p.x, p.y, r, cor[0]); disco(g, p.x, p.y, r - 2, cor[1]); disco(g, p.x, p.y, Math.max(0, r - 4), cor[2]); }
+      for (let i = 0; i < 3; i++) B.parts.push({ x: p.x + rnd(-r, r), y: p.y + rnd(-r, r), vx: -dir * rnd(10, 50), vy: rnd(-25, 10), vida: rnd(.2, .45), cor: cor[i % 3], t: Math.random() < .4 ? 2 : 1 });
+      for (let i = 0; i < 5; i++) { const a = tr * 18 + i * TAU / 5; g.fillStyle = cor[2]; g.fillRect(Math.round(p.x + Math.cos(a) * (r + 3)), Math.round(p.y + Math.sin(a) * (r + 3)), 1, 1); }
+      break;
+    }
+    case 'gotas': case 'folhas': case 'cacos': { // rajada de muitos projéteis
+      if (k > 1) break;
+      for (let i = 0; i < 10 + f * 6; i++) {
+        const kk = k * 1.6 - i * .06; if (kk < 0 || kk > 1) continue;
+        const p = pos(kk, fx.anim === 'gotas' ? 12 : 0), x = Math.round(p.x), y = Math.round(p.y + Math.sin(i * 1.7) * 8 + (fx.anim === 'folhas' ? Math.sin(kk * 14 + i) * 6 : 0));
+        if (fx.anim === 'gotas') { g.fillStyle = cor[0]; g.fillRect(x - 2, y - 1, 4 + f, 3 + f); g.fillStyle = cor[1]; g.fillRect(x - 1, y - 1, 2, 2); g.fillStyle = cor[2]; g.fillRect(x - 1, y - 1, 1, 1); }
+        else if (fx.anim === 'folhas') { g.fillStyle = TRACO; g.fillRect(x - 3, y - 2, 7, 5); g.fillStyle = cor[1]; g.fillRect(x - 2, y - 1, 5, 3); g.fillStyle = cor[2]; g.fillRect(x - 2, y - 1, 2, 1); g.fillStyle = cor[0]; g.fillRect(x, y + 1, 3, 1); }
+        else { for (let q = 0; q < 7; q++) { g.fillStyle = q < 2 ? cor[2] : cor[1]; g.fillRect(x - dir * q, y, 1, 1); } g.fillStyle = cor[0]; g.fillRect(x - dir * 5 - (dir < 0 ? 0 : 2), y - 1, 3, 1); g.fillRect(x - dir * 5 - (dir < 0 ? 0 : 2), y + 1, 3, 1); }
+      }
+      break;
+    }
+    case 'bolhas': {
+      if (k > 1) break;
+      for (let i = 0; i < 9 + f * 5; i++) {
+        const kk = k * 1.5 - i * .06; if (kk < 0 || kk > 1) continue;
+        const p = pos(kk, 6), r = 2 + Math.floor(h2(i, 3, 9) * 4), x = p.x + Math.sin(kk * 9 + i) * 8, y = p.y + Math.cos(kk * 7 + i * 2) * 8;
+        brilho(g, x, y, r, cor[1], .45); anel(g, x, y, r, cor[2]); g.fillStyle = '#ffffff'; g.fillRect(Math.round(x - r / 2), Math.round(y - r / 2), 1, 1);
+      }
+      break;
+    }
+    case 'feixe': { // carrega energia e solta um raio grosso
+      const bx = A.x + dir * 10, by = A.y - 4;
+      if (k < .35) {
+        const c = k / .35; brilho(g, bx, by, 3 + c * 9, cor[1], .35); disco(g, bx, by, Math.round(1 + c * 4), cor[2]);
+        for (let i = 0; i < 3; i++) { const a = rnd(TAU), d = rnd(14, 28); B.parts.push({ x: bx + Math.cos(a) * d, y: by + Math.sin(a) * d, vx: -Math.cos(a) * d * 4, vy: -Math.sin(a) * d * 4, vida: .22, cor: cor[i % 3], t: 1 }); }
+      } else if (k < 1.3) {
+        const fade = k > 1 ? 1 - (k - 1) / .3 : 1, w = Math.max(2, Math.round((7 + f * 5) * fade + Math.sin(tr * 50) * 1.5));
+        const e = clamp((k - .35) / .15, 0, 1), ex = lerp(bx, Z.x, e), ey = lerp(by, Z.y, e);
+        g.globalAlpha = .3; linhaGrossa(g, bx, by, ex, ey, w + 8, cor[1]); g.globalAlpha = 1;
+        linhaGrossa(g, bx, by, ex, ey, w, cor[0]); linhaGrossa(g, bx, by, ex, ey, Math.max(1, w - 3), cor[1]); linhaGrossa(g, bx, by, ex, ey, Math.max(1, w - 6), cor[2]);
+        disco(g, bx, by, Math.round(w * .8), cor[2]);
+        if (e >= 1) { brilho(g, Z.x, Z.y, w + 6, cor[1], .5); disco(g, Z.x, Z.y, Math.round(w * .7), cor[2]); for (let i = 0; i < 4; i++) B.parts.push({ x: Z.x, y: Z.y, vx: rnd(-100, 100), vy: rnd(-100, 100), vida: .3, cor: cor[i % 3], t: Math.random() < .5 ? 2 : 1 }); }
+        if (Math.random() < .6) { const q = rnd(); B.parts.push({ x: lerp(bx, ex, q), y: lerp(by, ey, q), vx: rnd(-30, 30), vy: rnd(-30, 30), vida: .25, cor: cor[2], t: 1 }); }
+        uma('clarao', () => { B.flash = { t0: tempoReal, cor: cor[1], a: .3 }; });
+      }
+      break;
+    }
+    case 'raio': { // raios caindo do céu
+      if (k > 1.15 || k < .15 || !(Math.floor(tr * 24) % 3)) break;
+      const nb = 1 + (fx.pot >= 80 ? 1 : 0) + f;
+      for (let b = 0; b < nb; b++) {
+        const tx = Z.x + (b - (nb - 1) / 2) * 14, n = 9; let x = tx + rnd(-10, 10), y = -4;
+        for (let i = 0; i < n; i++) {
+          const ny = Z.y * (i + 1) / n, nx = i === n - 1 ? tx : tx + Math.round(h2(i, Math.floor(tr * 20) + b * 7, 3) * 18 - 9);
+          g.globalAlpha = .3; linhaPx(g, x, y, nx, ny, 8 + f * 2, cor[1], cor[1]); g.globalAlpha = 1;
+          linhaPx(g, x, y, nx, ny, 3 + f, cor[1], cor[2]);
+          if (i === 4) linhaPx(g, nx, ny, nx + Math.round(h2(b, i, 5) * 28 - 14), ny + 12, 1, cor[1], cor[2]);
+          x = nx; y = ny;
+        }
+      }
+      if (Math.random() < .3) B.flash = { t0: tempoReal, cor: '#ffffff', a: .35 };
+      break;
+    }
+    case 'chuva': { // muitos projéteis caindo em cima do alvo
+      const n = 10 + f * 8;
+      for (let i = 0; i < n; i++) {
+        const kk = (k - i / n * .6) / .4; if (kk < 0) continue;
+        const tx = Z.x + (h2(i, 1, 7) - .5) * 64, ty = chao - 6 - h2(i, 3, 7) * 18;
+        if (kk >= 1) { uma('c' + i, () => { faiscas(tx, ty, cor, 6 + f * 4, 70, fx.tipo === 'rocha' ? 160 : 0, 2); if (fx.tipo === 'rocha' || fx.tipo === 'fogo') B.tremor = { t0: tempoReal, f: 1 + f }; }); continue; }
+        const sx = tx - (fx.tipo === 'fogo' || fx.tipo === 'rocha' ? 40 : 0), sy = -12 - h2(i, 2, 7) * 20, e = fx.tipo === 'planta' || fx.tipo === 'gelo' ? kk : kk * kk;
+        const x = lerp(sx, tx, e) + (fx.tipo === 'planta' || fx.tipo === 'gelo' ? Math.sin(kk * 12 + i) * 5 : 0), y = lerp(sy, ty, e);
+        if (fx.tipo === 'fogo') { brilho(g, x, y, 6 + f, cor[1], .3); disco(g, x, y, 3 + f, cor[0]); disco(g, x, y, 1 + f, cor[2]); B.parts.push({ x, y, vx: rnd(-10, 10), vy: rnd(-20, 0), vida: .25, cor: cor[1], t: 1 }); }
+        else if (fx.tipo === 'rocha') pedra(g, x, y, 7 + f * 3, 6 + f * 2, cor[1], cor[2]);
+        else if (fx.tipo === 'planta') { g.fillStyle = i % 2 ? '#ff8fb3' : cor[2]; g.fillRect(Math.round(x) - 1, Math.round(y) - 1, 3, 2); g.fillStyle = '#ffffff'; g.fillRect(Math.round(x), Math.round(y) - 2, 1, 1); }
+        else if (fx.tipo === 'gelo') { const X = Math.round(x), Y = Math.round(y); g.fillStyle = cor[2]; g.fillRect(X - 2, Y, 5, 1); g.fillRect(X, Y - 2, 1, 5); g.fillStyle = cor[1]; g.fillRect(X - 1, Y - 1, 3, 3); g.fillStyle = cor[2]; g.fillRect(X, Y, 1, 1); }
+        else if (fx.tipo === 'trovao') { if (kk > .55 && Math.floor(tr * 24 + i) % 2) { let x0 = tx, y0 = -4; for (let q = 0; q < 6; q++) { const ny = lerp(-4, ty, (q + 1) / 6), nx = q === 5 ? tx : tx + Math.round(h2(q, i, Math.floor(tr * 20)) * 12 - 6); linhaPx(g, x0, y0, nx, ny, 3, cor[1], cor[2]); x0 = nx; y0 = ny; } } }
+        else disco(g, x, y, 3, cor[1]);
+      }
+      break;
+    }
+    case 'pilar': { // algo enorme sai do chão debaixo do alvo
+      const base = chao - 2;
+      if (k < .3) {
+        const c = k / .3; g.globalAlpha = .5 * c; elipsePx(g, Math.round(Z.x), base, Math.round(10 + c * 16), Math.max(2, Math.round(2 + c * 3)), cor[1], cor[0]); g.globalAlpha = 1;
+        if (Math.random() < .6) B.parts.push({ x: Z.x + rnd(-20, 20), y: base, vx: 0, vy: -rnd(20, 70), vida: .3, cor: cor[1], t: 1 });
+      } else if (k < 1.3) {
+        const c = clamp((k - .3) / .2, 0, 1), fade = k > 1 ? 1 - (k - 1) / .3 : 1;
+        if (fx.tipo === 'sombra') { // eclipse: um buraco negro
+          const r = Math.round(((10 + f * 6) * fade + 6) * c);
+          brilho(g, Z.x, Z.y, r + 8, cor[1], .4); disco(g, Z.x, Z.y, r + 2, cor[1]); disco(g, Z.x, Z.y, r, '#000000'); anel(g, Z.x, Z.y, r + 3, cor[2]);
+          for (let i = 0; i < 14; i++) { const a = tr * 6 + i * TAU / 14, d = r + 7 + Math.sin(tr * 10 + i) * 3; g.fillStyle = cor[2]; g.fillRect(Math.round(Z.x + Math.cos(a) * d), Math.round(Z.y + Math.sin(a) * d * .6), 2, 1); }
+        } else if (fx.tipo === 'fogo') { // coluna de fogo
+          const h = Math.round(95 * c), w = Math.round((22 + f * 8) * fade) + Math.floor(tr * 30) % 2;
+          for (let y = 0; y < h; y++) { const ww = Math.max(2, Math.round(w * (1 - y / h * .45) + Math.sin(y * .3 + tr * 30) * 2)), yy = base - y, X = Math.round(Z.x);
+            g.fillStyle = cor[0]; g.fillRect(X - (ww >> 1), yy, ww, 1); g.fillStyle = cor[1]; g.fillRect(X - (ww >> 2), yy, Math.max(1, ww >> 1), 1); g.fillStyle = cor[2]; g.fillRect(X - (ww >> 3), yy, Math.max(1, ww >> 2), 1); }
+          for (let i = 0; i < 2; i++) B.parts.push({ x: Z.x + rnd(-w / 2, w / 2), y: base - rnd(0, h), vx: rnd(-30, 30), vy: -rnd(40, 90), vida: .35, cor: cor[1 + (Math.random() < .5 ? 1 : 0)], t: 2 });
+        } else { // espinhos de pedra, cristais de gelo ou espinhos de planta
+          const n = 5 + f * 2;
+          for (let i = 0; i < n; i++) { const cc = clamp(c * 1.6 - i * .1, 0, 1), h = Math.round((18 + (i % 2) * 12 + f * 8) * cc * fade);
+            if (h > 2) espinho(g, Z.x + (i - (n - 1) / 2) * 9, base + 2 - Math.abs(i - (n - 1) / 2), 8 + f * 2, h, cor[1], cor[2]); }
+          uma('pedrinhas', () => faiscas(Z.x, base, cor, 16, 90, 140, 2));
+        }
+        uma('tremor', () => { B.tremor = { t0: tempoReal, f: 2 + f }; });
+      }
+      break;
+    }
+    case 'onda': { // ondas de energia saindo do atacante
+      if (k > 1.15) break;
+      const Dd = Math.hypot(Z.x - A.x, Z.y - A.y);
+      if (fx.tipo === 'agua') { // um paredão de água atravessa a tela
+        const cx = dir > 0 ? lerp(-20, BW + 50, k) : lerp(BW + 20, -50, k);
+        g.globalAlpha = .9;
+        for (let dx = 0; dx < 56; dx++) { const x = Math.round(cx - dir * dx), h = Math.round((60 + f * 20) * Math.pow(Math.sin(dx / 56 * Math.PI), .7));
+          g.fillStyle = cor[0]; g.fillRect(x, BH - h, 1, h); g.fillStyle = cor[1]; g.fillRect(x, BH - h, 1, Math.min(h, 7)); g.fillStyle = cor[2]; g.fillRect(x, BH - h, 1, 2); }
+        g.globalAlpha = 1;
+        for (let i = 0; i < 3; i++) B.parts.push({ x: cx + rnd(-4, 4), y: BH - rnd(40, 70), vx: dir * rnd(20, 60), vy: -rnd(20, 60), vida: .4, cor: cor[1 + (i % 2)], t: 2, grav: 160 });
+      }
+      for (let i = 0; i < 4 + f * 2; i++) { const r = (k * 1.35 - i * .12) * (Dd + 30); if (r < 2) continue;
+        g.globalAlpha = clamp(1 - r / (Dd + 70), .2, 1); anel(g, A.x, A.y, r, cor[0]); anel(g, A.x, A.y, r - 1, cor[1]); anel(g, A.x, A.y, r - 2, cor[2]); g.globalAlpha = 1; }
+      if (fx.tipo === 'gelo') for (let i = 0; i < 8; i++) { const kk = (k * 1.6 + i * .13) % 1, x = lerp(A.x, Z.x, kk), y = lerp(A.y, Z.y, kk) + (i - 3.5) * 6; linhaPx(g, x - dir * 12, y, x, y, 1, cor[1], cor[2]); }
+      break;
+    }
+    case 'redemoinho': { // redemoinho em volta do alvo
+      if (k > 1.25) break;
+      const c = clamp(k / .3, 0, 1), fade = k > 1 ? 1 - (k - 1) / .25 : 1;
+      for (let i = 0; i < 40 + f * 14; i++) { const a = tr * (8 + i % 3) + i * .9, d = (32 - (i % 12) * 2) * c * fade * (1 - Math.min(k, 1) * .35) + 2;
+        g.fillStyle = cor[i % 3]; g.fillRect(Math.round(Z.x + Math.cos(a) * d), Math.round(Z.y + Math.sin(a) * d * .55 + (i % 5) - 2), 2, 2); }
+      brilho(g, Z.x, Z.y, 6 + 6 * c * fade, cor[1], .4); disco(g, Z.x, Z.y, Math.round(2 + 3 * c * fade), cor[2]);
+      break;
+    }
+    case 'terremoto': { // o chão racha do atacante até o alvo
+      if (k > 1.15) break;
+      B.tremor = { t0: tempoReal, f: 2 + f };
+      const pts = fx.racha || (fx.racha = Array.from({ length: 14 }, (_, i) => ({ x: lerp(POS[fx.de].x, POS[fx.para].x, i / 13) + rnd(-7, 7), y: lerp(POS[fx.de].y, POS[fx.para].y, i / 13) + rnd(-4, 4) })));
+      const m = Math.floor(clamp(k * 1.2, 0, 1) * 13);
+      for (let i = 0; i < m; i++) linhaPx(g, pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y, 3, TRACO, '#ff7a3a');
+      if (Math.random() < .7) { const q = pts[Math.floor(rnd(m + 1))]; B.parts.push({ x: q.x, y: q.y, vx: rnd(-30, 30), vy: -rnd(60, 130), vida: .55, cor: cor[Math.floor(rnd(3))], t: 2, grav: 280 }); }
+      for (let i = 0; i < 2; i++) B.parts.push({ x: rnd(0, BW), y: rnd(70, BH), vx: rnd(-10, 10), vy: -rnd(5, 20), vida: .4, cor: '#d8c8a8', t: 1 });
+      break;
+    }
+    case 'garra': { // três arranhões no alvo
+      if (k > 1.4) break;
+      for (let i = 0; i < 3; i++) {
+        const t0 = .55 + i * .12, kk = (k - t0) / .18; if (kk < 0) continue;
+        const vida = 1 - (k - t0 - .18) / .4; if (vida <= 0) continue;
+        const x0 = Z.x - 18 + i * 9, y0 = Z.y - 18, e = clamp(kk, 0, 1), xe = lerp(x0, x0 + 20, e), ye = lerp(y0, y0 + 34, e);
+        g.globalAlpha = clamp(vida, 0, 1);
+        linhaPx(g, x0, y0, xe, ye, 5 + f * 2, cor[0], cor[2]); linhaPx(g, x0, y0, xe, ye, 2, cor[1], cor[2]);
+        g.globalAlpha = 1;
+        uma('g' + i, () => faiscas(Z.x + i * 6 - 6, Z.y, cor, 10, 80, 0, 1));
+      }
+      break;
+    }
+    case 'mordida': { // dentes fechando no alvo
+      if (k > 1.35) break;
+      const c = clamp((k - .3) / .6, 0, 1), aberto = Math.round(26 * (1 - c * c)) + 2, w = 40 + f * 8;
+      g.globalAlpha = k > 1 ? clamp(1 - (k - 1) / .35, 0, 1) : clamp(k / .3, 0, 1);
+      dentes(g, Z.x, Math.round(Z.y - aberto), w, 1); dentes(g, Z.x, Math.round(Z.y + aberto), w, -1);
+      g.globalAlpha = 1;
+      break;
+    }
+    default: { // investida, ataque rápido e hiper golpe: linhas de velocidade
+      if (k > 1) break;
+      const P = centroDe(fx.de);
+      for (let i = 0; i < 5 + f * 4; i++) { const y = P.y + (h2(i, 5, 1) - .5) * 34, x = P.x - dir * (8 + ((k * 260 + i * 23) % 44)); g.fillStyle = i % 2 ? '#ffffff' : cor[2]; g.fillRect(Math.round(x), Math.round(y), 9 + f * 5, 1); }
+      if (fx.anim === 'rapido' && fx.tipo === 'trovao') for (let i = 0; i < 3; i++) B.parts.push({ x: P.x + rnd(-12, 12), y: P.y + rnd(-12, 12), vx: rnd(-60, 60), vy: rnd(-60, 60), vida: .2, cor: COR_FX.trovao[i % 3], t: 1 });
+      if (fx.anim === 'hiper' && k > .6) brilho(g, Z.x, Z.y, 6 + (k - .6) * 40, '#ffffff', .45);
+    }
+  }
+}
+function impacto(fx) { // explosão grande no alvo
+  const Z = centroDe(fx.para), cor = COR_FX[fx.tipo], f = fx.forte ? 1 : 0, n = 26 + f * 26, grav = fx.tipo === 'agua' || fx.tipo === 'rocha' ? 160 : 0;
+  for (let i = 0; i < n; i++) { const a = rnd(TAU), v = rnd(40, 130 + f * 50);
+    B.parts.push({ x: Z.x, y: Z.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - (grav ? 60 : 0), vida: rnd(.3, .65), cor: cor[i % 3], t: Math.random() < .4 ? 2 : 1, grav }); }
+  B.tremor = { t0: tempoReal, f: 1 + f * 2 + (fx.tipo === 'rocha' || fx.tipo === 'trovao' || fx.anim === 'hiper' ? 1 : 0) };
+  B.flash = { t0: tempoReal, cor: fx.tipo === 'trovao' ? '#ffffff' : cor[1], a: fx.tipo === 'trovao' ? .6 : .22 + f * .2 };
+  B.ring = { t0: tempoReal, x: Z.x, y: Z.y, cor: cor[1], cor2: cor[2], grande: 1 + f };
+  B.estrela = { t0: tempoReal, x: Z.x, y: Z.y, cor: cor[2] };
 }
 function desenhaBatalha(tr) {
+  const g = cB, dtq = Math.min(.05, tr - (B.tq || tr)); B.tq = tr;
+  g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false;
+  if (B.tremor) { if (tr - B.tremor.t0 > .35) B.tremor = null; else g.translate(Math.round(rnd(-1, 1) * B.tremor.f), Math.round(rnd(-1, 1) * B.tremor.f)); }
   fundoBatalha(tr);
-  const desenha1 = (quem, m, x, y, s) => {
-    const a = B.anim[quem] || {}, dt = tr - (a.t0 || 0); let ox = 0, oy = 0, esc = 1, vis = true;
-    const dir = quem === 'eu' ? 1 : -1;
-    if (a.tipo === 'ataque' && dt < .35) { const k = Math.sin(dt / .35 * Math.PI); ox = dir * k * 70; oy = -dir * k * 30; }
-    if (a.tipo === 'dano' && dt < .5) { ox = Math.sin(dt * 60) * 8; vis = Math.floor(dt * 16) % 2 === 0; }
-    if (a.tipo === 'entra' && dt < .35) esc = dt / .35;
-    if (a.tipo === 'cai') { if (dt > .5) return; oy = dt * 160; esc = 1 - dt; }
+  const desenha1 = quem => {
+    const m = quem === 'eu' ? meu() : B.ini, spr = spriteFera(m.id, KB[quem]); if (!spr) return;
+    const a = B.anim[quem] || {}, dt = tr - (a.t0 || 0), dir = quem === 'eu' ? 1 : -1, P = POS[quem];
+    let ox = 0, oy = Math.floor(tr * 2.2 + (quem === 'eu' ? 0 : 1)) % 2, vis = true;
+    if (a.tipo === 'ataque' && dt < .3) { const k = Math.sin(dt / .3 * Math.PI); ox = dir * k * 14; oy -= dir * k * 5; }
+    if (a.tipo === 'avanca' && dt < a.dur) { // corre até o inimigo e volta
+      const kk = dt / a.dur, q = kk < .6 ? Math.sin(kk / .6 * Math.PI / 2) : Math.cos((kk - .6) / .4 * Math.PI / 2);
+      ox = dir * q * 78; oy -= dir * q * 42;
+      if (a.rastro && kk < .65) { g.globalAlpha = .3; for (const z of [.35, .65]) blit(g, spr, P.x - spr.width / 2 + ox * z, P.y - spr.height + 2 + oy * z, quem === 'ini'); g.globalAlpha = 1; }
+    }
+    if (a.tipo === 'dano' && dt < .5) { ox = Math.round(Math.sin(dt * 60) * 2); vis = Math.floor(dt * 16) % 2 === 0; }
+    if (a.tipo === 'entra' && dt < .4) ox = -dir * (1 - dt / .4) * 140; // entra deslizando
+    if (a.tipo === 'cai') { if (dt > .45) return; oy = dt * 90; }     // afunda na plataforma
     if (quem === 'ini' && B.cap) return;
-    if (vis) desenhaFera(cB, F[m.id], x + ox, y + oy, s * esc, tr, { flip: quem === 'ini', ph: quem === 'eu' ? 1 : 3 });
+    B.centro[quem] = { x: P.x, y: P.y - spr.height / 2 };
+    if (!vis) return;
+    if (a.tipo === 'cai') { g.save(); g.beginPath(); g.rect(-9, -9, BW + 18, P.y + 11); g.clip(); }
+    blit(g, spr, P.x - spr.width / 2 + ox, P.y - spr.height + 2 + oy, quem === 'ini');
+    if (a.tipo === 'cai') g.restore();
   };
-  treinador(cB, 52, 404, 92, tr, HEROI);
-  if (B.dono) treinador(cB, 706, 240, 62, tr, { ...visual(B.dono, false), lado: -1 });
-  desenha1('ini', B.ini, 555, 232, 58);
-  desenha1('eu', meu(), 200, 392, 78);
+  desenha1('ini'); desenha1('eu');
   if (B.cap) { // núcleo de captura
-    const dt = tr - B.cap.t0; let x = 555, y = 205, r = 22;
-    if (B.cap.fase === 'voa') { const k = Math.min(1, dt / .5); x = lerp(230, 555, k); y = lerp(300, 205, k) - Math.sin(k * Math.PI) * 120; }
-    if (B.cap.fase === 'treme') x += Math.sin(dt * 10) * (Math.sin(dt * 10) > .3 ? 9 : 0);
-    cB.lineWidth = 4; cB.strokeStyle = TRACO; cB.lineJoin = 'round'; nucleo(cB, x, y, r, tr);
-    if (B.cap.fase === 'pronto') for (let i = 0; i < 8; i++) { const a = i / 8 * TAU + dt; cB.fillStyle = '#ffd23f'; ell(cB, x + Math.cos(a) * (30 + dt * 40), y + Math.sin(a) * (30 + dt * 40), 5, 5); cB.fill(); }
+    const dt = tr - B.cap.t0, C = centroDe('ini'), chao = POS.ini.y - 6;
+    let x = C.x, y = chao;
+    if (B.cap.fase === 'voa') { const k = Math.min(1, dt / .5); x = lerp(40, C.x, k); y = lerp(120, chao, k) - Math.sin(k * Math.PI) * 50; }
+    if (B.cap.fase === 'treme') x += Math.sin(dt * 10) > .3 ? 2 : 0;
+    blit(g, NUC, x - 4, y - 4);
+    if (B.cap.fase === 'pronto') for (let i = 0; i < 8; i++) { const a = i / 8 * TAU + dt; g.fillStyle = '#ffd23f'; g.fillRect(Math.round(x + Math.cos(a) * (8 + dt * 20)), Math.round(y + Math.sin(a) * (8 + dt * 20)), 2, 2); }
   }
-  if (B.fx) { // efeito do golpe
-    const dt = tr - B.fx.t0;
-    if (dt > .45) B.fx = null;
-    else { const [x, y] = B.fx.alvo === 'ini' ? [555, 180] : [200, 320], tp = TIPO[B.fx.tipo], k = dt / .45;
-      cB.globalAlpha = 1 - k; cB.lineWidth = 10 * (1 - k) + 2; cB.strokeStyle = tp.cor; ell(cB, x, y, 20 + k * 90, 20 + k * 90); cB.stroke();
-      cB.fillStyle = tp.luz || '#fff';
-      for (let i = 0; i < 9; i++) { const a = i / 9 * TAU + B.fx.t0; poli(cB, [x + Math.cos(a) * k * 110, y + Math.sin(a) * k * 110, x + Math.cos(a + .25) * (k * 110 - 26), y + Math.sin(a + .25) * (k * 110 - 26), x + Math.cos(a - .25) * (k * 110 - 26), y + Math.sin(a - .25) * (k * 110 - 26)]); cB.fill(); }
-      cB.globalAlpha = 1; }
-  }
+  desenhaGolpe(g, tr);
+  for (const p of B.parts) { p.vida -= dtq; p.x += p.vx * dtq; p.y += p.vy * dtq; p.vy += (p.grav || 0) * dtq; g.fillStyle = p.cor; g.fillRect(Math.round(p.x), Math.round(p.y), p.t, p.t); }
+  B.parts = B.parts.filter(p => p.vida > 0);
+  if (B.ring) { const k = (tr - B.ring.t0) / .35; if (k > 1) B.ring = null; else { const R = B.ring.grande;
+    anel(g, B.ring.x, B.ring.y, 4 + k * 24 * R, B.ring.cor); anel(g, B.ring.x, B.ring.y, 5 + k * 24 * R, B.ring.cor); anel(g, B.ring.x, B.ring.y, 2 + k * 15 * R, B.ring.cor2); } }
+  if (B.estrela) { const k = (tr - B.estrela.t0) / .22; if (k > 1) B.estrela = null; else for (let i = 0; i < 8; i++) { const a = i * TAU / 8 + .2, l = 6 + k * 22;
+    linhaPx(g, B.estrela.x + Math.cos(a) * 4, B.estrela.y + Math.sin(a) * 4, B.estrela.x + Math.cos(a) * l, B.estrela.y + Math.sin(a) * l, i % 2 ? 1 : 3, B.estrela.cor, '#ffffff'); } }
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  if (B.flash && B.flash.a) { const k = (tr - B.flash.t0) / .25; if (k > 1) B.flash = null; else { g.globalAlpha = B.flash.a * (1 - k); g.fillStyle = B.flash.cor; g.fillRect(0, 0, BW, BH); g.globalAlpha = 1; } }
 }
 
 // ---------- Loja ----------
@@ -1123,7 +1561,7 @@ function pintaLoja() {
   const el = $('#lojaItens'); el.innerHTML = '';
   for (const v of VENDA) {
     const b = document.createElement('button'); b.className = 'op'; b.disabled = S.din < v.preco; b.style.cssText = 'display:flex;align-items:center;gap:10px;text-align:left';
-    b.innerHTML = `<span class="ic ${v.ic}"></span><span style="flex:1">${v.nome}<small>você tem ${S[v.k]}</small></span><span style="color:#ffd23f">$${v.preco}</span>`;
+    b.innerHTML = `<span class="ic ${v.ic}"></span><span style="flex:1">${v.nome}<small>você tem ${S[v.k]}</small></span><span style="color:#b34d05">$${v.preco}</span>`;
     b.onclick = () => { if (S.din < v.preco) return; S.din -= v.preco; S[v.k]++; somPega(); pintaHud(); pintaLoja(); salva(); };
     el.appendChild(b);
   }
@@ -1140,7 +1578,7 @@ function pintaEquipe() {
   const l = $('#lista'); l.innerHTML = ''; mini = [];
   S.feras.forEach((m, i) => {
     const f = F[m.id], st = stat(m), d = document.createElement('div'); d.className = 'linha' + (i < 4 ? ' tim' : '');
-    const cv2 = document.createElement('canvas'); cv2.width = 128; cv2.height = 112;
+    const cv2 = document.createElement('canvas'); cv2.width = 40; cv2.height = 35;
     const pc = clamp(m.hp / st.hp, 0, 1);
     const meio = document.createElement('div'); meio.className = 'meio';
     meio.innerHTML = `<b>${f.nome}</b> Nv ${m.nv} ${etqTipo(f.tipo)}${i === 0 ? ' <span class="tp" style="background:#ff7a1a">líder</span>' : i > 3 ? ' <span class="tp" style="background:#7d6c8c">reserva</span>' : ''}
@@ -1155,7 +1593,7 @@ function pintaEquipe() {
   });
   const dx = $('#dex'); dx.innerHTML = '';
   for (const f of FERAS) {
-    const e = document.createElement('div'); e.className = 'dx'; const cv2 = document.createElement('canvas'); cv2.width = 128; cv2.height = 112;
+    const e = document.createElement('div'); e.className = 'dx'; const cv2 = document.createElement('canvas'); cv2.width = 40; cv2.height = 35;
     const st = S.dex[f.id] || 0; e.append(cv2, st ? f.nome : '???'); if (st === 2) e.style.color = '#f4efe6';
     dx.appendChild(e); mini.push({ cv2, f, vivo: st === 2, sil: st < 2, nada: !st });
   }
@@ -1163,10 +1601,13 @@ function pintaEquipe() {
 }
 function desenhaMini(tr) {
   for (const m of mini) {
-    const x = m.cv2.getContext('2d'); x.globalCompositeOperation = 'source-over'; x.clearRect(0, 0, 128, 112);
-    if (m.nada) { x.fillStyle = '#3b2d4a'; x.font = '900 44px system-ui'; x.textAlign = 'center'; x.fillText('?', 64, 72); continue; }
-    desenhaFera(x, m.f, 64, 106, 38 / Math.max(1, m.f.tam), m.vivo ? tr : 0, { semSombra: true });
-    if (m.sil) { x.globalCompositeOperation = 'source-in'; x.fillStyle = '#4a3a5c'; x.fillRect(0, 0, 128, 112); }
+    const x = m.cv2.getContext('2d'), w = m.cv2.width, h = m.cv2.height;
+    x.imageSmoothingEnabled = false; x.globalCompositeOperation = 'source-over'; x.clearRect(0, 0, w, h);
+    if (m.nada) { x.fillStyle = '#3b2d4a'; x.font = '30px "Jersey 10", monospace'; x.textAlign = 'center'; x.fillText('?', w / 2, h * .78); continue; }
+    const s = spriteFera(m.f.id, 8); if (!s) continue;
+    const z = Math.min(1, (w - 2) / s.width, (h - 2) / s.height), dw = Math.round(s.width * z), dh = Math.round(s.height * z);
+    x.drawImage(s, Math.round((w - dw) / 2), h - dh - 1 - (m.vivo ? Math.floor(tr * 2 + m.f.base[0]) % 2 : 0), dw, dh);
+    if (m.sil) { x.globalCompositeOperation = 'source-in'; x.fillStyle = '#4a3a5c'; x.fillRect(0, 0, w, h); }
   }
 }
 $('#bEquipe').onclick = abreEquipe;
@@ -1183,19 +1624,19 @@ addEventListener('keydown', e => {
 // ---------- Início e escolha da primeira fera ----------
 const cvI = $('#cvInicio'), cI = cvI.getContext('2d');
 function desenhaInicio(tr) {
-  const gr = cI.createLinearGradient(0, 0, 0, 330); gr.addColorStop(0, '#3a1410'); gr.addColorStop(.7, '#c8502a'); gr.addColorStop(.71, '#3a2c2c'); gr.addColorStop(1, '#1b1424');
-  cI.fillStyle = gr; cI.fillRect(0, 0, 760, 330);
-  cI.fillStyle = '#2a1a1a'; cI.beginPath(); cI.moveTo(0, 232); for (let i = 0; i <= 10; i++) cI.lineTo(i * 76, 232 - (i % 2 ? 90 : 30) - h2(i, 3, 5) * 50); cI.lineTo(760, 234); cI.fill();
-  desenhaFera(cI, F.abissauro, 150, 300, 62, tr, { ph: 1 });
-  desenhaFera(cI, F.selvatrox, 610, 300, 62, tr, { ph: 2, flip: true });
-  desenhaFera(cI, F.infernax, 380, 312, 80, tr, { ph: 3 });
+  const g = cI; g.imageSmoothingEnabled = false;
+  ['#3a1410', '#5a1e14', '#8a3420', '#c8502a'].forEach((cor, i) => { g.fillStyle = cor; g.fillRect(0, i * 15, 192, 15); });
+  for (let x = 0; x < 192; x++) { const hh = 18 + Math.round(Math.sin(x * .07) * 8 + Math.sin(x * .19) * 4); g.fillStyle = '#2a1a1a'; g.fillRect(x, 60 - hh, 1, hh); }
+  g.fillStyle = '#3a2c2c'; g.fillRect(0, 60, 192, 24); g.fillStyle = '#2e2222'; for (let y = 66; y < 84; y += 6) g.fillRect(0, y, 192, 2);
+  const um = (id, x, K, vira, ph) => { const s = spriteFera(id, K); if (s) blit(g, s, x - s.width / 2, 81 - s.height - Math.floor(tr * 2 + ph) % 2, vira); };
+  um('abissauro', 36, 8, false, 0); um('selvatrox', 156, 8, true, 1); um('infernax', 96, 10, false, 2);
 }
 const trio = [];
 function abreEscolha() {
   const el = $('#trio'); el.innerHTML = '';
   for (const id of ['brasito', 'marulho', 'espinhel']) {
     const f = F[id], b = document.createElement('button'); b.className = 'inicial';
-    const cv2 = document.createElement('canvas'); cv2.width = 200; cv2.height = 190;
+    const cv2 = document.createElement('canvas'); cv2.width = 64; cv2.height = 60;
     const n = document.createElement('div'); n.innerHTML = `${f.nome}<br>${etqTipo(f.tipo)}`;
     b.append(cv2, n); el.appendChild(b); trio.push({ cv2, f });
     b.onclick = () => {
@@ -1220,7 +1661,8 @@ function quadro(agora) {
   if (B) desenhaBatalha(tempoReal);
   if ($('#equipe').classList.contains('on')) desenhaMini(tempoReal);
   if ($('#inicio').classList.contains('on')) desenhaInicio(tempoReal);
-  if ($('#escolha').classList.contains('on')) for (const m of trio) { const x = m.cv2.getContext('2d'); x.clearRect(0, 0, 200, 190); desenhaFera(x, m.f, 100, 172, 78, tempoReal, { ph: m.f.base[0] }); }
+  if ($('#escolha').classList.contains('on')) for (const m of trio) { const x = m.cv2.getContext('2d'), s = spriteFera(m.f.id, 16); x.clearRect(0, 0, 64, 60); if (s) blit(x, s, 32 - s.width / 2, 58 - s.height - Math.floor(tempoReal * 2.2 + m.f.base[0]) % 2); }
+  if (preparar.length) spriteFera(...preparar.shift()); // prepara um sprite por quadro
   requestAnimationFrame(quadro);
 }
 addEventListener('pagehide', salva);
