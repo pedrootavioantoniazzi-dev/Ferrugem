@@ -55,7 +55,7 @@ Você começa com um cristal de minério e uma mineradora. Liga esteiras, fornos
 - 🏆 **1.619 conquistas**
 - 🗺 Mapa grande, com ferro, cobre, carvão, areia, petróleo e bauxita, e os cristais **voltam a nascer**
 - 📱 Funciona no **computador e no celular**
-- 💾 Salva sozinho, e o botão 🔗 gera um código para levar o jogo para outro aparelho
+- 💾 Salva sozinho, e com uma conta (👤) você continua em qualquer aparelho e aparece no 🏅 Top global
 
 **O que você aprende jogando**
 - **Sensores, atuadores e controladores**: cada máquina sabe quando tem material, quando tem energia e quando pode trabalhar

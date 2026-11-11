@@ -266,7 +266,6 @@ O jogo funciona igual no computador e no celular, salva sozinho e não precisa d
 | **Modo celular** | Topo numa linha só com o menu ☰; barra com Selecionar, Remover, Esteira e 🏗 Máquinas; contrato recolhível; painel da máquina como gaveta embaixo |
 | **Escolha do modo** | Na primeira vez o jogo pergunta "Celular ou Computador?" e lembra a resposta; dá para trocar no menu |
 | **Salvamento automático** | Salva no navegador a cada 15 segundos e ao fechar a página; botão Salvar para salvar na hora |
-| **🔗 Link do jogo** | Transforma o jogo inteiro num link compactado (cerca de 1.300 caracteres para uma fábrica grande). Abrindo o link em outro aparelho, o jogo continua de lá. Se o aparelho já tiver outro jogo, ele pergunta antes de substituir |
 | **Tutorial** | 8 passos com círculos no mapa mostrando onde construir; pode ser refeito pelo menu |
 | **Dicas "Como usar"** | Na primeira vez que cada máquina é colocada, aparece o que ela faz, o que entra e o que sai, com uma curiosidade "Você sabia?" |
 | **🗺 Minimapa** | Mostra o mapa inteiro com as jazidas e as máquinas; tocar nele leva a câmera até o ponto |
@@ -291,7 +290,6 @@ O jogo inteiro é um único arquivo `index.html` de cerca de 110 KB, escrito em 
 | **Dados do jogo** | Tabelas no código: máquinas (preço, energia, nível), itens (nome, valor, cor), receitas e contratos. Uma máquina nova é basicamente uma linha nova nessas tabelas |
 | **Esteiras** | Cada esteira sabe para onde aponta e quem a alimenta; o desenho vira curva, T ou cruzamento sozinho |
 | **Salvamento** | O estado do jogo vira texto (JSON) guardado no navegador. Se o navegador bloquear o armazenamento, o jogo continua funcionando só na memória |
-| **Link do jogo** | O salvamento é compactado (deflate) e transformado em texto seguro para links (base64). Ao abrir, o jogo confere os dados e descarta o que for inválido |
 | **Sons** | Gerados na hora pela Web Audio API, sem arquivos de áudio |
 | **Desempenho** | Só desenha o que aparece na tela; o chão é uma imagem pequena ampliada; o modo leve liga sozinho em computador fraco |
 | **Celular** | Toques, arrasto e pinça tratados à parte; a interface muda de layout no modo celular |
@@ -339,7 +337,7 @@ A melhor forma de apresentar o jogo é deixar o visitante construir a própria l
 - [ ] Imprimir um QR code com o link do site para os visitantes jogarem no celular
 - [ ] Em cada computador da feira, clicar em **Novo jogo** para começar do zero
 - [ ] Se o computador for fraco, ligar **⚡ Gráficos leves** no menu ☰
-- [ ] Deixar um jogo avançado salvo como 🔗 link, para mostrar as fábricas de veículos sem esperar
+- [ ] Deixar uma conta (👤) com um jogo avançado, para mostrar as fábricas de veículos sem esperar
 - [ ] Testar o som e levar fone, ou desligar o som com 🔇
 - [ ] Ensaiar a fala de 1 minuto e a demonstração
 
@@ -352,7 +350,7 @@ A melhor forma de apresentar o jogo é deixar o visitante construir a própria l
 | Funciona sem internet? | Sim. É um arquivo só; copiado num pen drive, abre direto |
 | É de graça? | Sim, e o código é aberto no GitHub |
 | O que o jogo ensina? | Como sensores, atuadores e controladores trabalham juntos, e como energia, gargalos, custos e produtividade afetam uma fábrica |
-| Como o jogo salva? | No próprio navegador, a cada 15 segundos. Para levar para outro aparelho, use o 🔗 Link do jogo |
+| Como o jogo salva? | No próprio navegador, a cada 15 segundos. Para levar para outro aparelho, entre numa conta (👤) |
 | Quanto tempo leva para zerar? | Chegar ao foguete leva horas; as 1.619 conquistas e os contratos sem fim fazem o jogo continuar depois disso |
 | Quais linguagens foram usadas? | HTML, CSS e JavaScript, sem bibliotecas |
 | Funciona em computador fraco? | Sim. O modo Gráficos leves liga sozinho quando o jogo fica lento |
@@ -364,6 +362,7 @@ O jogo passou por 13 versões. A versão aparece no topo da tela (no celular, no
 | Versão | Data | O que mudou |
 | --- | --- | --- |
 | v13 | 04/11/2026 | Desenho 7 vezes mais rápido, modo ⚡ Gráficos leves automático, menu ☰ também no computador, espaço livre para o selo da Netlify, publicação no GitHub |
+| v14 | 11/11/2026 | Contas online e 🏅 Top global ligados, 🏷 títulos de conquista, tela de abertura com créditos, reinício geral (temporada nova) e saída do 🔗 Link do jogo |
 | v12 | 03/11/2026 | 14 fábricas novas com veículos (bicicleta a foguete), bauxita e alumínio, borracha e pneus, 40 níveis, máquinas até o nível 10, 1.619 conquistas com abas, botão 🏗 Mais no computador |
 | v11 | 27/10/2026 | Petróleo, refinaria, baterias, carro elétrico e reator de fusão; cristais que renascem; mapa 180 × 130; painel do celular em gaveta; sons; árvores, nuvens e efeitos; esteiras mais rápidas por nível |
 | v10 | 27/10/2026 | 🔗 Link do jogo para levar o salvamento a outro aparelho; painel de máquina com botões fixos; barra do topo numa linha |

@@ -18,7 +18,7 @@ O jogador extrai minérios, transforma em produtos cada vez mais complexos e lig
 
 - 34 máquinas, 36 itens, 40 níveis e 1.619 conquistas.
 - Funciona no computador e no celular (com modo de tela simplificada).
-- Salva o progresso no navegador e permite levar o jogo para outro aparelho pelo "🔗 Link do jogo".
+- Salva o progresso no navegador e, com uma conta (👤), dá para continuar em outro aparelho e aparecer no 🏅 Top global.
 - Funciona sem internet: basta abrir o `index.html`.
 
 ## Créditos
