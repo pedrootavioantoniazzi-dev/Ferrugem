@@ -70,7 +70,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:0}
 
 /* Batalha: tela de 240×160 ampliada, com caixas de texto de videogame antigo */
 #batalha{padding:0;background:#0d0814}
-.arena{width:min(760px,100%,calc((100vh - 240px) * 1.5));min-width:min(320px,100%);max-height:100%;display:flex;flex-direction:column;position:relative}
+.arena{width:min(760px,100%,calc((100vh - 240px) * 1.5));width:min(760px,100%,calc((100dvh - 240px) * 1.5));min-width:min(320px,100%);max-height:100%;display:flex;flex-direction:column;position:relative}
 #palco{position:relative;border:4px solid #1b1424;border-bottom:0}
 #cvB{width:100%;height:auto;display:block}
 #batalha.on .arena{animation:clarao .55s steps(1)}
@@ -108,6 +108,39 @@ button{font:inherit;color:inherit;cursor:pointer;border:0}
 .dx{background:#1b1424;border:2px solid #3b2d4a;padding:3px 2px 5px;font-size:16px;color:#b9a8c9;overflow:hidden}
 .dx canvas{width:100%;height:auto}
 h3{margin:16px 0 0;font-size:21px;color:#ff7a1a;text-align:left;text-transform:uppercase;letter-spacing:1px}
+body.lutando #avisos{display:none} /* os avisos do mapa não cobrem a batalha */
+/* ---------- Celular em pé: barra de cima mais compacta ---------- */
+@media (max-width:520px){
+  #hud{padding:calc(6px + env(safe-area-inset-top)) 6px 0;gap:4px}
+  .grupo{gap:4px}
+  .chip,.btn{font-size:17px;padding:1px 6px;gap:4px;border-width:2px;box-shadow:2px 2px 0 #000}
+  .ic{width:11px;height:11px}
+  #objetivo{font-size:16px;padding:4px 10px;max-width:86vw;gap:6px}
+  #avisos{top:calc(48px + env(safe-area-inset-top))}
+  .aviso{font-size:17px;padding:5px 10px}
+}
+/* ---------- Celular deitado: tudo cabe na altura da tela ---------- */
+@media (orientation:landscape) and (max-height:520px){
+  .tela{padding:6px}
+  .cartao{padding:10px 14px}
+  .cartao h1{font-size:36px}
+  .cartao h1 small{font-size:18px}
+  .cartao h2{font-size:24px}
+  #cvInicio{width:168px!important}
+  .passos{grid-template-columns:1fr 1fr;font-size:15px;margin-top:6px;gap:4px}
+  .passos li{padding:3px 8px}
+  .rodape{display:none}
+  .grande{padding:6px 22px;font-size:22px;margin-top:8px}
+  .inicial canvas{width:auto;height:70px}
+  /* batalha: a cena à esquerda, a mensagem e os botões à direita */
+  .arena{width:100%;height:100%;min-width:0;flex-direction:row;align-items:center;gap:6px}
+  #palco{flex:none;width:min(60vw,calc((100vh - 16px) * 1.5));width:min(60vw,calc((100dvh - 16px) * 1.5));border-bottom:4px solid #1b1424}
+  .painel{flex:1;min-width:0;max-height:100%;overflow:auto;display:flex;flex-direction:column;touch-action:pan-y}
+  #bMsg{font-size:19px;min-height:48px;padding:6px 10px}
+  #bMenu{min-height:0;padding:6px;gap:5px}
+  .op{font-size:18px;padding:5px}
+  .op small{font-size:13px}
+}
 </style>
 </head>
 <body>
@@ -162,8 +195,10 @@ h3{margin:16px 0 0;font-size:21px;color:#ff7a1a;text-align:left;text-transform:u
       <div class="placa ini" id="pIni"><div class="l1"><b></b><span></span></div><div class="hp"><i></i></div></div>
       <div class="placa eu" id="pEu"><div class="l1"><b></b><span></span></div><div class="hp"><i></i></div><div class="hpn"></div><div class="xp"><i></i></div></div>
     </div>
-    <div id="bMsg"></div>
-    <div id="bMenu"></div>
+    <div class="painel">
+      <div id="bMsg"></div>
+      <div id="bMenu"></div>
+    </div>
   </div>
 </div>
 
@@ -1098,7 +1133,7 @@ async function iniciaBatalha(cfg) {
   pausado = true; paraTudo();
   B = Object.assign({ meu: S.feras.findIndex((m, i) => i < 4 && m.hp > 0), ocup: true, anim: {}, fx: null, cap: null, parts: [], centro: {}, t0: tempoReal, bio: bioma[S.y | 0][S.x | 0], noite: eNoite() }, cfg);
   S.dex[B.ini.id] = S.dex[B.ini.id] || 1;
-  menu(null); pintaPlacas(); $('#batalha').classList.add('on'); somBatalha();
+  menu(null); pintaPlacas(); $('#batalha').classList.add('on'); document.body.classList.add('lutando'); somBatalha();
   B.anim.ini = { tipo: 'entra', t0: tempoReal }; B.anim.eu = { tipo: 'entra', t0: tempoReal };
   if (B.dono) { const ch = B.dono; await diz(`${ch.nome} quer batalhar!`); await diz(`"${ch.fala}"`, 1500); await diz(`${ch.nome} mandou ${F[B.ini.id].nome}!`); }
   else if (B.tipo === 'lenda') { await diz('O chão treme…', 1300); await diz('FERRUGOR, o titã de ferrugem, despertou!', 1600); }
@@ -1267,7 +1302,7 @@ async function fimBatalha(res) {
     S.fim = 1; await diz(res === 'captura' ? 'FERRUGOR agora luta ao seu lado. Você é uma lenda!' : 'Você derrotou o titã! Mas ele voltará… tente capturá-lo.', 2400);
   }
   semEncontro = tempo + 2.5;
-  $('#batalha').classList.remove('on'); B = null; pausado = false; paraTudo();
+  $('#batalha').classList.remove('on'); document.body.classList.remove('lutando'); B = null; pausado = false; paraTudo();
   pintaHud(); salva();
 }
 // ---------- Batalha em pixel art: tela de 240×160, como os portáteis antigos ----------
@@ -1653,7 +1688,7 @@ $('#bJogar').onclick = () => { $('#inicio').classList.remove('on'); nota(440, 0,
 if (S.feras.length) $('#bJogar').textContent = 'Continuar';
 
 // ---------- Laço principal ----------
-let antes = performance.now(), tempoReal = 0, salvaEm = 0;
+let antes = performance.now(), tempoReal = 0, salvaEm = 0, quadros = 0;
 function quadro(agora) {
   const dt = Math.min(.05, (agora - antes) / 1000); antes = agora; tempoReal += dt;
   if (!pausado) { atualiza(dt); pintaObjetivo(); if (tempoReal > salvaEm) { salvaEm = tempoReal + 5; salva(); } }
@@ -1662,7 +1697,7 @@ function quadro(agora) {
   if ($('#equipe').classList.contains('on')) desenhaMini(tempoReal);
   if ($('#inicio').classList.contains('on')) desenhaInicio(tempoReal);
   if ($('#escolha').classList.contains('on')) for (const m of trio) { const x = m.cv2.getContext('2d'), s = spriteFera(m.f.id, 16); x.clearRect(0, 0, 64, 60); if (s) blit(x, s, 32 - s.width / 2, 58 - s.height - Math.floor(tempoReal * 2.2 + m.f.base[0]) % 2); }
-  if (preparar.length) spriteFera(...preparar.shift()); // prepara um sprite por quadro
+  if (preparar.length && !B && ++quadros % 4 === 0) spriteFera(...preparar.shift()); // prepara um sprite de vez em quando, sem travar
   requestAnimationFrame(quadro);
 }
 addEventListener('pagehide', salva);
