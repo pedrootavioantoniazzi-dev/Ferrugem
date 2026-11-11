@@ -274,7 +274,7 @@ O jogo funciona igual no computador e no celular, salva sozinho e não precisa d
 | **Sons** | Efeitos criados pelo próprio navegador (construir, remover, melhorar, subir de nível, conquista, contrato, falta de dinheiro); botão 🔊 / 🔇 para desligar |
 | **⚡ Gráficos leves** | Tira nuvens, árvores, fumaça e faíscas e limita a 30 quadros por segundo. Liga sozinho quando o computador é lento; dá para trocar no menu ☰ |
 | **Efeitos visuais** | "+$" subindo dos mercados, faíscas ao construir, estrelas ao melhorar, veículos saindo dos mercados quando são vendidos |
-| **Contas online e Top global** | Prontos no código, mas desligados: só funcionam depois de configurar um projeto Firebase |
+| **Contas online e Top global** | Ligados (Firebase): crie uma conta com nome e senha, continue o jogo em outro aparelho e apareça no 🏅 Top global |
 
 **Sem internet:** o jogo inteiro é um arquivo só. Copiado num pen drive, ele abre direto no navegador, o que é útil numa feira com Wi-Fi ruim.
 
