@@ -543,7 +543,7 @@ async function afterLogin(){await espLoad();try{const[d,r]=await Promise.all([fb
 function useCloud(cs){loadObj(cs);LS.setItem(OWN,user.uid);save(true);shownLv=0;sel=0;toast('Jogo da conta '+uname+' carregado')}
 function claim(){LS.setItem(OWN,user.uid);return cloudSave()}
 async function cloudSave(){if(!fb||!user||LS.getItem(OWN)!==user.uid)return;const s=snap();
- try{await Promise.all([fb.fs.setDoc(fsDoc('saves',user.uid),{data:JSON.stringify(s),t:s.t}),fb.fs.setDoc(fsDoc('ranking',user.uid),{nome:uname,dinheiro:Math.floor(money),nivel:plv(),titulo:titText(tit).slice(0,40),t:s.t})])}
+ try{await Promise.all([fb.fs.setDoc(fsDoc('saves',user.uid),{data:JSON.stringify(s),t:s.t,temporada:+TEMPORADA}),fb.fs.setDoc(fsDoc('ranking',user.uid),{nome:uname,dinheiro:Math.floor(money),nivel:plv(),titulo:titText(tit).slice(0,40),t:s.t,temporada:+TEMPORADA})])}
  catch(e){console.warn(e);if(Date.now()-netWarn>300000){netWarn=Date.now();toast('Sem conexão: jogo salvo só neste aparelho por enquanto')}}}
 async function topOpen(){if(!fb)return notCfg();modal('<b>🏅 Top global</b><p id=topW>Carregando...</p>');
  try{await cloudSave();const q=await fb.fs.getDocs(fb.fs.query(fb.fs.collection(fb.db,'ranking'),fb.fs.orderBy('dinheiro','desc'),fb.fs.limit(20)));let i=0,rows='';
