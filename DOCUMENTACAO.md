@@ -275,6 +275,7 @@ O jogo funciona igual no computador e no celular, salva sozinho e não precisa d
 | **⚡ Gráficos leves** | Tira nuvens, árvores, fumaça e faíscas e limita a 30 quadros por segundo. Liga sozinho quando o computador é lento; dá para trocar no menu ☰ |
 | **Efeitos visuais** | "+$" subindo dos mercados, faíscas ao construir, estrelas ao melhorar, veículos saindo dos mercados quando são vendidos |
 | **Contas online e Top global** | Ligados (Firebase): crie uma conta com nome e senha, continue o jogo em outro aparelho e apareça no 🏅 Top global |
+| **Títulos** | Qualquer conquista desbloqueada pode virar seu título (🏆 → 🏷 Usar); ele aparece ao lado do nome no 🏅 Top global |
 
 **Sem internet:** o jogo inteiro é um arquivo só. Copiado num pen drive, ele abre direto no navegador, o que é útil numa feira com Wi-Fi ruim.
 
