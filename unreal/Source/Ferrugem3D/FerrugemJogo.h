@@ -1,7 +1,7 @@
 // Ferrugem 3D - (Nexvora)
 // As 34 maquinas, 36 itens e receitas do Ferrugem 2D, numa grade 3D.
 // Feito para Unreal Engine 5.1 (projeto C++). Coloque em Source/Ferrugem3D/ junto com
-// FerrugemJogo.cpp e FerrugemDados.h.
+// FerrugemJogo.cpp.
 
 #pragma once
 
