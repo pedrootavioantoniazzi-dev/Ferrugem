@@ -16,6 +16,13 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 
+// Cor em hexadecimal (igual ao site) convertida para a cor "linear" que a Unreal usa.
+// Sem essa conversao as cores ficam claras e desbotadas.
+static FLinearColor Hex(const TCHAR* Codigo)
+{
+	return FLinearColor(FColor::FromHex(Codigo));
+}
+
 // Direcao -> passo na grade (0 = +X, 1 = +Y, 2 = -X, 3 = -Y)
 static FIntPoint DirDelta(int32 D)
 {
@@ -61,13 +68,13 @@ void AFerMundo::BeginPlay()
 
 	// Chao escuro
 	Chao->SetStaticMesh(Malha(TEXT("Plane")));
-	Chao->SetMaterial(0, MaterialCor(this, FLinearColor(0.05f, 0.07f, 0.09f)));
+	Chao->SetMaterial(0, MaterialCor(this, Hex(TEXT("10151C"))));
 	Chao->SetRelativeLocation(FVector(Total * 0.5f, Total * 0.5f, 0.5f));
 	Chao->SetRelativeScale3D(FVector((float)Lado, (float)Lado, 1.f));
 
 	// Linhas da grade
 	Linhas->SetStaticMesh(Malha(TEXT("Cube")));
-	Linhas->SetMaterial(0, MaterialCor(this, FLinearColor(0.13f, 0.16f, 0.2f)));
+	Linhas->SetMaterial(0, MaterialCor(this, Hex(TEXT("223040"))));
 	for (int32 i = 0; i <= Lado; i++)
 	{
 		Linhas->AddInstance(FTransform(FRotator::ZeroRotator, FVector(i * Tam, Total * 0.5f, 1.5f), FVector(0.03f, Total / 100.f, 0.01f)));
@@ -76,10 +83,19 @@ void AFerMundo::BeginPlay()
 
 	// Cristais de minerio de ferro (laranja, como no 2D)
 	Cristais->SetStaticMesh(Malha(TEXT("Cone")));
-	Cristais->SetMaterial(0, MaterialCor(this, FLinearColor(0.95f, 0.5f, 0.15f)));
+	Cristais->SetMaterial(0, MaterialCor(this, Hex(TEXT("E07B22"))));
 	CriarJazida(FIntPoint(12, 12), 4);
 	CriarJazida(FIntPoint(26, 10), 3);
 	CriarJazida(FIntPoint(9, 27), 3);
+
+	// Esconde o chao quadriculado do nivel "Basic" (o jogo tem o proprio chao)
+	for (TActorIterator<AStaticMeshActor> It(GetWorld()); It; ++It)
+	{
+		if (It->GetName().Contains(TEXT("Floor")))
+		{
+			It->SetActorHiddenInGame(true);
+		}
+	}
 
 	// Cores dos itens (uma por tipo)
 	MatItens.SetNum(3);
@@ -112,8 +128,8 @@ void AFerMundo::CriarJazida(FIntPoint C, int32 Raio)
 				continue;
 			}
 			Minerio.Add(P);
-			const FVector Lugar = Centro(P) + FVector(FMath::FRandRange(-15.f, 15.f), FMath::FRandRange(-15.f, 15.f), 25.f);
-			Cristais->AddInstance(FTransform(FRotator(0.f, FMath::FRandRange(0.f, 360.f), 0.f), Lugar, FVector(0.35f, 0.35f, 0.5f)));
+			const FVector Lugar = Centro(P) + FVector(FMath::FRandRange(-12.f, 12.f), FMath::FRandRange(-12.f, 12.f), 37.f);
+			Cristais->AddInstance(FTransform(FRotator(0.f, FMath::FRandRange(0.f, 360.f), 0.f), Lugar, FVector(0.45f, 0.45f, 0.75f)));
 		}
 	}
 }
@@ -228,10 +244,10 @@ FLinearColor AFerMundo::Cor(EFerTipo Tipo)
 {
 	switch (Tipo)
 	{
-	case EFerTipo::Mineradora: return FLinearColor(0.79f, 0.47f, 0.17f);
-	case EFerTipo::Esteira:    return FLinearColor(0.2f, 0.23f, 0.27f);
-	case EFerTipo::Forno:      return FLinearColor(0.72f, 0.27f, 0.17f);
-	case EFerTipo::Mercado:    return FLinearColor(0.18f, 0.62f, 0.42f);
+	case EFerTipo::Mineradora: return Hex(TEXT("C9772B"));
+	case EFerTipo::Esteira:    return Hex(TEXT("3A4452"));
+	case EFerTipo::Forno:      return Hex(TEXT("B8442B"));
+	case EFerTipo::Mercado:    return Hex(TEXT("2F9E6A"));
 	default:                   return FLinearColor::White;
 	}
 }
@@ -240,8 +256,8 @@ FLinearColor AFerMundo::CorItem(EFerItem Item)
 {
 	switch (Item)
 	{
-	case EFerItem::MinerioFerro: return FLinearColor(0.8f, 0.42f, 0.2f);
-	case EFerItem::LingoteFerro: return FLinearColor(0.92f, 0.78f, 0.65f);
+	case EFerItem::MinerioFerro: return Hex(TEXT("D9733A"));
+	case EFerItem::LingoteFerro: return Hex(TEXT("E8B496"));
 	default:                     return FLinearColor::White;
 	}
 }
@@ -315,7 +331,7 @@ void AFerMaquina::Iniciar(AFerMundo* NovoMundo, EFerTipo NovoTipo, FIntPoint Nov
 		Detalhe->SetStaticMesh(AFerMundo::Malha(TEXT("Cylinder")));
 		Detalhe->SetRelativeScale3D(FVector(0.3f, 0.3f, 0.7f));
 		Detalhe->SetRelativeLocation(FVector(0.f, 0.f, 75.f));
-		MatDetalhe = AFerMundo::MaterialCor(this, FLinearColor(0.6f, 0.62f, 0.65f));
+		MatDetalhe = AFerMundo::MaterialCor(this, Hex(TEXT("AAB3BD")));
 		break;
 
 	case EFerTipo::Esteira:
@@ -327,7 +343,7 @@ void AFerMaquina::Iniciar(AFerMundo* NovoMundo, EFerTipo NovoTipo, FIntPoint Nov
 		Detalhe->SetRelativeScale3D(FVector(0.2f, 0.2f, 0.2f));
 		Detalhe->SetRelativeLocation(FVector(30.f, 0.f, 15.f));
 		Detalhe->SetRelativeRotation(FRotator(-90.f, 0.f, 0.f));
-		MatDetalhe = AFerMundo::MaterialCor(this, FLinearColor(0.89f, 0.66f, 0.31f));
+		MatDetalhe = AFerMundo::MaterialCor(this, Hex(TEXT("E3A94F")));
 		break;
 
 	case EFerTipo::Forno:
@@ -338,7 +354,7 @@ void AFerMaquina::Iniciar(AFerMundo* NovoMundo, EFerTipo NovoTipo, FIntPoint Nov
 		Detalhe->SetStaticMesh(AFerMundo::Malha(TEXT("Sphere")));
 		Detalhe->SetRelativeScale3D(FVector(0.35f));
 		Detalhe->SetRelativeLocation(FVector(40.f, 0.f, 35.f));
-		MatDetalhe = AFerMundo::MaterialCor(this, FLinearColor(0.08f, 0.03f, 0.02f));
+		MatDetalhe = AFerMundo::MaterialCor(this, Hex(TEXT("14090A")));
 		break;
 
 	case EFerTipo::Mercado:
@@ -350,7 +366,7 @@ void AFerMaquina::Iniciar(AFerMundo* NovoMundo, EFerTipo NovoTipo, FIntPoint Nov
 		Detalhe->SetRelativeScale3D(FVector(0.45f, 0.45f, 0.06f));
 		Detalhe->SetRelativeLocation(FVector(0.f, 0.f, 80.f));
 		Detalhe->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
-		MatDetalhe = AFerMundo::MaterialCor(this, FLinearColor(1.f, 0.8f, 0.2f));
+		MatDetalhe = AFerMundo::MaterialCor(this, Hex(TEXT("F2C230")));
 		break;
 
 	default:
@@ -480,7 +496,7 @@ void AFerMaquina::Tick(float Dt)
 			Progresso = 0.f;
 			if (MatDetalhe)
 			{
-				MatDetalhe->SetVectorParameterValue(TEXT("Color"), FLinearColor(1.f, 0.45f, 0.05f));
+				MatDetalhe->SetVectorParameterValue(TEXT("Color"), Hex(TEXT("FFB020")));
 			}
 		}
 		if (Trabalhando)
@@ -492,7 +508,7 @@ void AFerMaquina::Tick(float Dt)
 				Saida.Add(EFerItem::LingoteFerro);
 				if (MatDetalhe)
 				{
-					MatDetalhe->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.08f, 0.03f, 0.02f));
+					MatDetalhe->SetVectorParameterValue(TEXT("Color"), Hex(TEXT("14090A")));
 				}
 			}
 		}
@@ -555,8 +571,8 @@ AFerCamera::AFerCamera()
 
 	Braco = CreateDefaultSubobject<USpringArmComponent>(TEXT("Braco"));
 	Braco->SetupAttachment(Raiz);
-	Braco->TargetArmLength = 2200.f;
-	Braco->SetRelativeRotation(FRotator(-55.f, 0.f, 0.f));
+	Braco->TargetArmLength = 1500.f;
+	Braco->SetRelativeRotation(FRotator(-62.f, 0.f, 0.f));
 	Braco->bDoCollisionTest = false;
 	Braco->bEnableCameraLag = true;
 	Braco->CameraLagSpeed = 8.f;
@@ -586,7 +602,7 @@ void AFerControle::BeginPlay()
 	SetInputMode(Modo);
 
 	// "fantasma": mostra onde a maquina vai ser construida (verde = pode, vermelho = nao pode)
-	MatFantasma = AFerMundo::MaterialCor(this, FLinearColor(0.1f, 0.8f, 0.2f));
+	MatFantasma = AFerMundo::MaterialCor(this, Hex(TEXT("22C55E")));
 	Fantasma = CriarPeca(TEXT("Cube"), FVector(0.95f, 0.95f, 0.08f), MatFantasma);
 	// seta branca: mostra para onde a maquina vai mandar os itens
 	Seta = CriarPeca(TEXT("Cone"), FVector(0.25f), AFerMundo::MaterialCor(this, FLinearColor(0.95f, 0.95f, 0.95f)));
@@ -631,7 +647,7 @@ void AFerControle::PlayerTick(float Dt)
 	// coloca a camera em cima da primeira jazida de minerio
 	if (!Posicionou && GetPawn())
 	{
-		GetPawn()->SetActorLocation(Mundo->Centro(FIntPoint(14, 13)));
+		GetPawn()->SetActorLocation(Mundo->Centro(FIntPoint(12, 12)));
 		Posicionou = true;
 	}
 
@@ -698,7 +714,7 @@ void AFerControle::AtualizarMira()
 				&& Mundo->Dinheiro >= AFerMundo::Preco(Ferramenta);
 			if (MatFantasma)
 			{
-				MatFantasma->SetVectorParameterValue(TEXT("Color"), Pode ? FLinearColor(0.1f, 0.8f, 0.2f) : FLinearColor(0.9f, 0.15f, 0.1f));
+				MatFantasma->SetVectorParameterValue(TEXT("Color"), Pode ? Hex(TEXT("22C55E")) : Hex(TEXT("EF4444")));
 			}
 		}
 	}
@@ -793,38 +809,39 @@ void AFerHUD::DrawHUD()
 	AFerMundo* M = PC->Mundo;
 	UFont* Fonte = GEngine->GetMediumFont();
 	UFont* FonteGrande = GEngine->GetLargeFont();
-	const FLinearColor Laranja(1.f, 0.62f, 0.11f);
+	const FLinearColor Laranja = Hex(TEXT("FF9F1C"));
+	const float E = 1.3f; // tamanho dos textos
 	const FLinearColor Cinza(0.7f, 0.75f, 0.8f);
 
 	// dinheiro e vendas (canto de cima)
-	DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.6f), 10.f, 10.f, 360.f, 76.f);
-	DrawText(FString::Printf(TEXT("$ %s"), *FText::AsNumber(FMath::FloorToInt(M->Dinheiro)).ToString()), Laranja, 22.f, 14.f, FonteGrande, 1.f);
-	DrawText(FString::Printf(TEXT("Itens vendidos: %d"), M->Vendidos), FLinearColor::White, 22.f, 54.f, Fonte, 1.f);
+	DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.6f), 10.f, 10.f, 420.f, 96.f);
+	DrawText(FString::Printf(TEXT("$ %s"), *FText::AsNumber(FMath::FloorToInt(M->Dinheiro)).ToString()), Laranja, 22.f, 14.f, FonteGrande, E);
+	DrawText(FString::Printf(TEXT("Itens vendidos: %d"), M->Vendidos), FLinearColor::White, 22.f, 66.f, Fonte, E);
 
 	// barra de construcao (embaixo)
-	const float Y = Canvas->ClipY - 74.f;
+	const float Y = Canvas->ClipY - 92.f;
 	float X = 20.f;
 	for (int32 i = 1; i <= 4; i++)
 	{
 		const EFerTipo T = static_cast<EFerTipo>(i);
 		const bool Escolhida = PC->Ferramenta == T;
-		DrawRect(Escolhida ? FLinearColor(1.f, 0.62f, 0.11f, 0.95f) : FLinearColor(0.f, 0.f, 0.f, 0.6f), X, Y, 200.f, 58.f);
-		DrawText(FString::Printf(TEXT("[%d] %s"), i, *AFerMundo::Nome(T)), Escolhida ? FLinearColor::Black : FLinearColor::White, X + 10.f, Y + 6.f, Fonte, 1.f);
-		DrawText(FString::Printf(TEXT("$ %d"), AFerMundo::Preco(T)), Escolhida ? FLinearColor::Black : Cinza, X + 10.f, Y + 30.f, Fonte, 1.f);
-		X += 210.f;
+		DrawRect(Escolhida ? Hex(TEXT("FF9F1C")) : FLinearColor(0.f, 0.f, 0.f, 0.6f), X, Y, 240.f, 76.f);
+		DrawText(FString::Printf(TEXT("[%d] %s"), i, *AFerMundo::Nome(T)), Escolhida ? FLinearColor::Black : FLinearColor::White, X + 10.f, Y + 6.f, Fonte, E);
+		DrawText(FString::Printf(TEXT("$ %d"), AFerMundo::Preco(T)), Escolhida ? FLinearColor::Black : Cinza, X + 10.f, Y + 40.f, Fonte, E);
+		X += 250.f;
 	}
 	static const TCHAR* Direcoes[4] = { TEXT("cima"), TEXT("direita"), TEXT("baixo"), TEXT("esquerda") };
-	DrawText(FString::Printf(TEXT("Dire\u00e7\u00e3o (R): %s"), Direcoes[PC->Dir & 3]), FLinearColor::White, X + 10.f, Y + 18.f, Fonte, 1.f);
+	DrawText(FString::Printf(TEXT("Dire\u00e7\u00e3o (R): %s"), Direcoes[PC->Dir & 3]), FLinearColor::White, X + 10.f, Y + 18.f, Fonte, E);
 
-	DrawText(TEXT("Clique: construir  |  Arraste: esteiras  |  Bot\u00e3o direito: remover  |  WASD: mover  |  Roda ou Z/X: zoom"), Cinza, 20.f, Y - 30.f, Fonte, 1.f);
+	DrawText(TEXT("Clique: construir  |  Arraste: esteiras  |  Bot\u00e3o direito: remover  |  WASD: mover  |  Roda ou Z/X: zoom"), Cinza, 20.f, Y - 38.f, Fonte, E);
 
 	// aviso no meio da tela
 	if (M->AvisoTempo > 0.f && !M->Aviso.IsEmpty())
 	{
 		float W = 0.f, H = 0.f;
-		GetTextSize(M->Aviso, W, H, FonteGrande, 1.f);
+		GetTextSize(M->Aviso, W, H, FonteGrande, E);
 		DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.7f), (Canvas->ClipX - W) * 0.5f - 16.f, Canvas->ClipY * 0.4f - 8.f, W + 32.f, H + 16.f);
-		DrawText(M->Aviso, FLinearColor(1.f, 0.55f, 0.5f), (Canvas->ClipX - W) * 0.5f, Canvas->ClipY * 0.4f, FonteGrande, 1.f);
+		DrawText(M->Aviso, FLinearColor(1.f, 0.55f, 0.5f), (Canvas->ClipX - W) * 0.5f, Canvas->ClipY * 0.4f, FonteGrande, E);
 	}
 }
 
