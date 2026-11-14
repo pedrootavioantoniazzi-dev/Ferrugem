@@ -28,9 +28,10 @@ echo.
 echo  [1/4] Projeto encontrado: %PROJ%
 
 rem --- 2. Baixa o codigo do GitHub
-set "RAW=https://raw.githubusercontent.com/pedrootavioantoniazzi-dev/ferrugem/main/unreal/Source/Ferrugem3D"
+rem baixa pela API do GitHub (sempre a versao mais nova, sem copia antiga no meio)
+set "RAW=https://api.github.com/repos/pedrootavioantoniazzi-dev/ferrugem/contents/unreal/Source/Ferrugem3D"
 echo  [2/4] Baixando o codigo do Ferrugem 3D...
-powershell -NoProfile -Command "$ProgressPreference='SilentlyContinue'; try { Invoke-WebRequest '%RAW%/FerrugemJogo.h' -OutFile '%SRC%\FerrugemJogo.h' -UseBasicParsing; Invoke-WebRequest '%RAW%/FerrugemJogo.cpp' -OutFile '%SRC%\FerrugemJogo.cpp' -UseBasicParsing; Invoke-WebRequest '%RAW%/FerrugemDados.h' -OutFile '%SRC%\FerrugemDados.h' -UseBasicParsing } catch { Write-Host $_; exit 1 }"
+powershell -NoProfile -Command "$ProgressPreference='SilentlyContinue'; $h=@{Accept='application/vnd.github.raw'; 'User-Agent'='Ferrugem3D-instalador'}; try { Invoke-WebRequest '%RAW%/FerrugemJogo.h' -OutFile '%SRC%\FerrugemJogo.h' -Headers $h -UseBasicParsing; Invoke-WebRequest '%RAW%/FerrugemJogo.cpp' -OutFile '%SRC%\FerrugemJogo.cpp' -Headers $h -UseBasicParsing; Invoke-WebRequest '%RAW%/FerrugemDados.h' -OutFile '%SRC%\FerrugemDados.h' -Headers $h -UseBasicParsing } catch { Write-Host $_; exit 1 }"
 if errorlevel 1 (
   echo.
   echo  [ERRO] Nao consegui baixar os arquivos. Confira a internet e tente de novo.
