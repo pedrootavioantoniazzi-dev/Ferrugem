@@ -30,14 +30,14 @@ echo  [1/4] Projeto encontrado: %PROJ%
 rem --- 2. Baixa o codigo do GitHub
 set "RAW=https://raw.githubusercontent.com/pedrootavioantoniazzi-dev/ferrugem/main/unreal/Source/Ferrugem3D"
 echo  [2/4] Baixando o codigo do Ferrugem 3D...
-powershell -NoProfile -Command "$ProgressPreference='SilentlyContinue'; try { Invoke-WebRequest '%RAW%/FerrugemJogo.h' -OutFile '%SRC%\FerrugemJogo.h' -UseBasicParsing; Invoke-WebRequest '%RAW%/FerrugemJogo.cpp' -OutFile '%SRC%\FerrugemJogo.cpp' -UseBasicParsing } catch { Write-Host $_; exit 1 }"
+powershell -NoProfile -Command "$ProgressPreference='SilentlyContinue'; try { Invoke-WebRequest '%RAW%/FerrugemJogo.h' -OutFile '%SRC%\FerrugemJogo.h' -UseBasicParsing; Invoke-WebRequest '%RAW%/FerrugemJogo.cpp' -OutFile '%SRC%\FerrugemJogo.cpp' -UseBasicParsing; Invoke-WebRequest '%RAW%/FerrugemDados.h' -OutFile '%SRC%\FerrugemDados.h' -UseBasicParsing } catch { Write-Host $_; exit 1 }"
 if errorlevel 1 (
   echo.
   echo  [ERRO] Nao consegui baixar os arquivos. Confira a internet e tente de novo.
   pause
   exit /b 1
 )
-echo        OK: FerrugemJogo.h e FerrugemJogo.cpp copiados.
+echo        OK: FerrugemJogo.h, FerrugemJogo.cpp e FerrugemDados.h copiados.
 
 rem --- 3. Faz o projeto usar o modo de jogo do Ferrugem (FerGameMode)
 echo  [3/4] Configurando o modo de jogo...
