@@ -70,3 +70,51 @@ Para abrir sempre nessa fase: **Editar → Configurações do Projeto → Maps &
 3. Aperte **3** e coloque um forno no fim das esteiras.
 4. Mais esteiras saindo do forno, e um **mercado** (**4**) no fim.
 5. Veja o dinheiro subir. 💰
+
+## Modelos 3D próprios (Tripo, Blender, Kenney…)
+
+O jogo procura o modelo de cada máquina em **Content → Modelos**, com o nome do código abaixo.
+Se achar, usa o modelo (e ajusta o tamanho sozinho para caber no quadrado). Se não achar, usa a caixa colorida.
+
+1. Exporte o modelo em **FBX** (ou GLB) e renomeie com o nome da tabela (ex.: `miner.fbx`).
+2. Na Unreal: **Content Drawer → Content → Modelos** (crie a pasta se não existir) e arraste o arquivo para dentro.
+3. Na janela de importação, marque **Build Nanite** (deixa modelos pesados leves) e clique em **Import All**.
+4. Confira se o modelo (ícone de forma 3D) ficou com o nome certo. Se não, botão direito → **Rename**.
+5. Aperte **Play**.
+
+| Máquina | Nome do arquivo |
+|---|---|
+| Esteira | `conv` |
+| Mineradora | `miner` |
+| Forno | `furn` |
+| Prensa | `press` |
+| Gerador | `gen` |
+| Armazém | `store` |
+| Mercado | `sell` |
+| Trefiladora | `wire` |
+| Painel solar | `solar` |
+| Montadora | `asm` |
+| Siderúrgica | `mill` |
+| Eletrônica | `elec` |
+| Fáb. de motores | `motf` |
+| Turbina eólica | `wind` |
+| Linha de robôs | `robf` |
+| Bomba de petróleo | `pump` |
+| Refinaria | `refin` |
+| Fáb. de baterias | `batt` |
+| Fáb. de carros | `car` |
+| Reator de fusão | `fusion` |
+| Petroquímica | `chem` |
+| Fáb. de pneus | `tiref` |
+| Laminadora | `roll` |
+| Fáb. de bicicletas | `bikef` |
+| Fáb. de patinetes | `scootf` |
+| Fáb. de motos | `motof` |
+| Fáb. de caminhões | `truckf` |
+| Fáb. de drones | `dronef` |
+| Fáb. de ônibus | `busf` |
+| Fáb. de trilhos | `railf` |
+| Fáb. de trens | `trainf` |
+| Estaleiro | `shipy` |
+| Fáb. de aviões | `planef` |
+| Base de foguetes | `rocketf` |

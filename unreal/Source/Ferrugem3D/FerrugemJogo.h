@@ -139,6 +139,7 @@ public:
 	void Vender(int32 Item);
 
 	static UStaticMesh* Malha(const TCHAR* NomeMalha); // "Cube", "Sphere", "Cylinder", "Cone", "Plane"
+	static UStaticMesh* ModeloDaMaquina(int32 Tipo);   // Content/Modelos/<id>, ou nullptr
 	static UMaterialInterface* MaterialBase();
 	static UMaterialInstanceDynamic* MaterialCor(UObject* Dono, FLinearColor C);
 	UMaterialInstanceDynamic* MaterialDoItem(int32 Item);

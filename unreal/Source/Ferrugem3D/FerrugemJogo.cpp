@@ -667,6 +667,23 @@ UStaticMesh* AFerMundo::Malha(const TCHAR* NomeMalha)
 	return LoadObject<UStaticMesh>(nullptr, *Caminho);
 }
 
+UStaticMesh* AFerMundo::ModeloDaMaquina(int32 Tipo)
+{
+	static TSet<int32> SemModelo;
+	if (Tipo < 0 || Tipo >= FerM::NUM || SemModelo.Contains(Tipo))
+	{
+		return nullptr;
+	}
+	const FString Id = GFerMaq[Tipo].Id;
+	const FString Caminho = FString::Printf(TEXT("/Game/Modelos/%s.%s"), *Id, *Id);
+	UStaticMesh* M = LoadObject<UStaticMesh>(nullptr, *Caminho, nullptr, LOAD_NoWarn | LOAD_Quiet);
+	if (!M)
+	{
+		SemModelo.Add(Tipo);
+	}
+	return M;
+}
+
 UMaterialInterface* AFerMundo::MaterialBase()
 {
 	return LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
@@ -852,6 +869,30 @@ void AFerMaquina::Iniciar(AFerMundo* NovoMundo, int32 NovoTipo, FIntPoint NovaPo
 
 	MatDetalhe = AFerMundo::MaterialCor(this, CorDetalhe);
 	Detalhe->SetMaterial(0, MatDetalhe);
+
+	// Modelo 3D proprio: se existir Content/Modelos/<id> (ex.: Modelos/miner), usa ele no lugar da caixa.
+	// O tamanho e ajustado sozinho para caber no quadrado da grade, em pe no chao.
+	if (UStaticMesh* Modelo = AFerMundo::ModeloDaMaquina(Tipo))
+	{
+		const FBox Caixa = Modelo->GetBoundingBox();
+		const FVector Tamanho = Caixa.GetSize();
+		const float Maior = FMath::Max3((float)Tamanho.X, (float)Tamanho.Y, 1.f);
+		const float Escala = (Tipo == FerM::conv ? 100.f : 92.f) / Maior;
+		const FVector Meio = Caixa.GetCenter();
+
+		Corpo->SetStaticMesh(Modelo);
+		Corpo->EmptyOverrideMaterials(); // usa as cores/texturas do proprio modelo
+		Corpo->SetRelativeRotation(FRotator::ZeroRotator);
+		Corpo->SetRelativeScale3D(FVector(Escala));
+		Corpo->SetRelativeLocation(FVector(-Meio.X * Escala, -Meio.Y * Escala, -Caixa.Min.Z * Escala));
+
+		// a esteira continua mostrando a seta; nas outras o modelo ja diz tudo
+		if (Tipo != FerM::conv)
+		{
+			Detalhe->SetVisibility(false);
+		}
+		Rotulo->SetRelativeLocation(FVector(0.f, 0.f, Tamanho.Z * Escala + 25.f));
+	}
 }
 
 void AFerMaquina::Girar(int32 NovaDir)
