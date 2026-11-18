@@ -15,15 +15,30 @@ for /f "usebackq delims=" %%D in (`powershell -NoProfile -Command "[Environment]
 set "PROJ=%DOCS%\Unreal Projects\Ferrugem3D"
 set "SRC=%PROJ%\Source\Ferrugem3D"
 
+rem --- se nao achou nesta conta, procura nas outras contas do computador
+if not exist "%PROJ%\Ferrugem3D.uproject" (
+  for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "$a=Get-ChildItem 'C:\Users\*\Documents\Unreal Projects\Ferrugem3D\Ferrugem3D.uproject','C:\Users\*\OneDrive*\*\Unreal Projects\Ferrugem3D\Ferrugem3D.uproject' -ErrorAction SilentlyContinue ^| Select-Object -First 1; if($a){$a.DirectoryName}"`) do set "PROJ=%%P"
+)
+rem --- se ainda nao achou, pergunta
 if not exist "%PROJ%\Ferrugem3D.uproject" (
   echo.
-  echo  [ERRO] Nao achei o projeto em:
+  echo  Nao achei o projeto Ferrugem3D sozinho.
+  echo  Abra a pasta do projeto no Explorador, clique na barra de endereco,
+  echo  copie o caminho ^(Ctrl+C^) e cole aqui ^(botao direito^). Depois aperte Enter.
+  echo.
+  set /p "PROJ=Caminho da pasta Ferrugem3D: "
+)
+set "PROJ=%PROJ:"=%"
+if not exist "%PROJ%\Ferrugem3D.uproject" (
+  echo.
+  echo  [ERRO] Nao achei o Ferrugem3D.uproject em:
   echo  %PROJ%
-  echo  Crie o projeto Ferrugem3D na Unreal 5.1 ^(Top Down, C++^) e rode de novo.
+  echo  Neste computador, crie primeiro o projeto Ferrugem3D na Unreal 5.1 ^(Top Down, C++^).
   echo.
   pause
   exit /b 1
 )
+set "SRC=%PROJ%\Source\Ferrugem3D"
 echo.
 echo  [1/4] Projeto encontrado: %PROJ%
 
