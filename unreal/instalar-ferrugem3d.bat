@@ -44,7 +44,7 @@ echo  [1/4] Projeto encontrado: %PROJ%
 
 rem --- 2. Baixa o codigo do GitHub
 rem baixa pela API do GitHub (sempre a versao mais nova, sem copia antiga no meio)
-set "RAW=https://api.github.com/repos/pedrootavioantoniazzi-dev/ferrugem/contents/unreal/Source/Ferrugem3D"
+set "RAW=https://api.github.com/repos/game-ferrugem/game-ferrugem.github.io/contents/unreal/Source/Ferrugem3D"
 echo  [2/4] Baixando o codigo do Ferrugem 3D...
 powershell -NoProfile -Command "$ProgressPreference='SilentlyContinue'; $h=@{Accept='application/vnd.github.raw'; 'User-Agent'='Ferrugem3D-instalador'}; try { Invoke-WebRequest '%RAW%/FerrugemJogo.h' -OutFile '%SRC%\FerrugemJogo.h' -Headers $h -UseBasicParsing; Invoke-WebRequest '%RAW%/FerrugemJogo.cpp' -OutFile '%SRC%\FerrugemJogo.cpp' -Headers $h -UseBasicParsing; Invoke-WebRequest '%RAW%/FerrugemDados.h' -OutFile '%SRC%\FerrugemDados.h' -Headers $h -UseBasicParsing } catch { Write-Host $_; exit 1 }"
 if errorlevel 1 (

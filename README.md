@@ -6,13 +6,13 @@ O jogador extrai minérios, transforma em produtos cada vez mais complexos e lig
 
 ## Links
 
-- **Jogar:** https://pedrootavioantoniazzi-dev.github.io/Ferrugem/
+- **Jogar:** https://game-ferrugem.github.io/
 - **Trailer:** https://youtu.be/cyXfUx24iXM
-- **Documentação completa:** [DOCUMENTACAO.md](DOCUMENTACAO.md) · [versão em página](https://pedrootavioantoniazzi-dev.github.io/Ferrugem/documentacao.html) · [PDF para imprimir](Documentacao-Ferrugem.pdf)
+- **Documentação completa:** [DOCUMENTACAO.md](DOCUMENTACAO.md) · [versão em página](https://game-ferrugem.github.io/documentacao.html) · [PDF para imprimir](Documentacao-Ferrugem.pdf)
 
 ## Outros jogos
 
-- **Feras de Ferrugem** ([`polen/`](polen/index.html)): jogo 2D em pixel art, no estilo dos portáteis antigos, de capturar, treinar e batalhar com 28 feras originais, 3 Guardiões e o titã Ferrugor. Jogar: https://pedrootavioantoniazzi-dev.github.io/Ferrugem/polen/
+- **Feras de Ferrugem** ([`polen/`](polen/index.html)): jogo 2D em pixel art, no estilo dos portáteis antigos, de capturar, treinar e batalhar com 28 feras originais, 3 Guardiões e o titã Ferrugor. Jogar: https://game-ferrugem.github.io/polen/
 
 ## Em resumo
 

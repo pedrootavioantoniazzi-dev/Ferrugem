@@ -2,7 +2,7 @@
 
 Versão 13 · novembro de 2026 · autor: Pedro Otávio Antoniazzi
 
-**Jogar agora:** [pedrootavioantoniazzi-dev.github.io/Ferrugem](https://pedrootavioantoniazzi-dev.github.io/Ferrugem/) · **Trailer:** [youtu.be/cyXfUx24iXM](https://youtu.be/cyXfUx24iXM)
+**Jogar agora:** [game-ferrugem.github.io](https://game-ferrugem.github.io/) · **Trailer:** [youtu.be/cyXfUx24iXM](https://youtu.be/cyXfUx24iXM)
 
 ## Sumário
 
@@ -28,8 +28,8 @@ O jogador começa com $650. Ele extrai minérios, transforma em produtos cada ve
 
 **Onde jogar:**
 
-- Site público: [pedrootavioantoniazzi-dev.github.io/Ferrugem](https://pedrootavioantoniazzi-dev.github.io/Ferrugem/)
-- Código-fonte: [github.com/pedrootavioantoniazzi-dev/Ferrugem](https://github.com/pedrootavioantoniazzi-dev/Ferrugem)
+- Site público: [game-ferrugem.github.io](https://game-ferrugem.github.io/)
+- Código-fonte: [github.com/game-ferrugem/game-ferrugem.github.io](https://github.com/game-ferrugem/game-ferrugem.github.io)
 - Sem internet: basta abrir o arquivo `index.html` em qualquer navegador.
 
 **O jogo em números (versão 13):**
@@ -386,11 +386,11 @@ O jogo passou por 13 versões. A versão aparece no topo da tela (no celular, no
 
 | Para quê | Endereço |
 | --- | --- |
-| Jogar (site público) | [pedrootavioantoniazzi-dev.github.io/Ferrugem](https://pedrootavioantoniazzi-dev.github.io/Ferrugem/) |
+| Jogar (site público) | [game-ferrugem.github.io](https://game-ferrugem.github.io/) |
 | Trailer (YouTube) | [youtu.be/cyXfUx24iXM](https://youtu.be/cyXfUx24iXM) |
-| Esta documentação (página) | [pedrootavioantoniazzi-dev.github.io/Ferrugem/documentacao.html](https://pedrootavioantoniazzi-dev.github.io/Ferrugem/documentacao.html) |
+| Esta documentação (página) | [game-ferrugem.github.io/documentacao.html](https://game-ferrugem.github.io/documentacao.html) |
 | Esta documentação (PDF) | [Documentacao-Ferrugem.pdf](Documentacao-Ferrugem.pdf) |
-| Código-fonte | [github.com/pedrootavioantoniazzi-dev/Ferrugem](https://github.com/pedrootavioantoniazzi-dev/Ferrugem) |
+| Código-fonte | [github.com/game-ferrugem/game-ferrugem.github.io](https://github.com/game-ferrugem/game-ferrugem.github.io) |
 | Versão antiga na Netlify | [dancing-kataifi-3377a4.netlify.app](https://dancing-kataifi-3377a4.netlify.app) |
 
 **Referência técnica rápida:**
